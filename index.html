@@ -6,9 +6,10 @@
     <link href="css/layout.css" media="screen" rel="stylesheet"/>
     <link href="css/theme.css" media="screen" rel="stylesheet"/>
 </head>
-<body>
+<body ng-cloak ng-controller="Main">
     <header>
         <h1>Make Your Mark</h1>
+        <p><strong>v{{ version }}</strong> - <span class="muted">{{ versionName }}</span></p>
     </header>
     <section id="arena">
         <canvas id="mainCanvas" width="1200" height="600">
@@ -29,6 +30,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src='https://cdn.firebase.com/js/client/2.1.1/firebase.js'></script> <!-- Firebase -->
     <script src="app/app.js"></script>
+    <script src="app/main.js"></script>
+    <script src="app/fireservice.js"></script>
+    <script src="app/utility.js"></script>
     <script src="js/seedrandom.js"></script>
     <script src="js/localStorageModule.js"></script>
 </body>

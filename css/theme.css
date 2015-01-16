@@ -11,6 +11,7 @@ h2 { color: #f2f5eb; }
 section#arena { border-color: #222; background: #42555C; }
 
 strong { font-weight: bold; }
+.muted { color: #858a71; }
 p:not(.error) strong, dt strong { color: #f2f5eb; }
 .button-group { display: inline-block; border-color: #656666; }
 .error { font-size: 3em; color: #FF7055; }
