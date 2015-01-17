@@ -8,7 +8,7 @@ h1 { font-size: 3em; color: #d3d9b9; text-shadow: none; -webkit-text-fill-color:
 
 h2 { color: #f2f5eb; }
 
-section#arena { border-color: #222; background: #42555C; }
+.canvas { border-color: #222; background: #42555C; }
 
 strong { font-weight: bold; }
 .muted { color: #858a71; }

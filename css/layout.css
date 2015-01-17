@@ -9,9 +9,12 @@ header h1 + p { float: left; margin: 30px 0 0 12px; }
 #globalTime .unit { float: left; width: 75px; }
 #globalTime .unit .number { font-size: 3.1em; }
 #globalTime .unit .label { font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
-section#arena { position: relative; border: 1px solid; height: 600px; background: #555; }
+.canvas { position: relative; border: 1px solid; height: 600px; background: #555; }
+.canvases canvas { position: absolute; }
 canvas#mainCanvas { background: url('../img/grid-dot.png'); }
-canvas#highCanvas { position: absolute; top: 0; left: 0; }
+#mainUnderCanvas { opacity: 0.8; }
+#highUnderCanvas { opacity: 0.6; }
+/*canvas#highCanvas { position: absolute; top: 0; left: 0; }*/
 section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
 section#controls { padding: 6px 0; }
 section#controls>section { float: left; }

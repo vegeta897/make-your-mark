@@ -12,12 +12,9 @@
         <p><strong>v{{ version }}</strong> - <span class="muted">{{ versionName }}</span></p>
     </header>
     <section id="arena">
-        <canvas id="mainCanvas" width="1200" height="600">
-            Your browser is too old for this game. <a href="http://www.google.com/chrome">Time to upgrade.</a>
-        </canvas>
-        <canvas id="highCanvas" width="1200" height="600"></canvas>
+        <div class="canvas"></div>
         <p class="coords">
-            <strong>{{ 0 }}</strong> , <strong>{{ 0 }}</strong>
+            <strong>{{ cursor.x }}</strong> , <strong>{{ cursor.y }}</strong>
         </p>
     </section>
     <section id="controls">
@@ -37,6 +34,8 @@
     <script src="app/app.js"></script>
     <script src="app/main.js"></script>
     <script src="app/game.js"></script>
+    <script src="app/controls.js"></script>
+    <script src="app/canvas/canvas.js"></script>
     <script src="app/fireservice.js"></script>
     <script src="app/utility.js"></script>
     <script src="js/seedrandom.js"></script>

@@ -45,7 +45,7 @@ Application.Services.factory('Game',function($timeout,FireService) {
     
     FireService.initServerTime(function(offset){
         game.localServerOffset = offset;
-        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1407300000000) / step);
+        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1408150000000) / step);
         last = performance.now();
         setInterval(tick,step);
         requestAnimationFrame(frame);
