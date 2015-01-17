@@ -1,17 +1,8 @@
 'use strict';
 Application.Services.factory('FireService',function() {
     var fireRef = new Firebase('https://mym897.firebaseio.com/map1');
+
     var localTimeOffset = 0;
-    var localTimeRef = new Date().getTime();
-    var timeStampID = 'stamp'+parseInt(Math.random()*10000);
-    fireRef.child('timeStampTests/'+timeStampID).set(Firebase.ServerValue.TIMESTAMP,function(){
-        fireRef.child('timeStampTests/'+timeStampID).once('value',function(snap){
-            localTimeOffset = snap.val() - localTimeRef;
-            console.log('local time offset:',localTimeOffset);
-            fireRef.child('timeStampTests/'+timeStampID).remove();
-            //setInterval(interval,500);
-        })
-    });
     var getServerTime = function() {
         return localTimeOffset ? new Date().getTime() + localTimeOffset : new Date().getTime();
     };
@@ -55,6 +46,19 @@ Application.Services.factory('FireService',function() {
         },
         onGlobal: function(path, handler) {
             fireRef.parent().child(path).on('value',function(snap) { handler(snap.val()); });
+        },
+        initServerTime: function(callback) {
+            var localTimeRef = new Date().getTime();
+            var timeStampID = 'stamp'+parseInt(Math.random()*10000);
+            fireRef.child('timeStampTests/'+timeStampID).set(Firebase.ServerValue.TIMESTAMP,function(){
+                fireRef.child('timeStampTests/'+timeStampID).once('value',function(snap){
+                    localTimeOffset = snap.val() - localTimeRef;
+                    console.log('local time offset:',localTimeOffset);
+                    callback(localTimeOffset);
+                    fireRef.child('timeStampTests/'+timeStampID).remove();
+                    //setInterval(interval,500);
+                })
+            });
         },
         ref: fireRef, getServerTime: getServerTime
     };
