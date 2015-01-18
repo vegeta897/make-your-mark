@@ -97,6 +97,9 @@ Application.Services.service('Util', function() {
         restrictNumber: function(input,min,max) {
             input = input.replace(/[^\d.-]/g, '').replace('..','.').replace('..','.').replace('-','');
             return input > max ? max : input < min ? min : input;
+        },
+        positionSeed: function(x,y) {
+            return ("000000" + (+x+500000)).slice(-6)+("000000" + (+y+500000)).slice(-6);
         }
     }
 });

@@ -32,9 +32,16 @@ Application.Directives.directive('canvas',function() {
     }
 });
 
-Application.Services.factory('Canvas', function(FireService,Controls) {
+Application.Services.factory('Canvas', function(FireService,Controls,Util) {
     var canvases, cursor = { x: '-', y: '-'};
     Controls.attachCursor(cursor);
+    
+    var clearAll = function() {
+        for (var c in canvases) {
+            if (!canvases.hasOwnProperty(c) || c.substr(c.length - 6) == 'Canvas') continue;
+            canvases[c].clearRect(0, 0, canvases[c + 'Canvas'].width, canvases[c + 'Canvas'].height);
+        }
+    };
 
     return {
         attachCanvases: function(c) { canvases = c; },
@@ -73,11 +80,7 @@ Application.Services.factory('Canvas', function(FireService,Controls) {
                 ref: FireService.ref.child('canvas/'+prefix)
             };
         },
-        clear: function() { 
-            for(var c in canvases) { if(!canvases.hasOwnProperty(c) || c.substr(c.length - 6) == 'Canvas') continue;
-                canvases[c].clearRect(0,0,canvases[c+'Canvas'].width,canvases[c+'Canvas'].height);
-            }
-        },
-        cursor: cursor
+        clear: function() { canvases.main.clearRect(0,0,canvases.mainCanvas.width,canvases.mainCanvas.height); },
+        clearAll: clearAll, cursor: cursor
     };
 });

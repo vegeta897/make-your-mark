@@ -5,6 +5,7 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'/>
     <link href="css/layout.css" media="screen" rel="stylesheet"/>
     <link href="css/theme.css" media="screen" rel="stylesheet"/>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body ng-cloak ng-controller="Main">
     <header>
@@ -13,11 +14,12 @@
     </header>
     <section id="arena">
         <div class="canvas"></div>
+        <controls></controls>
         <p class="coords">
             <strong>{{ cursor.x }}</strong> , <strong>{{ cursor.y }}</strong>
         </p>
     </section>
-    <section id="controls">
+    <section id="info">
         <h2>Welcome to <strong>Make Your Mark</strong>!</h2>
         <dl>
             <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
@@ -34,7 +36,9 @@
     <script src="app/app.js"></script>
     <script src="app/main.js"></script>
     <script src="app/game.js"></script>
-    <script src="app/controls.js"></script>
+    <script src="app/player.js"></script>
+    <script src="app/renderer.js"></script>
+    <script src="app/controls/controls.js"></script>
     <script src="app/canvas/canvas.js"></script>
     <script src="app/fireservice.js"></script>
     <script src="app/utility.js"></script>

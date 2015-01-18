@@ -9,6 +9,14 @@ h1 { font-size: 3em; color: #d3d9b9; text-shadow: none; -webkit-text-fill-color:
 h2 { color: #f2f5eb; }
 
 .canvas { border-color: #222; background: #42555C; }
+.controls { border-color: #222; background: #3C4244; }
+.controls .movement button { background: #626F73; border-color: #3C4244; border-radius: 16px; color: #ABC9CF; transition: all 0.4s; }
+.controls .movement button:hover { background: #79888c; color: #badbe0; transition: all 0.05s; }
+.controls .movement button:active { background: #7f9094; color: #a7c0c2; transition: all 0.02s;  }
+#moveUp { border-top-left-radius: 48px; border-top-right-radius: 48px; } 
+#moveLeft { border-top-left-radius: 48px; border-bottom-left-radius: 48px; }
+#moveRight { border-top-right-radius: 48px; border-bottom-right-radius: 48px; } 
+#moveDown { border-bottom-left-radius: 48px; border-bottom-right-radius: 48px; }
 
 strong { font-weight: bold; }
 .muted { color: #858a71; }

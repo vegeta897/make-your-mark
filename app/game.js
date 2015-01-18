@@ -1,13 +1,11 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Player) {
 
     var game = {
-        arena: {width: 200, height: 100, pixels: 6}, fps: 60,
-        objects: {},
-        player: {
-            input: {}, score: 0
-        }
+        arena: {width: 37, height: 25, pixels: 24}, fps: 60,
+        objects: {}, player: Player.player
     };
+    
     game.frames = game.frameCount = game.localServerOffset = game.framesPerSecond = game.tickCount = 0;
     
     var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
@@ -30,7 +28,7 @@ Application.Services.factory('Game',function($timeout,FireService) {
         game.frames++; game.frameCount++;
         if(!rendered) {
             $timeout(function(){});
-            //Canvas.render(rt,game,step,game.ticks);
+            Renderer.drawFrame(rt,step,game.ticks);
             rendered = true;
         }
         requestAnimationFrame(frame);
@@ -45,8 +43,9 @@ Application.Services.factory('Game',function($timeout,FireService) {
     
     FireService.initServerTime(function(offset){
         game.localServerOffset = offset;
-        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1408150000000) / step);
+        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1421585000000) / step);
         last = performance.now();
+        Renderer.init(game);
         setInterval(tick,step);
         requestAnimationFrame(frame);
     });

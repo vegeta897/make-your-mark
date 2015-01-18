@@ -9,20 +9,27 @@ header h1 + p { float: left; margin: 30px 0 0 12px; }
 #globalTime .unit { float: left; width: 75px; }
 #globalTime .unit .number { font-size: 3.1em; }
 #globalTime .unit .label { font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
-.canvas { position: relative; border: 1px solid; height: 600px; background: #555; }
+.canvas { position: relative; float: left; border: 1px solid; width: 888px; height: 600px; background: #555; }
 .canvases canvas { position: absolute; }
 canvas#mainCanvas { background: url('../img/grid-dot.png'); }
 #mainUnderCanvas { opacity: 0.8; }
 #highUnderCanvas { opacity: 0.6; }
 /*canvas#highCanvas { position: absolute; top: 0; left: 0; }*/
-section#arena p.coords { margin-right: 2px; float: right; text-align: right; }
-section#controls { padding: 6px 0; }
-section#controls>section { float: left; }
-section#controls>section:first-child { width: 300px; }
-section#controls>section:nth-child(2) { width: 900px; }
+.controls { float: left; box-sizing: border-box; padding: 8px; width: 312px; height: 602px; border: 1px solid; border-left-width: 0; }
+.controls .upper { height: 289px; }
+.controls .movement { height: 295px; padding: 1px; position: relative; box-sizing: border-box; }
+.controls .movement button { border: 1px solid; width: 97px; height: 97px; position: absolute; font-size: 48px; }
+#moveUp { left: 99px; } #moveLeft { top: 99px; }
+#moveRight { top: 99px; left: 197px; } #moveDown { left: 99px; top: 197px; }
+section#arena p.coords { margin-right: 2px; float: right; text-align: right; margin-bottom: 0; }
+section#info { padding: 6px 0; clear: both; top: -12px; position: relative; }
+section#info>section { float: left; }
+section#info>section:first-child { width: 300px; }
+section#info>section:nth-child(2) { width: 900px; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
 .button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }
 p { margin-bottom: 1em; }
+button:focus { outline: 0; }
 
 [ng\:cloak], [ng-cloak], .ng-cloak { display: none !important; }
