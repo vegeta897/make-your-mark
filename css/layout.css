@@ -11,7 +11,7 @@ header h1 + p { float: left; margin: 30px 0 0 12px; }
 #globalTime .unit .label { font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
 .canvas { position: relative; float: left; border: 1px solid; width: 888px; height: 600px; background: #555; }
 .canvases canvas { position: absolute; }
-canvas#mainCanvas { background: url('../img/grid-dot.png'); }
+/*canvas#mainCanvas { background: url('../img/grid-dot.png'); }*/
 #mainUnderCanvas { opacity: 0.8; }
 #highUnderCanvas { opacity: 0.6; }
 /*canvas#highCanvas { position: absolute; top: 0; left: 0; }*/

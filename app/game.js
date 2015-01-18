@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService,Renderer,Player) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls) {
 
     var game = {
         arena: {width: 37, height: 25, pixels: 24}, fps: 60,
@@ -35,6 +35,8 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
     };
     
     var update = function(step,dt,now) {
+        Controls.processInput(game,Player);
+        Player.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;
             game.tickCount = game.frameCount = 0;
