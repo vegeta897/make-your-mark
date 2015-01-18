@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls,World) {
 
     var game = {
         arena: {width: 37, height: 25, pixels: 24}, fps: 60,
@@ -28,6 +28,8 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         game.frames++; game.frameCount++;
         if(!rendered) {
             $timeout(function(){});
+            var cursor = Controls.getCursor();
+            cursor.onThing = World.getThingsAt(cursor.x,cursor.y).length > 0;
             Renderer.drawFrame(rt,step,game.ticks);
             rendered = true;
         }
@@ -43,11 +45,14 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         }
     };
     
+    // Initialize game
     FireService.initServerTime(function(offset){
         game.localServerOffset = offset;
         game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1421585000000) / step);
         last = performance.now();
         Renderer.init(game);
+        World.initGame(game);
+        World.setPosition(game.player.x,game.player.y);
         setInterval(tick,step);
         requestAnimationFrame(frame);
     });

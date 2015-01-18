@@ -75,9 +75,9 @@ Application.Services.factory('Controls',function() {
             }
             if(cursor.x != '-') {
                 var co = { x: cursor.x - 444, y: cursor.y - 300 }; // Center-based cursor coords
-                if(co.y < 0 && Math.abs(co.x) < Math.abs(co.y)) { cursor.quad = 'up'; }
-                else if(co.y >= 0 && Math.abs(co.x) < Math.abs(co.y)) { cursor.quad = 'down'; }
-                else if(co.x < 0 && Math.abs(co.x) > Math.abs(co.y)) { cursor.quad = 'left'; }
+                if(co.y < 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'up'; }
+                else if(co.y >= 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'down'; }
+                else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { cursor.quad = 'left'; }
                 else { cursor.quad = 'right'; }
             } else { cursor.quad = false; }
             
@@ -91,6 +91,6 @@ Application.Services.factory('Controls',function() {
         },
         onUp: function(){onUp();}, onLeft: function(){onLeft();}, 
         onRight: function(){onRight();}, onDown: function(){onDown();}, 
-        onKey: onKey, onMouse: onMouse
+        onKey: onKey, onMouse: onMouse, getCursor: function() { return cursor; }
     };
 });

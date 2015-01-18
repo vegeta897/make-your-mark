@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Player',function(Renderer,Controls) {
+Application.Services.factory('Player',function(Renderer,Controls,World) {
 
     var player = { 
         x: 0, y: 0, offset: { x: 0, y: 0 }, input: {}, score: 0
@@ -21,7 +21,8 @@ Application.Services.factory('Player',function(Renderer,Controls) {
     var doMove = function(step,tick) {
         if(!player.moving) return;
         moveStart = moveStart ? moveStart : tick;
-        var progress = (tick - moveStart)/15;
+        var progress = (tick - moveStart)/12;
+        //progress += (1-progress)/3; // Ease out
         switch(player.moving) {
             case 'up': player.offset.y = progress*-24; break;
             case 'left': player.offset.x = progress*-24; break;
@@ -37,6 +38,7 @@ Application.Services.factory('Player',function(Renderer,Controls) {
             case 'right': player.x++; break;
             case 'down': player.y++; break;
         }
+        World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = player.offset.y = 0;
     };
     
