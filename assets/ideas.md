@@ -14,3 +14,8 @@ Player lives should be finite
 De-incentive to picking up everything you can find
     More stuff carried = die faster?
     When you die, all your carried stuff goes back to original spots
+    
+Persistent "recipe" learning system that makes it easier to do things you've already done
+
+Making marks causes surrounding ground area to colorize to player's color
+    Better marks cause further/stronger spread

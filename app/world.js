@@ -20,14 +20,25 @@ Application.Services.factory('World',function(Util,Things,Renderer) {
             }
         }
     };
+    
+    var getVicinity = function() {
+        var vicinity = [];
+        for(var vt = 0; vt < world.things.length; vt++) {
+            if(Math.abs(world.things[vt].relative.x)+Math.abs(world.things[vt].relative.y) <= 1) {
+                vicinity.push(world.things[vt]);
+            }
+        }
+        return vicinity;
+    };
 
     return {
         initGame: function(g) { game = g; },
         setPosition: function(x,y) { 
             position.x = x; position.y = y;
             generateThings();
+            return getVicinity();
         },
-        getThingsAt: function(x,y) {
+        getThingsAt: function(x,y,type) {
             var things = [];
             if(x == '-') return things;
             var gameX = Math.floor(x/24), gameY = Math.floor(y/24);

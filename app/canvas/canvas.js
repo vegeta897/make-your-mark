@@ -81,6 +81,7 @@ Application.Services.factory('Canvas', function(FireService,Controls,Util) {
             };
         },
         clear: function() { canvases.main.clearRect(0,0,canvases.mainCanvas.width,canvases.mainCanvas.height); },
+        clearUnder: function() { canvases.mainUnder.clearRect(0,0,canvases.mainUnderCanvas.width,canvases.mainUnderCanvas.height); },
         clearAll: clearAll, cursor: cursor
     };
 });

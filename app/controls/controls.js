@@ -5,11 +5,15 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls) {
+        controller: function($scope,Controls,Game,Util) {
             $scope.moveUp = Controls.onUp;
             $scope.moveLeft = Controls.onLeft;
             $scope.moveRight = Controls.onRight;
             $scope.moveDown = Controls.onDown;
+            $scope.game = Game.game;
+            $scope.onThing = Controls.addToHover;
+            $scope.offThing = Controls.clearHover;
+            $scope.isOnThing = function(thing) { return Util.thingInArray(thing,Controls.getCursor().things); };
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
@@ -51,7 +55,7 @@ Application.Services.factory('Controls',function() {
     var onUp, onLeft, onRight, onDown;
     
     return {
-        attachCursor: function(c) { cursor = c; },
+        attachCursor: function(c) { cursor = c; cursor.hover = []; },
         attachMoves: function(move) {
             onUp = function(){move('up');}; onLeft = function(){move('left');}; 
             onRight = function(){move('right');}; onDown = function(){move('down');};
@@ -91,6 +95,8 @@ Application.Services.factory('Controls',function() {
                 
             }
         },
+        addToHover: function(thing) { cursor.hover.push(thing); },
+        clearHover: function(thing) { cursor.hover = []; },
         onUp: function(){onUp();}, onLeft: function(){onLeft();}, 
         onRight: function(){onRight();}, onDown: function(){onDown();}, 
         onKey: onKey, onMouse: onMouse, getCursor: function() { return cursor; }

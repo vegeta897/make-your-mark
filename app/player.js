@@ -4,6 +4,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World) {
     var player = { 
         x: 0, y: 0, offset: { x: 0, y: 0 }, input: {}, score: 0
     };
+    var last = { offset: {  } };
     var moveStart, doneMoving;
     
     Renderer.addRender(function(c) {
@@ -38,7 +39,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World) {
             case 'right': player.x++; break;
             case 'down': player.y++; break;
         }
-        World.setPosition(player.x,player.y);
+        player.vicinity = World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = player.offset.y = 0;
     };
     
@@ -48,7 +49,14 @@ Application.Services.factory('Player',function(Renderer,Controls,World) {
         init: function() { },
         update: function(step,tick) {
             doMove(step,tick);
-            
+        },
+        hasMoved: function() {
+            if(last.x != player.x || last.y != player.y || last.offset.x != player.offset.x || last.offset.y != player.offset.y) {
+                last.x = player.x; last.y = player.y; last.offset.x = player.offset.x; last.offset.y = player.offset.y;
+                return true;
+            } else {
+                return false;
+            }
         },
         move: move,
         player: player

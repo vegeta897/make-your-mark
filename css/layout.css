@@ -12,11 +12,11 @@ header h1 + p { float: left; margin: 30px 0 0 12px; }
 .canvas { position: relative; float: left; border: 1px solid; width: 888px; height: 600px; background: #555; }
 .canvases canvas { position: absolute; }
 /*canvas#mainCanvas { background: url('../img/grid-dot.png'); }*/
-#mainUnderCanvas { opacity: 0.8; }
-#highUnderCanvas { opacity: 0.6; }
 /*canvas#highCanvas { position: absolute; top: 0; left: 0; }*/
 .controls { float: left; box-sizing: border-box; padding: 8px; width: 312px; height: 602px; border: 1px solid; border-left-width: 0; }
 .controls .upper { height: 289px; }
+.controls .upper h2 { text-align: center; }
+.controls .upper .thing { font-size: 18px; float: left; padding: 6px; margin: 6px 8px; border: 1px solid; cursor: pointer; }
 .controls .movement { height: 295px; padding: 1px; position: relative; box-sizing: border-box; }
 .controls .movement button { border: 1px solid; width: 97px; height: 97px; position: absolute; font-size: 48px; }
 #moveUp { left: 99px; } #moveLeft { top: 99px; }

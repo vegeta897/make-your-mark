@@ -9,23 +9,26 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     return {
         init: function(g) { c = Canvas.getCanvases(); game = g; },
         initWorld: function(w) { world = w; },
-        drawFrame: function(rt,step,tick) {
-            Canvas.clear();
-            if(!c.main) return;
+        drawBG: function(rt,step,tick) {
+            Canvas.clearUnder();
             // Render background
             for(var bgw = -1; bgw < game.arena.width+1; bgw++) {
                 for(var bgh = -1; bgh < game.arena.height+1; bgh++) {
                     Math.seedrandom('bg'+Util.positionSeed(+game.player.x + +bgw, +game.player.y + +bgh));
                     var tileChance = Math.random();
                     if(tileChance > 0.5) { continue; }
-                    else if(tileChance < 0.02) {c.main.fillStyle = 'rgba(0,0,0,0.1)'; }
-                    else if(tileChance < 0.1) {c.main.fillStyle = 'rgba(0,0,0,0.08)'; }
-                    else if(tileChance < 0.3) {c.main.fillStyle = 'rgba(0,0,0,0.04)'; }
-                    else {c.main.fillStyle = 'rgba(0,0,0,0.02)'; }
-                    c.main.fillRect(bgw*game.arena.pixels-game.player.offset.x,bgh*game.arena.pixels-game.player.offset.y,
+                    else if(tileChance < 0.02) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
+                    else if(tileChance < 0.1) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
+                    else if(tileChance < 0.3) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.04)'; }
+                    else {c.mainUnder.fillStyle = 'rgba(0,0,0,0.02)'; }
+                    c.mainUnder.fillRect(bgw*game.arena.pixels-game.player.offset.x,bgh*game.arena.pixels-game.player.offset.y,
                         game.arena.pixels,game.arena.pixels);
                 }
             }
+        },
+        drawFrame: function(rt,step,tick) {
+            Canvas.clear();
+            if(!c.main) return;
             // Render world
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
@@ -33,27 +36,29 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 var drawX = (t.relative.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x;
                 var drawY = (t.relative.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y;
                 c.main.fillRect(drawX+7,drawY+7,10,10);
+                c.main.fillStyle = '#112244';
+                c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
+                c.main.fillText(t.name[0],drawX+11,drawY+16);
             }
             // Render player
             for(var i = 0; i < renderArray.length; i++) {
                 renderArray[i](c);
             }
-            if(cursor.things.length > 0) {
-                var cx = Math.floor(cursor.x / game.arena.pixels) * game.arena.pixels-game.player.offset.x;
-                var cy = Math.floor(cursor.y / game.arena.pixels) * game.arena.pixels-game.player.offset.y;
+            var allCursorThings = cursor.things.concat(cursor.hover);
+            for(var ct = 0; ct < allCursorThings.length; ct++) {
+                var cx = (allCursorThings[ct].relative.x + 18) * game.arena.pixels-game.player.offset.x;
+                var cy = (allCursorThings[ct].relative.y + 12) * game.arena.pixels-game.player.offset.y;
                 c.main.lineWidth = 2;c.main.strokeStyle = 'rgba(150,200,255,0.5)';
                 c.main.beginPath();
                 c.main.moveTo(cx + 4,cy + 4); c.main.lineTo(cx + 20,cy + 4);
                 c.main.lineTo(cx + 20,cy + 20); c.main.lineTo(cx + 4,cy + 20);
                 c.main.closePath(); c.main.stroke();
-                for(var ct = 0; ct < cursor.things.length; ct++) {
-                    c.main.font = '14px Verdana'; c.main.textAlign = 'center';
-                    c.main.fillStyle = 'rgba(180,230,255,1)';
-                    c.main.shadowColor = 'rgba(0,0,0,1)'; c.main.shadowBlur = 3;
-                    c.main.shadowOffsetX = 0; c.main.shadowOffsetY = 0;
-                    c.main.fillText(cursor.things[ct].name,cx+12,cy-4-(16*ct));
-                    c.main.shadowBlur = 0;
-                }
+                c.main.font = '14px Verdana'; c.main.textAlign = 'center';
+                c.main.fillStyle = 'rgba(180,230,255,1)';
+                c.main.shadowColor = 'rgba(0,0,0,1)'; c.main.shadowBlur = 3;
+                c.main.shadowOffsetX = 0; c.main.shadowOffsetY = 0;
+                c.main.fillText(allCursorThings[ct].name,cx+12,cy-4-(16*ct));
+                c.main.shadowBlur = 0;
             }
             // Render move arrow
             if(cursor.quad) {

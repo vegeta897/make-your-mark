@@ -2,13 +2,13 @@
 Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls,World) {
 
     var game = {
-        arena: {width: 37, height: 25, pixels: 24}, fps: 60,
+        arena: {width: 37, height: 25, pixels: 24}, fps: 60, rendered: true,
         objects: {}, player: Player.player
     };
     
     game.frames = game.frameCount = game.localServerOffset = game.framesPerSecond = game.tickCount = 0;
     
-    var now, dt = 0, last = 0, rendered = false, step = 1000/game.fps; // 60 FPS
+    var now, dt = 0, last = 0, step = 1000/game.fps; // 60 FPS
 
     var tick = function() {
         if(game.crashed) { return; }
@@ -16,28 +16,31 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         if(dt > 60000) { console.log('too many updates missed! game crash'); game.crashed = game.paused = true; }
         if(dt > step) {
             while(dt >= step) {
-                dt -= step; if(game.paused && !game.oneFrame) { continue; } else { rendered = false; }
-                game.ticks++; update(step,dt,now);
-                game.oneFrame = false;
+                dt -= step; if(game.paused && !game.oneFrame) { continue; } else { game.rendered = false; }
+                game.ticks++; update(step,dt,now); game.oneFrame = false;
             }
         }
         last = now;
     };
+    
     var frame = function() {
         var rt = performance.now() - last;
         game.frames++; game.frameCount++;
-        if(!rendered) {
+        if(Player.hasMoved()) {
+            Renderer.drawBG(rt,step,game.ticks);
+        }
+        if(!game.rendered) {
             $timeout(function(){});
-            var cursor = Controls.getCursor();
-            cursor.things = World.getThingsAt(cursor.x,cursor.y);
             Renderer.drawFrame(rt,step,game.ticks);
-            rendered = true;
+            game.rendered = true;
         }
         requestAnimationFrame(frame);
     };
     
     var update = function(step,dt,now) {
         Controls.processInput(game,Player);
+        var cursor = Controls.getCursor();
+        cursor.things = World.getThingsAt(cursor.x,cursor.y);
         Player.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;

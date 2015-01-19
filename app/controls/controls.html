@@ -1,5 +1,8 @@
 <div class="controls">
-    <div class="upper"></div>
+    <div class="upper">
+        <h2>Vicinity</h2>
+        <div class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-class="{ hover: isOnThing(thing) }">{{ thing.name }}</div>
+    </div>
     <div class="movement">
         <button id="moveUp" ng-click="moveUp()"><i class="fa fa-arrow-up"></i></button>
         <button id="moveLeft" ng-click="moveLeft()"><i class="fa fa-arrow-left"></i></button>

@@ -100,6 +100,14 @@ Application.Services.service('Util', function() {
         },
         positionSeed: function(x,y) {
             return ("000000" + (+x+500000)).slice(-6)+("000000" + (+y+500000)).slice(-6);
+        },
+        getFastDistance: function(x1,y1,x2,y2) { // Get distance squared between 2 points
+            return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
+        },
+        thingInArray: function(thing,array) {
+            for(var i = 0; i < array.length; i++) {
+                if(array[i].guid == thing.guid) return true;
+            }
         }
     }
 });

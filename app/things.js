@@ -7,7 +7,8 @@ Application.Services.factory('Things',function(Util) {
         pencil: { name: 'Pencil', size: SIZE.TINY, common: 100 },
         paper: { name: 'Paper', size: SIZE.TINY, common: 200 }
     };
-
+    
+    var guid = 0;
     var thingsArray = [];
     
     var totalCommon = function() {
@@ -29,7 +30,7 @@ Application.Services.factory('Things',function(Util) {
                 total += thingsArray[i].common;
                 if(total < target) continue;
                 var newThing = angular.copy(thingsArray[i]);
-                newThing.x = x; newThing.y = y;
+                newThing.x = x; newThing.y = y; newThing.guid = seed+':'+(guid++);
                 return newThing;
             }
         }
