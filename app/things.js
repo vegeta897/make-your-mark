@@ -22,7 +22,7 @@ Application.Services.factory('Things',function(Util) {
     
     return {
         spawnThing: function(seed,x,y) {
-            Math.seedrandom(seed);
+            Math.seedrandom('thing'+seed);
             var target = Util.randomIntRange(1,totalCommon);
             var total = 0;
             for(var i = 0; i < thingsArray.length; i++) {

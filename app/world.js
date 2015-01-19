@@ -12,8 +12,8 @@ Application.Services.factory('World',function(Util,Things,Renderer) {
         for(var bgw = Math.ceil(game.arena.width/-2)-1; bgw < Math.floor(game.arena.width/2)+2; bgw++) {
             for(var bgh = Math.ceil(game.arena.height/-2)-1; bgh < Math.floor(game.arena.height/2)+2; bgh++) {
                 var seed = Util.positionSeed(+position.x + bgw, +position.y + bgh);
-                Math.seedrandom(seed);
-                if(Math.random() > 0.02) continue; // 5% chance of thing
+                Math.seedrandom('thing-gen'+seed);
+                if(Math.random() > 0.02) continue; // 2% chance of thing
                 var thing = Things.spawnThing(seed,+position.x + bgw, +position.y + bgh);
                 thing.relative = { x: bgw, y: bgh };
                 world.things.push(thing);

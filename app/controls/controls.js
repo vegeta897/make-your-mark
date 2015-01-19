@@ -14,6 +14,8 @@ Application.Directives.directive('controls',function() {
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
             jQuery(window).mouseup(function(e) { return Controls.onMouse(e, e.which, false); });
+            
+            // TODO: Sometimes mouse down event handler doesn't initialize
         }
     }
 });
@@ -73,8 +75,8 @@ Application.Services.factory('Controls',function() {
                     Player.move(MOVE[key]); break; 
                 }
             }
-            if(cursor.x != '-') {
-                var co = { x: cursor.x - 444, y: cursor.y - 300 }; // Center-based cursor coords
+            var co = { x: cursor.x - 444, y: cursor.y - 300 }; // Center-based cursor coords
+            if(cursor.x != '-' && Math.pow(co.x,2) + Math.pow(co.y,2) > 1296) {
                 if(co.y < 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'up'; }
                 else if(co.y >= 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'down'; }
                 else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { cursor.quad = 'left'; }

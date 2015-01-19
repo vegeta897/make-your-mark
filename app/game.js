@@ -29,7 +29,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         if(!rendered) {
             $timeout(function(){});
             var cursor = Controls.getCursor();
-            cursor.onThing = World.getThingsAt(cursor.x,cursor.y).length > 0;
+            cursor.things = World.getThingsAt(cursor.x,cursor.y);
             Renderer.drawFrame(rt,step,game.ticks);
             rendered = true;
         }

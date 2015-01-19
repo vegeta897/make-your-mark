@@ -30,7 +30,7 @@ Application.Services.service('Util', function() {
     };
     
     return {
-        randomIntRange: function(min,max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
+        randomIntRange: function(min,max) { return Math.floor(Math.random() * (+max - +min + 1)) + +min ; },
         pickInArray: pickInArray,
         hsvToHex: hsvToHex, hexToRGB: hexToRGB,
         randomColor: function(/* maxMins (object has 'maxSat') OR object type (string) */) {

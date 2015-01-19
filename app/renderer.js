@@ -15,12 +15,12 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render background
             for(var bgw = -1; bgw < game.arena.width+1; bgw++) {
                 for(var bgh = -1; bgh < game.arena.height+1; bgh++) {
-                    Math.seedrandom(Util.positionSeed(+game.player.x + +bgw, +game.player.y + +bgh));
+                    Math.seedrandom('bg'+Util.positionSeed(+game.player.x + +bgw, +game.player.y + +bgh));
                     var tileChance = Math.random();
                     if(tileChance > 0.5) { continue; }
-                    else if(tileChance < 0.03) {c.main.fillStyle = 'rgba(0,0,0,0.15)'; }
-                    else if(tileChance < 0.1) {c.main.fillStyle = 'rgba(0,0,0,0.1)'; }
-                    else if(tileChance < 0.3) {c.main.fillStyle = 'rgba(0,0,0,0.06)'; }
+                    else if(tileChance < 0.02) {c.main.fillStyle = 'rgba(0,0,0,0.1)'; }
+                    else if(tileChance < 0.1) {c.main.fillStyle = 'rgba(0,0,0,0.08)'; }
+                    else if(tileChance < 0.3) {c.main.fillStyle = 'rgba(0,0,0,0.04)'; }
                     else {c.main.fillStyle = 'rgba(0,0,0,0.02)'; }
                     c.main.fillRect(bgw*game.arena.pixels-game.player.offset.x,bgh*game.arena.pixels-game.player.offset.y,
                         game.arena.pixels,game.arena.pixels);
@@ -38,17 +38,22 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             for(var i = 0; i < renderArray.length; i++) {
                 renderArray[i](c);
             }
-            if(cursor.onThing) {
+            if(cursor.things.length > 0) {
                 var cx = Math.floor(cursor.x / game.arena.pixels) * game.arena.pixels-game.player.offset.x;
                 var cy = Math.floor(cursor.y / game.arena.pixels) * game.arena.pixels-game.player.offset.y;
                 c.main.lineWidth = 2;c.main.strokeStyle = 'rgba(150,200,255,0.5)';
                 c.main.beginPath();
-                c.main.moveTo(cx + 4,cy + 4);
-                c.main.lineTo(cx + 20,cy + 4);
-                c.main.lineTo(cx + 20,cy + 20);
-                c.main.lineTo(cx + 4,cy + 20);
-                c.main.closePath();
-                c.main.stroke();
+                c.main.moveTo(cx + 4,cy + 4); c.main.lineTo(cx + 20,cy + 4);
+                c.main.lineTo(cx + 20,cy + 20); c.main.lineTo(cx + 4,cy + 20);
+                c.main.closePath(); c.main.stroke();
+                for(var ct = 0; ct < cursor.things.length; ct++) {
+                    c.main.font = '14px Verdana'; c.main.textAlign = 'center';
+                    c.main.fillStyle = 'rgba(180,230,255,1)';
+                    c.main.shadowColor = 'rgba(0,0,0,1)'; c.main.shadowBlur = 3;
+                    c.main.shadowOffsetX = 0; c.main.shadowOffsetY = 0;
+                    c.main.fillText(cursor.things[ct].name,cx+12,cy-4-(16*ct));
+                    c.main.shadowBlur = 0;
+                }
             }
             // Render move arrow
             if(cursor.quad) {
