@@ -5,7 +5,9 @@ Application.Services.factory('Things',function(Util) {
     
     var things = {
         pencil: { name: 'Pencil', size: SIZE.TINY, common: 100 },
-        paper: { name: 'Paper', size: SIZE.TINY, common: 200 }
+        paper: { name: 'Paper', size: SIZE.TINY, common: 200 },
+        rock: { name: 'Rock', size: SIZE.SMALL, common: 150 },
+        scissors: { name: 'Scissors', size: SIZE.SMALL, common: 40 }
     };
     
     var guid = 0;

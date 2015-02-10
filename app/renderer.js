@@ -16,10 +16,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 for(var bgh = -1; bgh < game.arena.height+1; bgh++) {
                     Math.seedrandom('bg'+Util.positionSeed(+game.player.x + +bgw, +game.player.y + +bgh));
                     var tileChance = Math.random();
-                    if(tileChance > 0.5) { continue; }
-                    else if(tileChance < 0.02) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
-                    else if(tileChance < 0.1) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
-                    else if(tileChance < 0.3) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.04)'; }
+                    if(tileChance > 0.1) { continue; }
+                    else if(tileChance < 0.002) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
+                    else if(tileChance < 0.005) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
+                    else if(tileChance < 0.02) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.04)'; }
                     else {c.mainUnder.fillStyle = 'rgba(0,0,0,0.02)'; }
                     c.mainUnder.fillRect(bgw*game.arena.pixels-game.player.offset.x,bgh*game.arena.pixels-game.player.offset.y,
                         game.arena.pixels,game.arena.pixels);

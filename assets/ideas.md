@@ -19,3 +19,5 @@ Persistent "recipe" learning system that makes it easier to do things you've alr
 
 Making marks causes surrounding ground area to colorize to player's color
     Better marks cause further/stronger spread
+    
+Players can set up "traps" that may have ill-effects on other players
