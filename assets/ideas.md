@@ -9,7 +9,9 @@ More complicated "marks" require more complex interactions involving more object
 
 Player lives should be finite
     Need to keep making marks or you die
-    Player's life ends when page closed?
+    No users/registration, persistence is done through localstorage
+        Players can enter a name when they die?
+    
     
 De-incentive to picking up everything you can find
     More stuff carried = die faster?

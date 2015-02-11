@@ -12,23 +12,27 @@
         <h1>Make Your Mark</h1>
         <p><strong>v{{ version }}</strong> - <span class="muted">{{ versionName }}</span></p>
     </header>
-    <section id="arena">
+    <section id="arena" ng-hide="needUpdate">
         <div class="canvas"></div>
         <controls></controls>
-        <p class="coords">
-            <strong>{{ cursor.x }}</strong> , <strong>{{ cursor.y }}</strong>
-        </p>
+        <!--<p class="coords">-->
+            <!--<strong>{{ cursor.x }}</strong> , <strong>{{ cursor.y }}</strong>-->
+        <!--</p>-->
     </section>
-    <section id="info">
+    <section id="info" ng-hide="needUpdate">
         <h2>Welcome to <strong>Make Your Mark</strong>!</h2>
         <p>
-            Use left click, WASD, or the buttons on the right to move.
+            To <strong>move</strong>, use left click, WASD, or the buttons on the right.<br />
+            To <strong>select things</strong>, left click on them. Right click to <strong>deselect</strong>.
         </p>
         <dl>
             <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
             <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
             <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
         </dl>
+    </section>
+    <section ng-show="needUpdate">
+        <h2 class="error">Your game is out of date! Shift+F5 to hard-refresh the page</h2>
     </section>
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular.min.js"></script>

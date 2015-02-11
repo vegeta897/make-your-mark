@@ -1,8 +1,12 @@
 'use strict';
-Application.Services.factory('Player',function(Renderer,Controls,World) {
+Application.Services.factory('Player',function(Renderer,Controls,World,Util,localStorageService) {
 
+    Math.seedrandom();
+    var storedPlayer = localStorageService.get('player') || 
+        { x: Util.randomIntRange(-100,100), y: Util.randomIntRange(-100,100), score: 0 };
+    localStorageService.set('player',storedPlayer);
     var player = { 
-        x: 0, y: 0, offset: { x: 0, y: 0 }, input: {}, score: 0
+        x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, input: {}, score: +storedPlayer.score
     };
     var last = { offset: {  } };
     var moveStart, doneMoving;
@@ -39,6 +43,8 @@ Application.Services.factory('Player',function(Renderer,Controls,World) {
             case 'right': player.x++; break;
             case 'down': player.y++; break;
         }
+        var storedPlayer = { x: player.x, y: player.y, score: player.score };
+        localStorageService.set('player',storedPlayer);
         player.vicinity = World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = player.offset.y = 0;
     };

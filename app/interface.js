@@ -17,17 +17,15 @@ Application.Services.factory('Interface',function(World) {
             // Generate hover list
             c.hover = {};
             var underCursor = World.getThingsAt(c.x, c.y);
-            var hoverCount = 0; var hoverSelect;
+            var hoverSelect;
             for(var i = 0; i < underCursor.length; i++) {
                 c.hover[underCursor[i].guid] = underCursor[i];
                 hoverSelect = underCursor[i];
-                hoverCount++;
             }
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
-            
+            // Select/Deselect things
             if(lmb && hoverSelect) game.selected = hoverSelect;
             if(rmb) { delete game.selected; }
-            
             // Determine cursor quad
             var co = { x: c.x - 444, y: c.y - 300 }; // Center-based cursor coords
             if(c.x != '-' && Math.pow(co.x,2) + Math.pow(co.y,2) > 1296) {

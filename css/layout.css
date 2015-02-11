@@ -25,7 +25,7 @@ header h1 + p { float: left; margin: 30px 0 0 12px; }
 #moveRight { top: 99px; left: 197px; } #moveDown { left: 99px; top: 197px; }
 
 section#arena p.coords { margin-right: 2px; float: right; text-align: right; margin-bottom: 0; }
-section#info { padding: 6px 0; clear: both; top: -12px; position: relative; }
+section#info { padding: 6px 0; clear: both; }
 section#info>section { float: left; }
 section#info>section:first-child { width: 300px; }
 section#info>section:nth-child(2) { width: 900px; }
@@ -33,7 +33,7 @@ section#info>section:nth-child(2) { width: 900px; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
 .button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }
-p { margin-bottom: 1em; }
+p { margin-bottom: 1em; line-height: 1.2em; }
 button:focus { outline: 0; }
 
 .clearfix { overflow: auto; }

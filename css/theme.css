@@ -23,7 +23,7 @@ h2 { color: #f2f5eb; }
 #moveRight { border-top-right-radius: 48px; border-bottom-right-radius: 48px; } 
 #moveDown { border-bottom-left-radius: 48px; border-bottom-right-radius: 48px; }
 
-strong { font-weight: bold; }
+strong { font-weight: bold; font-size: 1.1em; }
 .muted { color: #858a71; }
 p:not(.error) strong, dt strong { color: #f2f5eb; }
 .button-group { display: inline-block; border-color: #656666; }
