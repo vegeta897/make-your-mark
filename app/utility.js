@@ -101,6 +101,10 @@ Application.Services.service('Util', function() {
         positionSeed: function(x,y) {
             return ("000000" + (+x+500000)).slice(-6)+("000000" + (+y+500000)).slice(-6);
         },
+        isInArea: function(x1,y1,x2,y2,w,h) { // Is XY1 within a rectangular area WxH centered on XY2
+            return Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2;
+        },
+        getXYdiff: function(x1,y1,x2,y2) { return { x: +x2 - +x1, y: +y2 - +y1 }; }, // XY diff between 2 points
         getFastDistance: function(x1,y1,x2,y2) { // Get distance squared between 2 points
             return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
         },

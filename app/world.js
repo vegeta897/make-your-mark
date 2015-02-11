@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('World',function(Util,Things,Renderer) {
+Application.Services.factory('World',function(Util,Things,Renderer,FireService) {
 
     var position = { x: 0, y: 0 };
     var game;
@@ -32,7 +32,19 @@ Application.Services.factory('World',function(Util,Things,Renderer) {
     };
 
     return {
-        initGame: function(g) { game = g; },
+        initGame: function(g) { 
+            game = g;
+            FireService.onValue('players',function(players){
+                world.players = players;
+                for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
+                    Math.seedrandom(pKey);
+                    world.players[pKey] = {
+                        guid: pKey, x: +players[pKey].split(':')[0], y: +players[pKey].split(':')[1],
+                        color: Util.randomColor('vibrant')
+                    };
+                }
+            });
+        },
         setPosition: function(x,y) { 
             position.x = x; position.y = y;
             generateThings();

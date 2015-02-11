@@ -14,13 +14,13 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Fire
     var last = { offset: {  } };
     var moveStart, doneMoving;
     
-    Renderer.addRender(function(c) {
-        c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
-        var width = c.mainCanvas.width, height = c.mainCanvas.height;
-        c.main.beginPath();
-        c.main.arc(width/2, height/2, 8, 0, 2 * Math.PI, false);
-        c.main.fill();
-    });
+    //Renderer.addRender(function(c) {
+    //    c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
+    //    var width = c.mainCanvas.width, height = c.mainCanvas.height;
+    //    c.main.beginPath();
+    //    c.main.arc(width/2, height/2, 8, 0, 2 * Math.PI, false);
+    //    c.main.fill();
+    //});
     
     var move = function(dir) {
         player.moving = !player.moving ? dir : player.moving;

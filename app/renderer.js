@@ -40,7 +40,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.fillRect(drawX+7,drawY+7,10,10);
                 c.main.fillStyle = '#112244';
                 c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                c.main.fillText(t.name[0],drawX+11,drawY+16);
+                var letterFix = t.name[0] == 'R' ? 1 : 0;
+                c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
                 c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
@@ -57,10 +58,23 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
-            // Render player
-            for(var i = 0; i < renderArray.length; i++) {
-                renderArray[i](c);
+            // Render players
+            for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue; 
+                var p = world.players[pKey], self = pKey == game.player.guid;
+                if(!Util.isInArea(game.player.x,game.player.y, p.x, p.y,game.arena.width,game.arena.height)) continue;
+                var diff = Util.getXYdiff(game.player.x, game.player.y, p.x, p.y);
+                var off = self ? 0 : 1; // Don't apply movement offset to self
+                var pdx = (diff.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x*off;
+                var pdy = (diff.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y*off;
+                c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
+                c.main.beginPath();
+                c.main.arc(pdx+game.arena.pixels/2, pdy+game.arena.pixels/2, 8, 0, 2 * Math.PI, false);
+                c.main.fill();
             }
+            // Render player
+            //for(var i = 0; i < renderArray.length; i++) {
+            //    renderArray[i](c);
+            //}
             // Render move arrow
             if(cursor.quad) {
                 c.main.fillStyle = 'rgba(255,255,255,0.1)';
