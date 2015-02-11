@@ -1,18 +1,21 @@
 'use strict';
-Application.Services.factory('Player',function(Renderer,Controls,World,Util,localStorageService) {
+Application.Services.factory('Player',function(Renderer,Controls,World,Util,FireService,localStorageService) {
 
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player') || 
-        { x: Util.randomIntRange(-100,100), y: Util.randomIntRange(-100,100), score: 0 };
+        { x: Util.randomIntRange(-100,100), y: Util.randomIntRange(-100,100), 
+            score: 0, guid: 'P'+Util.randomIntRange(0,1000000) };
     localStorageService.set('player',storedPlayer);
+    Math.seedrandom(storedPlayer.guid);
     var player = { 
-        x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, input: {}, score: +storedPlayer.score
+        x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, 
+        input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant')
     };
     var last = { offset: {  } };
     var moveStart, doneMoving;
     
     Renderer.addRender(function(c) {
-        c.main.fillStyle = 'rgba(255,255,255,0.8)';
+        c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
         var width = c.mainCanvas.width, height = c.mainCanvas.height;
         c.main.beginPath();
         c.main.arc(width/2, height/2, 8, 0, 2 * Math.PI, false);
@@ -43,8 +46,9 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,loca
             case 'right': player.x++; break;
             case 'down': player.y++; break;
         }
-        var storedPlayer = { x: player.x, y: player.y, score: player.score };
+        var storedPlayer = { x: player.x, y: player.y, score: player.score, guid: player.guid };
         localStorageService.set('player',storedPlayer);
+        FireService.set('players/'+player.guid,player.x+':'+player.y);
         player.vicinity = World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = player.offset.y = 0;
     };
@@ -52,7 +56,11 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,loca
     Controls.attachMoves(move);
     
     return {
-        init: function() { },
+        init: function() {
+            player.vicinity = World.setPosition(player.x,player.y);
+            FireService.set('players/'+player.guid,player.x+':'+player.y);
+            console.log(player.guid,player.x+':'+player.y);
+        },
         update: function(step,tick) {
             doMove(step,tick);
         },

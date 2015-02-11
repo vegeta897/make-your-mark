@@ -55,6 +55,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         World.initGame(game);
         World.setPosition(game.player.x,game.player.y);
         Interface.initGame(game);
+        Player.init();
         setInterval(tick,step);
         requestAnimationFrame(frame);
     });
