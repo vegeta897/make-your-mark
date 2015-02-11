@@ -11,6 +11,8 @@ Application.Directives.directive('controls',function() {
             $scope.moveRight = Controls.onRight;
             $scope.moveDown = Controls.onDown;
             $scope.game = Game.game;
+            $scope.selectThing = Interface.controlsSelectThing;
+            $scope.thingIsSelected = function(thing) { return Game.game.selected && Game.game.selected.guid == thing.guid; };
             $scope.onThing = Interface.controlsOnThing;
             $scope.offThing = Interface.controlsOffThing;
             $scope.isOnThing = function(thing) { return Canvas.getCursor().hover.hasOwnProperty(thing.guid); };
@@ -65,11 +67,10 @@ Application.Services.factory('Controls',function(Interface,Canvas) {
                     Player.move(MOVE[key]); break; 
                 }
             }
-            Interface.updateCursor(cursor);
+            var io = Interface.updateCursor(cursor,input.mouse.left,input.mouse.right);
             
             if(input.mouse.left) {
-                if(cursor.quad)
-                Player.move(cursor.quad);
+                if(cursor.quad && io.move) Player.move(cursor.quad);
             }
             if(input.mouse.right) {
                 

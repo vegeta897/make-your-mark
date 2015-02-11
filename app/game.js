@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls,World) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls,World,Interface) {
 
     var game = {
         arena: {width: 37, height: 25, pixels: 24}, fps: 60, rendered: true,
@@ -54,6 +54,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         Renderer.init(game);
         World.initGame(game);
         World.setPosition(game.player.x,game.player.y);
+        Interface.initGame(game);
         setInterval(tick,step);
         requestAnimationFrame(frame);
     });

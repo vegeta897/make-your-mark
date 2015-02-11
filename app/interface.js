@@ -9,14 +9,24 @@ Application.Services.factory('Interface',function(World) {
         initWorld: function(w) { world = w; },
         controlsOnThing: function(thing) { controls.hover = thing; },
         controlsOffThing: function(thing) { delete controls.hover; },
-        updateCursor: function(c) {
+        controlsSelectThing: function(thing) {
+            if(game.selected && game.selected.guid == thing.guid) { delete game.selected; return; }
+            game.selected = thing;
+        },
+        updateCursor: function(c,lmb,rmb) { // lmb,rmb = left/right mouse pressed
             // Generate hover list
             c.hover = {};
             var underCursor = World.getThingsAt(c.x, c.y);
+            var hoverCount = 0; var hoverSelect;
             for(var i = 0; i < underCursor.length; i++) {
                 c.hover[underCursor[i].guid] = underCursor[i];
+                hoverSelect = underCursor[i];
+                hoverCount++;
             }
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
+            
+            if(lmb && hoverSelect) game.selected = hoverSelect;
+            if(rmb) { delete game.selected; }
             
             // Determine cursor quad
             var co = { x: c.x - 444, y: c.y - 300 }; // Center-based cursor coords
@@ -26,6 +36,8 @@ Application.Services.factory('Interface',function(World) {
                 else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { c.quad = 'left'; }
                 else { c.quad = 'right'; }
             } else { c.quad = false; }
+            
+            return { move: !(lmb && hoverSelect) };
         }
     };
 });
