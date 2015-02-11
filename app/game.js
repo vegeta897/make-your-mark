@@ -38,6 +38,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
     };
     
     var update = function(step,dt,now) {
+        if(!World.worldReady()) return;
         Controls.processInput(game,Player);
         Player.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
@@ -55,7 +56,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         World.initGame(game);
         World.setPosition(game.player.x,game.player.y);
         Interface.initGame(game);
-        Player.init();
+        Player.initGame(game);
         setInterval(tick,step);
         requestAnimationFrame(frame);
     });

@@ -11,8 +11,7 @@ Player lives should be finite
     Need to keep making marks or you die
     No users/registration, persistence is done through localstorage
         Players can enter a name when they die?
-    
-    
+
 De-incentive to picking up everything you can find
     More stuff carried = die faster?
     When you die, all your carried stuff goes back to original spots

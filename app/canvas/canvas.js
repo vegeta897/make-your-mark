@@ -33,7 +33,7 @@ Application.Directives.directive('canvas',function() {
 });
 
 Application.Services.factory('Canvas', function(FireService,Util) {
-    var canvases, cursor = { x: '-', y: '-'};
+    var canvases, cursor = { x: '-', y: '-', hover: {} };
     
     var clearAll = function() {
         for (var c in canvases) {

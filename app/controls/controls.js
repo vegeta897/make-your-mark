@@ -5,7 +5,7 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls,Interface,Game,Canvas,Util) {
+        controller: function($scope,Controls,Interface,Game,Player,Canvas,Util) {
             $scope.moveUp = Controls.onUp;
             $scope.moveLeft = Controls.onLeft;
             $scope.moveRight = Controls.onRight;
@@ -16,6 +16,7 @@ Application.Directives.directive('controls',function() {
             $scope.onThing = Interface.controlsOnThing;
             $scope.offThing = Interface.controlsOffThing;
             $scope.isOnThing = function(thing) { return Canvas.getCursor().hover.hasOwnProperty(thing.guid); };
+            $scope.takeThing = Player.takeThing;
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });

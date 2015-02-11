@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Player',function(Renderer,Controls,World,Util,FireService,localStorageService) {
+Application.Services.factory('Player',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player') || 
@@ -9,10 +9,11 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Fire
     Math.seedrandom(storedPlayer.guid);
     var player = { 
         x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, 
-        input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant')
+        input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant'),
+        carried: Things.expandThings(storedPlayer.carried) || []
     };
     var last = { offset: {  } };
-    var moveStart, doneMoving;
+    var moveStart, doneMoving, game;
     
     //Renderer.addRender(function(c) {
     //    c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
@@ -21,6 +22,12 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Fire
     //    c.main.arc(width/2, height/2, 8, 0, 2 * Math.PI, false);
     //    c.main.fill();
     //});
+    
+    var storePlayer = function() {
+        var storedPlayer = { x: player.x, y: player.y, score: player.score, guid: player.guid,
+            carried: Things.shrinkThings(player.carried) };
+        localStorageService.set('player',storedPlayer);
+    };
     
     var move = function(dir) {
         player.moving = !player.moving ? dir : player.moving;
@@ -46,17 +53,18 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Fire
             case 'right': player.x++; break;
             case 'down': player.y++; break;
         }
-        var storedPlayer = { x: player.x, y: player.y, score: player.score, guid: player.guid };
-        localStorageService.set('player',storedPlayer);
+        storePlayer();
         FireService.set('players/'+player.guid,player.x+':'+player.y);
         player.vicinity = World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = player.offset.y = 0;
     };
     
+    World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.x,player.y); });
     Controls.attachMoves(move);
     
     return {
-        init: function() {
+        initGame: function(g) {
+            game = g;
             player.vicinity = World.setPosition(player.x,player.y);
             FireService.set('players/'+player.guid,player.x+':'+player.y);
             console.log(player.guid,player.x+':'+player.y);
@@ -71,6 +79,13 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Fire
             } else {
                 return false;
             }
+        },
+        takeThing: function(thing) {
+            thing.removed = true;
+            player.carried.push(thing);
+            World.removeThing(thing);
+            delete game.selected;
+            storePlayer();
         },
         move: move,
         player: player

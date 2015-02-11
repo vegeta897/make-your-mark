@@ -33,6 +33,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
+                if(t.removed || world.removed.hasOwnProperty(t.guid)) continue;
                 c.main.fillStyle = '#6699aa';
                 var drawX = (t.relative.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x;
                 var drawY = (t.relative.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y;

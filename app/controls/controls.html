@@ -8,6 +8,13 @@
             <h2>Selected</h2>
             <h3>{{ game.selected.name }}</h3>
             <p>{{ game.selected.desc }}</p>
+            <button ng-click="takeThing(game.selected)">Take</button>
+        </section>
+        <section ng-show="game.player.carried.length > 0">
+            <h2>Carrying</h2>
+            <div class="thing" ng-repeat="carried in game.player.carried">
+                {{ carried.name }}
+            </div>
         </section>
     </div>
     <div class="movement">

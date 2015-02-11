@@ -23,18 +23,37 @@ Application.Services.factory('Things',function(Util) {
         return total;
     }();
     
+    var spawnThing = function(x,y) {
+        Math.seedrandom('thing'+Util.positionSeed(x,y));
+        var target = Util.randomIntRange(1,totalCommon);
+        var total = 0;
+        for(var i = 0; i < thingsArray.length; i++) {
+            total += thingsArray[i].common;
+            if(total < target) continue;
+            var newThing = angular.copy(thingsArray[i]);
+            newThing.x = x; newThing.y = y; newThing.guid = Util.positionSeed(x,y)/*+':'+(guid++)*/;
+            return newThing;
+        }
+    };
+    
     return {
-        spawnThing: function(seed,x,y) {
-            Math.seedrandom('thing'+seed);
-            var target = Util.randomIntRange(1,totalCommon);
-            var total = 0;
-            for(var i = 0; i < thingsArray.length; i++) {
-                total += thingsArray[i].common;
-                if(total < target) continue;
-                var newThing = angular.copy(thingsArray[i]);
-                newThing.x = x; newThing.y = y; newThing.guid = seed/*+':'+(guid++)*/;
-                return newThing;
+        spawnThing: spawnThing,
+        expandThings: function(th) {
+            if(!th || th.length == 0) return [];
+            th = angular.copy(th);
+            for(var i = 0; i < th.length; i++) {
+                var pos = Util.positionFromSeed(th[i]);
+                th[i] = spawnThing(pos.x,pos.y);
             }
+            return th;
+        },
+        shrinkThings: function(th) {
+            if(!th || th.length == 0) return [];
+            th = angular.copy(th);
+            for(var i = 0; i < th.length; i++) {
+                th[i] = th[i].guid;
+            }
+            return th;
         }
     };
 });

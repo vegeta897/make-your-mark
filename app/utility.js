@@ -101,6 +101,9 @@ Application.Services.service('Util', function() {
         positionSeed: function(x,y) {
             return ("000000" + (+x+500000)).slice(-6)+("000000" + (+y+500000)).slice(-6);
         },
+        positionFromSeed: function(seed) {
+            return { x: +seed.substr(0,6)-500000, y: +seed.slice(6)-500000 };
+        },
         isInArea: function(x1,y1,x2,y2,w,h) { // Is XY1 within a rectangular area WxH centered on XY2
             return Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2;
         },
