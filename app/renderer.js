@@ -44,21 +44,23 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             for(var i = 0; i < renderArray.length; i++) {
                 renderArray[i](c);
             }
-            var allCursorThings = cursor.things.concat(cursor.hover);
-            for(var ct = 0; ct < allCursorThings.length; ct++) {
-                var cx = (allCursorThings[ct].relative.x + 18) * game.arena.pixels-game.player.offset.x;
-                var cy = (allCursorThings[ct].relative.y + 12) * game.arena.pixels-game.player.offset.y;
+            // Render thing hover
+            var hoverCount = 0;
+            for(var hKey in cursor.hover) { if(!cursor.hover.hasOwnProperty(hKey)) continue;
+                var cx = (cursor.hover[hKey].relative.x + 18) * game.arena.pixels-game.player.offset.x;
+                var cy = (cursor.hover[hKey].relative.y + 12) * game.arena.pixels-game.player.offset.y;
                 c.main.lineWidth = 2;c.main.strokeStyle = 'rgba(150,200,255,0.5)';
                 c.main.beginPath();
                 c.main.moveTo(cx + 4,cy + 4); c.main.lineTo(cx + 20,cy + 4);
                 c.main.lineTo(cx + 20,cy + 20); c.main.lineTo(cx + 4,cy + 20);
                 c.main.closePath(); c.main.stroke();
                 c.main.font = '14px Verdana'; c.main.textAlign = 'center';
-                c.main.fillStyle = 'rgba(180,230,255,1)';
+                c.main.fillStyle = 'rgba(240,240,240,1)';
                 c.main.shadowColor = 'rgba(0,0,0,1)'; c.main.shadowBlur = 3;
                 c.main.shadowOffsetX = 0; c.main.shadowOffsetY = 0;
-                c.main.fillText(allCursorThings[ct].name,cx+12,cy-4-(16*ct));
+                c.main.fillText(cursor.hover[hKey].name,cx+12,cy-4-(16*hoverCount));
                 c.main.shadowBlur = 0;
+                hoverCount++;
             }
             // Render move arrow
             if(cursor.quad) {

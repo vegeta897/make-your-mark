@@ -32,9 +32,8 @@ Application.Directives.directive('canvas',function() {
     }
 });
 
-Application.Services.factory('Canvas', function(FireService,Controls,Util) {
+Application.Services.factory('Canvas', function(FireService,Util) {
     var canvases, cursor = { x: '-', y: '-'};
-    Controls.attachCursor(cursor);
     
     var clearAll = function() {
         for (var c in canvases) {
@@ -46,6 +45,7 @@ Application.Services.factory('Canvas', function(FireService,Controls,Util) {
     return {
         attachCanvases: function(c) { canvases = c; },
         getCanvases: function() { return canvases; },
+        getCursor: function() { return cursor; },
         initListeners: function(c) {
             c.addEventListener('mousemove',function(e){
                 var offset = jQuery(c).offset();
@@ -54,11 +54,12 @@ Application.Services.factory('Canvas', function(FireService,Controls,Util) {
                 var moved = cursor.x != newX || cursor.y != newY;
                 if(!moved) return;
                 cursor.x = newX; cursor.y = newY;
-                Controls.onMouseMove();
             },false);
-            c.addEventListener('mouseleave',Controls.onMouseOut,false);
-            c.addEventListener('mousedown',Controls.onMouseDown,false);
-            c.addEventListener('mouseup',Controls.onMouseUp,false);
+            c.addEventListener('mouseleave',function(e){
+                cursor.x = cursor.y = '-';
+            },false);
+            c.addEventListener('mousedown',function(){},false);
+            c.addEventListener('mouseup',function(){},false);
         },
         getFireService: function(prefix) {
             return { // Override some FireService functions to include path prefix

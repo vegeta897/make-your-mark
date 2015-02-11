@@ -39,8 +39,6 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
     
     var update = function(step,dt,now) {
         Controls.processInput(game,Player);
-        var cursor = Controls.getCursor();
-        cursor.things = World.getThingsAt(cursor.x,cursor.y);
         Player.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;

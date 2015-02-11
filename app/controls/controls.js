@@ -5,15 +5,15 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls,Game,Util) {
+        controller: function($scope,Controls,Interface,Game,Canvas,Util) {
             $scope.moveUp = Controls.onUp;
             $scope.moveLeft = Controls.onLeft;
             $scope.moveRight = Controls.onRight;
             $scope.moveDown = Controls.onDown;
             $scope.game = Game.game;
-            $scope.onThing = Controls.addToHover;
-            $scope.offThing = Controls.clearHover;
-            $scope.isOnThing = function(thing) { return Util.thingInArray(thing,Controls.getCursor().things); };
+            $scope.onThing = Interface.controlsOnThing;
+            $scope.offThing = Interface.controlsOffThing;
+            $scope.isOnThing = function(thing) { return Canvas.getCursor().hover.hasOwnProperty(thing.guid); };
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
@@ -24,7 +24,7 @@ Application.Directives.directive('controls',function() {
     }
 });
 
-Application.Services.factory('Controls',function() {
+Application.Services.factory('Controls',function(Interface,Canvas) {
     
     var KEY = { BACKSPACE: 8, TAB: 9, RETURN: 13, ESC: 27, SPACE: 32, PAGEUP: 33, PAGEDOWN: 34, END: 35,
         HOME: 36, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, INSERT: 45, DELETE: 46, ZERO: 48, ONE: 49, TWO: 50,
@@ -51,27 +51,13 @@ Application.Services.factory('Controls',function() {
 
     var MOVE = { w: 'up', a: 'left', s: 'down', d: 'right' };
 
-    var cursor;
+    var cursor = Canvas.getCursor();
     var onUp, onLeft, onRight, onDown;
     
     return {
-        attachCursor: function(c) { cursor = c; cursor.hover = []; },
         attachMoves: function(move) {
             onUp = function(){move('up');}; onLeft = function(){move('left');}; 
             onRight = function(){move('right');}; onDown = function(){move('down');};
-        },
-        onMouseMove: function() {
-            
-        },
-        onMouseDown: function(e) {
-            
-        },
-        onMouseUp: function(e) {
-            
-        },
-        onMouseOut: function(e) {
-            
-            cursor.x = cursor.y = '-';
         },
         processInput: function(game,Player) {
             for(var key in input.kb) { if(!input.kb.hasOwnProperty(key)) continue;
@@ -79,13 +65,7 @@ Application.Services.factory('Controls',function() {
                     Player.move(MOVE[key]); break; 
                 }
             }
-            var co = { x: cursor.x - 444, y: cursor.y - 300 }; // Center-based cursor coords
-            if(cursor.x != '-' && Math.pow(co.x,2) + Math.pow(co.y,2) > 1296) {
-                if(co.y < 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'up'; }
-                else if(co.y >= 0 && Math.abs(co.x) <= Math.abs(co.y)) { cursor.quad = 'down'; }
-                else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { cursor.quad = 'left'; }
-                else { cursor.quad = 'right'; }
-            } else { cursor.quad = false; }
+            Interface.updateCursor(cursor);
             
             if(input.mouse.left) {
                 if(cursor.quad)
@@ -95,10 +75,8 @@ Application.Services.factory('Controls',function() {
                 
             }
         },
-        addToHover: function(thing) { cursor.hover.push(thing); },
-        clearHover: function(thing) { cursor.hover = []; },
         onUp: function(){onUp();}, onLeft: function(){onLeft();}, 
         onRight: function(){onRight();}, onDown: function(){onDown();}, 
-        onKey: onKey, onMouse: onMouse, getCursor: function() { return cursor; }
+        onKey: onKey, onMouse: onMouse
     };
 });
