@@ -94,7 +94,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             var gameX = Math.floor(x/24), gameY = Math.floor(y/24);
             for(var i = 0; i < world.things.length; i++) {
                 if(world.things[i].relative.x+18 == gameX && world.things[i].relative.y+12 == gameY && 
-                    !world.removed.hasOwnProperty(world.things[i].guid)) things.push(world.things[i]);
+                    !world.things[i].removed) things.push(world.things[i]);
             }
             return things;
         },
