@@ -17,11 +17,12 @@ Application.Directives.directive('controls',function() {
             $scope.offThing = Interface.controlsOffThing;
             $scope.isOnThing = function(thing) { return Canvas.getCursor().hover.hasOwnProperty(thing.guid); };
             $scope.takeThing = Player.takeThing;
+            $scope.dropThing = Player.dropThing;
+            $scope.thingIsCarried = Player.thingIsCarried;
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
             jQuery(window).mouseup(function(e) { return Controls.onMouse(e, e.which, false); });
-            
             // TODO: Sometimes mouse down event handler doesn't initialize
         }
     }

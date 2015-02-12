@@ -8,11 +8,12 @@
             <h2>Selected</h2>
             <h3>{{ game.selected.name }}</h3>
             <p>{{ game.selected.desc }}</p>
-            <button ng-click="takeThing(game.selected)">Take</button>
+            <button ng-click="takeThing(game.selected)" ng-show="!thingIsCarried(game.selected)">Take</button>
+            <button ng-click="dropThing(game.selected)" ng-show="thingIsCarried(game.selected)">Drop</button>
         </section>
         <section ng-show="game.player.carried.length > 0">
             <h2>Carrying</h2>
-            <div class="thing" ng-repeat="carried in game.player.carried">
+            <div class="thing" ng-repeat="carried in game.player.carried" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried) }">
                 {{ carried.name }}
             </div>
         </section>

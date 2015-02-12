@@ -1,7 +1,7 @@
 'use strict';
 Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Canvas,FireService) {
 
-    $scope.version = 0.002; $scope.versionName = 'Mark attack';
+    $scope.version = 0.003; $scope.versionName = 'Mark attack';
     FireService.onceGlobal('version',function(ver) {
         if($scope.version < ver) {
             $scope.needUpdate = true;
@@ -11,7 +11,6 @@ Application.Controllers.controller('Main', function($scope,$timeout,Game,World,C
             });
         }
     });
-    console.log('Main controller initialized!');
     
     $scope.game = Game.game;
     $scope.world = World.world;

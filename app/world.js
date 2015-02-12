@@ -3,8 +3,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
 
     var position = { x: 0, y: 0 };
     var game;
-    var world = { things: [], removed: {} };
-    var removedReady = false, onRemoved;
+    var world = { things: [], removed: {}, dropped: {} };
+    var removedReady = false, droppedReady = false, onRemoved;
     
     Renderer.initWorld(world);
     
@@ -27,15 +27,27 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         var vicinity = [];
         for(var vt = 0; vt < world.things.length; vt++) {
             if(Math.abs(world.things[vt].relative.x)+Math.abs(world.things[vt].relative.y) <= 1 && 
-                !world.removed.hasOwnProperty(world.things[vt].guid)) {
+                !world.things[vt].removed) {
                 vicinity.push(world.things[vt]);
             }
         }
         return vicinity;
     };
+    
+    var applyRemovalsAndDrops = function() {
+        for(var t = 0; t < world.things.length; t++) {
+            if(world.removed.hasOwnProperty(world.things[t].guid)) world.things[t].removed = true;
+        }
+        for(var dKey in world.dropped) { if(!world.dropped.hasOwnProperty(dKey)) continue;
+            
+            var relative = Util.getXYdiff(position.x,position.y,world.dropped[dKey].x,world.dropped[dKey].y);
+            world.dropped[dKey].relative = { x: relative.x, y: relative.y };
+            world.things.push(world.dropped[dKey]);
+        }
+    };
 
     return {
-        initGame: function(g) { 
+        initGame: function(g) {
             game = g;
             FireService.onValue('players',function(players) {
                 for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
@@ -54,13 +66,26 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                     removed[rKey].removed = true;
                 }
                 world.removed = removed || {};
+                applyRemovalsAndDrops();
                 removedReady = true; onRemoved();
+            });
+            FireService.onValue('dropped',function(dropped) {
+                for(var dKey in dropped) { if(!dropped.hasOwnProperty(dKey)) continue;
+                    var pos = Util.positionFromSeed(dKey);
+                    var x = +dropped[dKey].split(':')[0], y = +dropped[dKey].split(':')[1];
+                    dropped[dKey] = Things.spawnThing(pos.x,pos.y);
+                    dropped[dKey].x = x; dropped[dKey].y = y;
+                }
+                world.dropped = dropped || {};
+                applyRemovalsAndDrops();
+                droppedReady = true; onRemoved();
             });
         },
         setRemovedCallback: function(cb) { onRemoved = cb; },
         setPosition: function(x,y) { 
             position.x = x; position.y = y;
             generateThings();
+            applyRemovalsAndDrops();
             return getVicinity();
         },
         getThingsAt: function(x,y,type) {
@@ -76,6 +101,15 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         removeThing: function(thing) {
             //world.removed[thing.guid] = thing;
             FireService.set('removed/'+thing.guid,1);
+            FireService.remove('dropped/'+thing.guid);
+        },
+        addThing: function(thing) {
+            var origPos = Util.positionFromSeed(thing.guid);
+            if(origPos.x == thing.x && origPos.y == thing.y) { // Dropped in original position
+                FireService.remove('removed/'+thing.guid);
+            } else { // Dropped somewhere else
+                FireService.set('dropped/'+thing.guid,thing.x+':'+thing.y);
+            }
         },
         isRemoved: function(thing) {
             return world.removed.hasOwnProperty(thing.guid);

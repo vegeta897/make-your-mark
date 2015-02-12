@@ -46,7 +46,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         }
         doneMoving = progress >= 1;
         if(!doneMoving) return;
-        moveStart = doneMoving = false;
+        moveStart = false; doneMoving = false;
         switch(player.moving) {
             case 'up': player.y--; break;
             case 'left': player.x--; break;
@@ -56,7 +56,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         storePlayer();
         FireService.set('players/'+player.guid,player.x+':'+player.y);
         player.vicinity = World.setPosition(player.x,player.y);
-        player.moving = false; player.offset.x = player.offset.y = 0;
+        player.moving = false; player.offset.x = 0; player.offset.y = 0;
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.x,player.y); });
@@ -67,7 +67,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             game = g;
             player.vicinity = World.setPosition(player.x,player.y);
             FireService.set('players/'+player.guid,player.x+':'+player.y);
-            console.log(player.guid,player.x+':'+player.y);
+            console.log('Player:',player.guid,player.x+':'+player.y);
         },
         update: function(step,tick) {
             doMove(step,tick);
@@ -76,9 +76,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             if(last.x != player.x || last.y != player.y || last.offset.x != player.offset.x || last.offset.y != player.offset.y) {
                 last.x = player.x; last.y = player.y; last.offset.x = player.offset.x; last.offset.y = player.offset.y;
                 return true;
-            } else {
-                return false;
-            }
+            } else { return false; }
         },
         takeThing: function(thing) {
             thing.removed = true;
@@ -86,6 +84,25 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             World.removeThing(thing);
             delete game.selected;
             storePlayer();
+        },
+        dropThing: function(thing) {
+            thing.removed = false;
+            for(var i = 0; i < player.carried.length; i++) {
+                if(player.carried[i].guid == thing.guid) {
+                    player.carried.splice(i,1); break;
+                }
+            }
+            thing.x = player.x; thing.y = player.y;
+            World.addThing(thing);
+            delete game.selected;
+            storePlayer();
+        },
+        thingIsCarried: function(thing) {
+            if(!thing) return false;
+            for(var i = 0; i < player.carried.length; i++) {
+                if(player.carried[i].guid == thing.guid) return true;
+            }
+            return false;
         },
         move: move,
         player: player

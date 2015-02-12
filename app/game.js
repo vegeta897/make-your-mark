@@ -6,14 +6,14 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         objects: {}, player: Player.player
     };
     
-    game.frames = game.frameCount = game.localServerOffset = game.framesPerSecond = game.tickCount = 0;
+    game.frames = 0; game.frameCount = 0; game.localServerOffset = 0; game.framesPerSecond = 0; game.tickCount = 0;
     
     var now, dt = 0, last = 0, step = 1000/game.fps; // 60 FPS
 
     var tick = function() {
         if(game.crashed) { return; }
         now = performance.now(); dt += (now - last);
-        if(dt > 60000) { console.log('too many updates missed! game crash'); game.crashed = game.paused = true; }
+        if(dt > 60000) { console.log('too many updates missed! game crash'); game.crashed = true; game.paused = true; }
         if(dt > step) {
             while(dt >= step) {
                 dt -= step; if(game.paused && !game.oneFrame) { continue; } else { game.rendered = false; }
@@ -43,7 +43,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         Player.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;
-            game.tickCount = game.frameCount = 0;
+            game.tickCount = 0; game.frameCount = 0;
         }
     };
     

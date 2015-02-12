@@ -14,13 +14,13 @@ h2 { color: #f2f5eb; }
 .controls .upper .thing { background: #626F73; color: #cfe2e6;  border-color: #3C4244; }
 .controls .upper .thing.hover, .controls .upper .thing:hover { background: #79888c; color: #cff4fa; border-color: #ABC9CF; }
 .controls .upper .thing.selected { background: #74b8c2; color: #ebffff; border-color: #d4f4f4; }
-.controls .upper button { background: #44adc2; color: #e1eff1;  border-color: #0C4D68; transition: all 0.25s; }
-.controls .upper button:hover { background: #307382; color: #e1eff1;  border-color: #32454b; transition: all 0.05s; }
+.controls .upper button { background: #44adc2; color: #e1eff1;  border-color: #0C4D68; transition: background 0.25s, color 0.1s, border-color 0.1s; }
+.controls .upper button:hover { background: #307382; color: #e1eff1;  border-color: #32454b; transition: background 0.05s, color 0.02s, border-color 0.02s; }
 .controls .upper button:active { background: #44adc2; color: #e1eff1;  border-color: #5793b2; }
 
-.controls .movement button { background: #626F73; border-color: #3C4244; border-radius: 16px; color: #ABC9CF; transition: all 0.4s; }
-.controls .movement button:hover { background: #79888c; color: #badbe0; transition: all 0.05s; }
-.controls .movement button:active { background: #7f9094; color: #a7c0c2; transition: all 0.02s;  }
+.controls .movement button { background: #626F73; border-color: #3C4244; border-radius: 16px; color: #ABC9CF; transition: background 0.25s, color 0.1s, border-color 0.1s; }
+.controls .movement button:hover { background: #79888c; color: #badbe0; transition: background 0.05s, color 0.02s, border-color 0.02s; }
+.controls .movement button:active { background: #7f9094; color: #a7c0c2; transition: background 0.05s, color 0.02s, border-color 0.02s; }
 #moveUp { border-top-left-radius: 48px; border-top-right-radius: 48px; } 
 #moveLeft { border-top-left-radius: 48px; border-bottom-left-radius: 48px; }
 #moveRight { border-top-right-radius: 48px; border-bottom-right-radius: 48px; } 
