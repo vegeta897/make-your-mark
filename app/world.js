@@ -27,7 +27,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         var vicinity = [];
         for(var vt = 0; vt < world.things.length; vt++) {
             if(Math.abs(world.things[vt].relative.x)+Math.abs(world.things[vt].relative.y) <= 1 && 
-                !world.things[vt].removed) {
+                (!world.things[vt].removed || world.things[vt].dropped)) {
                 vicinity.push(world.things[vt]);
             }
         }
@@ -97,8 +97,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             if(x == '-') return things;
             var gameX = Math.floor(x/24), gameY = Math.floor(y/24);
             for(var i = 0; i < world.things.length; i++) {
-                if(world.things[i].relative.x+18 == gameX && world.things[i].relative.y+12 == gameY && 
-                    !world.things[i].removed) things.push(world.things[i]);
+                if(world.things[i].relative.x+18 == gameX && world.things[i].relative.y+12 == gameY &&
+                    (!world.things[i].removed || world.things[i].dropped)) things.push(world.things[i]);
             }
             return things;
         },
