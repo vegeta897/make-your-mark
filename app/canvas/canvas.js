@@ -56,7 +56,7 @@ Application.Services.factory('Canvas', function(FireService,Util) {
                 cursor.x = newX; cursor.y = newY;
             },false);
             c.addEventListener('mouseleave',function(e){
-                cursor.x = cursor.y = '-';
+                cursor.x = '-'; cursor.y = '-';
             },false);
             c.addEventListener('mousedown',function(){},false);
             c.addEventListener('mouseup',function(){},false);
@@ -83,6 +83,7 @@ Application.Services.factory('Canvas', function(FireService,Util) {
         },
         clear: function() { canvases.main.clearRect(0,0,canvases.mainCanvas.width,canvases.mainCanvas.height); },
         clearUnder: function() { canvases.mainUnder.clearRect(0,0,canvases.mainUnderCanvas.width,canvases.mainUnderCanvas.height); },
+        clearHigh: function() { canvases.high.clearRect(0,0,canvases.highCanvas.width,canvases.highCanvas.height); },
         clearAll: clearAll, cursor: cursor
     };
 });

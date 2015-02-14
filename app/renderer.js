@@ -28,6 +28,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
         },
         drawFrame: function(rt,step,tick) {
             Canvas.clear();
+            Canvas.clearHigh();
             if(!c.main) return;
             // Render things
             var hoverCount = {};
@@ -51,12 +52,16 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.moveTo(drawX + 4,drawY + 4); c.main.lineTo(drawX + 20,drawY + 4);
                 c.main.lineTo(drawX + 20,drawY + 20); c.main.lineTo(drawX + 4,drawY + 20);
                 c.main.closePath(); c.main.stroke();
-                c.main.font = '14px Verdana'; c.main.textAlign = 'center';
-                c.main.fillStyle = 'rgba(240,240,240,1)';
-                c.main.shadowColor = 'rgba(0,0,0,1)'; c.main.shadowBlur = 3;
-                c.main.shadowOffsetX = 0; c.main.shadowOffsetY = 0;
-                c.main.fillText(t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
-                c.main.shadowBlur = 0;
+                c.high.font = '14px Verdana'; c.high.textAlign = 'center';
+                c.high.fillStyle = 'rgba(240,240,240,1)';
+                c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
+                c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
+                var mods = '';
+                if(t.hasOwnProperty('mods')) { 
+                    for(var i = 0; i < t.mods.length; i++) { mods += Util.capitalize(t.mods[i]) + ' '; } 
+                }
+                c.high.fillText(mods+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
+                c.high.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
             // Render players
@@ -78,31 +83,31 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             //}
             // Render move arrow
             if(cursor.quad) {
-                c.main.fillStyle = 'rgba(255,255,255,0.1)';
-                c.main.beginPath();
+                c.high.fillStyle = 'rgba(255,255,255,0.1)';
+                c.high.beginPath();
                 switch(cursor.quad) {
                     case 'up':
-                        c.main.moveTo(c.mainCanvas.width/2, c.mainCanvas.height/2 - 50);
-                        c.main.lineTo(c.mainCanvas.width/2 + 20, c.mainCanvas.height/2 - 30);
-                        c.main.lineTo(c.mainCanvas.width/2 - 20, c.mainCanvas.height/2 - 30);
+                        c.high.moveTo(c.highCanvas.width/2, c.highCanvas.height/2 - 50);
+                        c.high.lineTo(c.highCanvas.width/2 + 20, c.highCanvas.height/2 - 30);
+                        c.high.lineTo(c.highCanvas.width/2 - 20, c.highCanvas.height/2 - 30);
                         break;
                     case 'down':
-                        c.main.moveTo(c.mainCanvas.width/2, c.mainCanvas.height/2 + 50);
-                        c.main.lineTo(c.mainCanvas.width/2 + 20, c.mainCanvas.height/2 + 30);
-                        c.main.lineTo(c.mainCanvas.width/2 - 20, c.mainCanvas.height/2 + 30);
+                        c.high.moveTo(c.highCanvas.width/2, c.highCanvas.height/2 + 50);
+                        c.high.lineTo(c.highCanvas.width/2 + 20, c.highCanvas.height/2 + 30);
+                        c.high.lineTo(c.highCanvas.width/2 - 20, c.highCanvas.height/2 + 30);
                         break;
                     case 'left':
-                        c.main.moveTo(c.mainCanvas.width/2 - 50, c.mainCanvas.height/2);
-                        c.main.lineTo(c.mainCanvas.width/2 - 30, c.mainCanvas.height/2 + 20);
-                        c.main.lineTo(c.mainCanvas.width/2 - 30, c.mainCanvas.height/2 - 20);
+                        c.high.moveTo(c.highCanvas.width/2 - 50, c.highCanvas.height/2);
+                        c.high.lineTo(c.highCanvas.width/2 - 30, c.highCanvas.height/2 + 20);
+                        c.high.lineTo(c.highCanvas.width/2 - 30, c.highCanvas.height/2 - 20);
                         break;
                     case 'right':
-                        c.main.moveTo(c.mainCanvas.width/2 + 50, c.mainCanvas.height/2);
-                        c.main.lineTo(c.mainCanvas.width/2 + 30, c.mainCanvas.height/2 + 20);
-                        c.main.lineTo(c.mainCanvas.width/2 + 30, c.mainCanvas.height/2 - 20);
+                        c.high.moveTo(c.highCanvas.width/2 + 50, c.highCanvas.height/2);
+                        c.high.lineTo(c.highCanvas.width/2 + 30, c.highCanvas.height/2 + 20);
+                        c.high.lineTo(c.highCanvas.width/2 + 30, c.highCanvas.height/2 - 20);
                         break;
                 }
-                c.main.fill();
+                c.high.fill();
             }
         },
         addRender: function(r) { renderArray.push(r); }

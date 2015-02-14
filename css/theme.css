@@ -17,6 +17,9 @@ h2 { color: #f2f5eb; }
 .controls .upper button { background: #44adc2; color: #e1eff1;  border-color: #0C4D68; transition: background 0.25s, color 0.1s, border-color 0.1s; }
 .controls .upper button:hover { background: #307382; color: #e1eff1;  border-color: #32454b; transition: background 0.05s, color 0.02s, border-color 0.02s; }
 .controls .upper button:active { background: #44adc2; color: #e1eff1;  border-color: #5793b2; }
+.controls .upper button.action { background: #5fae5d; color: #d4f8d6;  border-color: #096812; }
+.controls .upper button.action:hover { background: #418241; color: #e6fae7;  border-color: #2c592f; }
+.controls .upper button.action:active { background: #5fae5d; color: #d4f8d6;  border-color: #408446; }
 
 .controls .movement button { background: #626F73; border-color: #3C4244; border-radius: 16px; color: #ABC9CF; transition: background 0.25s, color 0.1s, border-color 0.1s; }
 .controls .movement button:hover { background: #79888c; color: #badbe0; transition: background 0.05s, color 0.02s, border-color 0.02s; }

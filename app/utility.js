@@ -33,6 +33,7 @@ Application.Services.service('Util', function() {
         randomIntRange: function(min,max) { return Math.floor(Math.random() * (+max - +min + 1)) + +min ; },
         pickInArray: pickInArray,
         hsvToHex: hsvToHex, hexToRGB: hexToRGB,
+        capitalize: function(s) { return s.substring(0,1).toUpperCase()+s.substring(1); },
         randomColor: function(/* maxMins (object has 'maxSat') OR object type (string) */) {
             //    var palette = jQuery.isArray(arguments[0]) ? arguments[0] : undefined;
             if (arguments[0]) {
@@ -112,9 +113,20 @@ Application.Services.service('Util', function() {
             return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
         },
         thingInArray: function(thing,array) {
+            if(!thing || !array) return false;
             for(var i = 0; i < array.length; i++) {
                 if(array[i].guid == thing.guid) return true;
             }
+        },
+        addThingMod: function(thing,mod) { 
+            if(thing.hasOwnProperty('mods')) {
+                if(jQuery.inArray(mod,thing.mods) < 0) thing.mods.push(mod);
+            }  else {
+                thing.mods = [mod];
+            }
+        },
+        thingHasMod: function(thing,mod) {
+            return thing.hasOwnProperty('mods') && jQuery.inArray(mod,thing.mods) >= 0;
         }
     }
 });

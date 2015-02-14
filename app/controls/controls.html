@@ -2,19 +2,22 @@
     <div class="upper">
         <section ng-show="game.player.vicinity.length > 0" class="clearfix">
             <h2>Vicinity</h2>
-            <div class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing) }">{{ thing.name }}</div>
-        </section>
-        <section ng-show="game.selected">
-            <h2>Selected</h2>
-            <h3>{{ game.selected.name }}</h3>
-            <p>{{ game.selected.desc }}</p>
-            <button ng-click="takeThing(game.selected)" ng-show="!thingIsCarried(game.selected)">Take</button>
-            <button ng-click="dropThing(game.selected)" ng-show="thingIsCarried(game.selected)">Drop</button>
+            <div class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing) }"><span ng-repeat="mod in thing.mods">{{ mod + ' ' | capitalize }}</span>{{ thing.name }}</div>
         </section>
         <section ng-show="game.player.carried.length > 0">
             <h2>Carrying</h2>
             <div class="thing" ng-repeat="carried in game.player.carried" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried) }">
                 {{ carried.name }}
+            </div>
+        </section>
+        <section ng-show="game.selected">
+            <h2>Selected</h2>
+            <h3><span ng-repeat="mod in game.selected.mods">{{ mod + ' ' | capitalize }}</span>{{ game.selected.name }}</h3>
+            <p>{{ game.selected.desc }}</p>
+            <div ng-show="isInReach(game.selected)">
+                <button ng-click="takeThing(game.selected)" ng-show="!thingIsCarried(game.selected)">Take</button>
+                <button ng-click="dropThing(game.selected)" ng-show="thingIsCarried(game.selected)">Drop</button>
+                <button class="action" ng-repeat="action in game.selected.actions" ng-click="thingAction(game.selected,action)">{{ action | capitalize }}</button>
             </div>
         </section>
     </div>

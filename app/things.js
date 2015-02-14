@@ -4,10 +4,25 @@ Application.Services.factory('Things',function(Util) {
     var SIZE = { MICRO: 1, TINY: 2, SMALL: 3, MEDIUM: 4, LARGE: 5, HUGE: 6 };
     
     var things = {
-        pencil: { name: 'Pencil', size: SIZE.TINY, common: 100, desc: 'A fine writing utensil.' },
-        paper: { name: 'Paper', size: SIZE.TINY, common: 200, desc: 'Flat, white, rectangular, flimsy.' },
-        rock: { name: 'Rock', size: SIZE.SMALL, common: 150, desc: 'About the size of your fist, it could do some damage.' },
-        scissors: { name: 'Scissors', size: SIZE.SMALL, common: 40, desc: 'One pair of one scissors.' }
+        pencil: { name: 'Pencil', size: SIZE.TINY, common: 100,
+            desc: 'A fine writing utensil.', actions: ['break'], 
+            properties: ['hard','sharp'] },
+        paper: { name: 'Paper', size: SIZE.TINY, common: 200,
+            desc: 'Flat, white, rectangular, flimsy.', actions: ['tear'], 
+            properties: ['flat','cuttable'] },
+        rock: { name: 'Rock', size: SIZE.SMALL, common: 150, 
+            desc: 'About the size of your fist, it could do some damage.', 
+            properties: ['hard'] },
+        scissors: { name: 'Scissors', size: SIZE.SMALL, common: 40,
+            desc: 'One pair of one scissors.', actions: ['break','cut'], 
+            properties: ['hard','sharp'] }
+    };
+    
+    var actions = { // S = Self, T = Target
+        'break': function(s) { Util.addThingMod(s,'broken'); },
+        'tear': function(s) { Util.addThingMod(s,'torn'); },
+        'cut': function(t) { Util.addThingMod(t,'cut'); }
+        // TODO: Cutting folded paper makes a paper snowflake
     };
     
     //var guid = 0;
@@ -54,6 +69,12 @@ Application.Services.factory('Things',function(Util) {
                 th[i] = th[i].guid;
             }
             return th;
+        },
+        doAction: function(s,a) {
+            if(!s.hasOwnProperty('actions') || jQuery.inArray(a,s.actions) < 0) {
+                return false; // Cancel if this object "s" can't do this action "a"
+            }
+            actions[a](s);
         }
     };
 });
