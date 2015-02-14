@@ -5,7 +5,7 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls,Interface,Game,Player,Canvas,Things,Util) {
+        controller: function($scope,Controls,Interface,Game,Player,Canvas,Util) {
             $scope.moveUp = Controls.onUp;
             $scope.moveLeft = Controls.onLeft;
             $scope.moveRight = Controls.onRight;
@@ -19,7 +19,7 @@ Application.Directives.directive('controls',function() {
             $scope.takeThing = Player.takeThing;
             $scope.dropThing = Player.dropThing;
             $scope.thingIsCarried = Player.thingIsCarried;
-            $scope.thingAction = Things.doAction;
+            $scope.thingAction = Player.thingAction;
             $scope.isInReach = function(thing) {
                 return Player.thingIsCarried(thing) || Util.thingInArray(thing,Player.player.vicinity);
             };

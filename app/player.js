@@ -104,6 +104,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             }
             return false;
         },
+        thingAction: function(s,a) { if(Things.doAction(s,a)) storePlayer(); },
         move: move,
         player: player
     };

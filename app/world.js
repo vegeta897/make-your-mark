@@ -13,7 +13,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         for(var bgw = Math.ceil(game.arena.width/-2)-1; bgw < Math.floor(game.arena.width/2)+2; bgw++) {
             for(var bgh = Math.ceil(game.arena.height/-2)-1; bgh < Math.floor(game.arena.height/2)+2; bgh++) {
                 var seed = Util.positionSeed(+position.x + bgw, +position.y + bgh);
-                if(world.removed.hasOwnProperty(seed)) continue;
+                //if(world.removed.hasOwnProperty(seed)) continue;
                 Math.seedrandom('thing-gen'+seed);
                 if(Math.random() > 0.02) continue; // 2% chance of thing
                 var thing = Things.spawnThing(+position.x + bgw, +position.y + bgh);
@@ -39,9 +39,9 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             if(world.removed.hasOwnProperty(world.things[t].guid)) world.things[t].removed = true;
         }
         for(var dKey in world.dropped) { if(!world.dropped.hasOwnProperty(dKey)) continue;
-            
             var relative = Util.getXYdiff(position.x,position.y,world.dropped[dKey].x,world.dropped[dKey].y);
             world.dropped[dKey].relative = { x: relative.x, y: relative.y };
+            world.dropped[dKey].dropped = true;
             world.things.push(world.dropped[dKey]);
         }
     };
@@ -72,9 +72,13 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             FireService.onValue('dropped',function(dropped) {
                 for(var dKey in dropped) { if(!dropped.hasOwnProperty(dKey)) continue;
                     var pos = Util.positionFromSeed(dKey);
-                    var x = +dropped[dKey].split(':')[0], y = +dropped[dKey].split(':')[1];
+                    var split = dropped[dKey].split(':');
+                    var x = +split[0], y = +split[1];
+                    var mods = split[2];
+                    mods = mods ? mods.split(',') : mods;
                     dropped[dKey] = Things.spawnThing(pos.x,pos.y);
                     dropped[dKey].x = x; dropped[dKey].y = y;
+                    if(mods) dropped[dKey].mods = mods;
                 }
                 world.dropped = dropped || {};
                 applyRemovalsAndDrops();
@@ -99,16 +103,22 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             return things;
         },
         removeThing: function(thing) {
-            //world.removed[thing.guid] = thing;
             FireService.set('removed/'+thing.guid,1);
             FireService.remove('dropped/'+thing.guid);
         },
         addThing: function(thing) {
             var origPos = Util.positionFromSeed(thing.guid);
-            if(origPos.x == thing.x && origPos.y == thing.y) { // Dropped in original position
-                FireService.remove('removed/'+thing.guid);
-            } else { // Dropped somewhere else
-                FireService.set('dropped/'+thing.guid,thing.x+':'+thing.y);
+            if(origPos.x == thing.x && origPos.y == thing.y && !thing.hasOwnProperty('mods')) { 
+                FireService.remove('removed/'+thing.guid); // Dropped in original position with no mods
+            } else { // Dropped somewhere else and/or with mods
+                var mods = '';
+                if(thing.hasOwnProperty('mods')) {
+                    mods = ':';
+                    for(var m = 0; m < thing.mods.length; m++) {
+                        mods += m == thing.mods.length - 1 ? thing.mods[m] : thing.mods[m] + ',';
+                    }
+                }
+                FireService.set('dropped/'+thing.guid,thing.x+':'+thing.y+mods);
             }
         },
         isRemoved: function(thing) {

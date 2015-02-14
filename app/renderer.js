@@ -34,11 +34,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
-                if(t.removed) continue;
-                c.main.fillStyle = '#6699aa';
+                c.main.fillStyle = 'rgba(0,0,0,0.07)';
                 var drawX = (t.relative.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x;
                 var drawY = (t.relative.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y;
                 var grid = drawX+':'+drawY;
+                c.main.fillRect(drawX+6,drawY+6,12,12);
+                if(t.removed && !t.dropped) continue; // If object removed, it's just a shadow
+                c.main.fillStyle = '#6699aa';
                 c.main.fillRect(drawX+7,drawY+7,10,10);
                 c.main.fillStyle = '#112244';
                 c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';

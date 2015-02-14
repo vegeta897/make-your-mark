@@ -4,11 +4,9 @@
             <h2>Vicinity</h2>
             <div class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing) }"><span ng-repeat="mod in thing.mods">{{ mod + ' ' | capitalize }}</span>{{ thing.name }}</div>
         </section>
-        <section ng-show="game.player.carried.length > 0">
+        <section ng-show="game.player.carried.length > 0" class="clearfix">
             <h2>Carrying</h2>
-            <div class="thing" ng-repeat="carried in game.player.carried" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried) }">
-                {{ carried.name }}
-            </div>
+            <div class="thing" ng-repeat="carried in game.player.carried" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried) }"><span ng-repeat="mod in carried.mods">{{ mod + ' ' | capitalize }}</span>{{ carried.name }}</div>
         </section>
         <section ng-show="game.selected">
             <h2>Selected</h2>

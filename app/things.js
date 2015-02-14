@@ -57,8 +57,12 @@ Application.Services.factory('Things',function(Util) {
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
-                var pos = Util.positionFromSeed(th[i]);
+                var guid = th[i].split(':')[0];
+                var mods = th[i].split(':')[1];
+                mods = mods ? mods.split(',') : mods;
+                var pos = Util.positionFromSeed(guid);
                 th[i] = spawnThing(pos.x,pos.y);
+                if(mods) th[i].mods = mods;
             }
             return th;
         },
@@ -66,7 +70,14 @@ Application.Services.factory('Things',function(Util) {
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
-                th[i] = th[i].guid;
+                var guidMod = th[i].guid;
+                if(th[i].hasOwnProperty('mods')) { // If has mods, build comma delimited list
+                    guidMod = guidMod + ':';
+                    for(var m = 0; m < th[i].mods.length; m++) {
+                        guidMod += m == th[i].mods.length - 1 ? th[i].mods[m] : th[i].mods[m] + ',';
+                    }
+                }
+                th[i] = guidMod;
             }
             return th;
         },
@@ -74,7 +85,7 @@ Application.Services.factory('Things',function(Util) {
             if(!s.hasOwnProperty('actions') || jQuery.inArray(a,s.actions) < 0) {
                 return false; // Cancel if this object "s" can't do this action "a"
             }
-            actions[a](s);
+            actions[a](s); return true;
         }
     };
 });
