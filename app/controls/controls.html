@@ -16,7 +16,6 @@
                 <button ng-click="takeThing(game.selected)" ng-show="!thingIsCarried(game.selected)">Take</button>
                 <button ng-click="dropThing(game.selected)" ng-show="thingIsCarried(game.selected)">Drop</button>
                 <button class="action" ng-repeat="action in game.selected | thingActions" ng-click="thingAction({s:game.selected},action)">{{ action | capitalize }}</button>
-                <span ng-repeat="a in game.selected.actionsExtra">{{a}}</span>
             </div>
         </section>
     </div>
