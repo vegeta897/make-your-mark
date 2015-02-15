@@ -8,4 +8,4 @@ Application.Controllers = angular.module('application.controllers', []);
 Application.Filters = angular.module('application.filters', []);
 Application.Directives = angular.module('application.directives', []);
 
-angular.module('application', ['ngSanitize', 'ngAnimate', 'application.filters', 'application.services', 'application.directives', 'application.constants', 'application.controllers','LocalStorageModule']);
+angular.module('application', ['ngSanitize', 'application.filters', 'application.services', 'application.directives', 'application.constants', 'application.controllers','LocalStorageModule']);

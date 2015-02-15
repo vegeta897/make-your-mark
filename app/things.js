@@ -18,10 +18,10 @@ Application.Services.factory('Things',function(Util) {
             properties: ['hard','sharp'] }
     };
     
-    var actions = { // S = Self, T = Target
-        'break': function(s) { Util.addThingMod(s,'broken'); },
-        'tear': function(s) { Util.addThingMod(s,'torn'); },
-        'cut': function(t) { Util.addThingMod(t,'cut'); }
+    var actions = { // t.s = Self, t.t = Target
+        'break': { t: 0, do: function(t) { Util.addThingMod(t.s,'broken'); } },
+        'tear': { t: 0, do: function(t) { Util.addThingMod(t.s,'torn'); } },
+        'cut': { t: 1, do: function(t) { Util.addThingMod(t.t,'cut'); } }
         // TODO: Cutting folded paper makes a paper snowflake
     };
     
@@ -81,11 +81,15 @@ Application.Services.factory('Things',function(Util) {
             }
             return th;
         },
-        doAction: function(s,a) {
-            if(!s.hasOwnProperty('actions') || jQuery.inArray(a,s.actions) < 0) {
-                return false; // Cancel if this object "s" can't do this action "a"
+        targetsRequired: function(a) { return actions[a].t; },
+        doAction: function(t,a) {
+            if(!t.s.hasOwnProperty('actions') || jQuery.inArray(a, t.s.actions) < 0) {
+                return false; // Cancel if this object "t.s" can't do this action "a"
             }
-            actions[a](s); return true;
+            if((actions[a].t == 1 && t.hasOwnProperty('t')) || 
+                (actions[a].t == 0)) { 
+                actions[a].do(t); return true;
+            }
         }
     };
 });

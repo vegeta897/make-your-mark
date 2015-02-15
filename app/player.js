@@ -2,8 +2,8 @@
 Application.Services.factory('Player',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
     Math.seedrandom();
-    var storedPlayer = localStorageService.get('player') || 
-        { x: Util.randomIntRange(-100,100), y: Util.randomIntRange(-100,100), 
+    var storedPlayer =/* localStorageService.get('player') || */
+        { x: Util.randomIntRange(-60,60), y: Util.randomIntRange(-60,60), 
             score: 0, guid: 'P'+Util.randomIntRange(0,1000000) };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
@@ -58,6 +58,14 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         player.vicinity = World.setPosition(player.x,player.y);
         player.moving = false; player.offset.x = 0; player.offset.y = 0;
     };
+
+    var thingIsCarried = function(thing) {
+        if(!thing) return false;
+        for(var i = 0; i < player.carried.length; i++) {
+            if(player.carried[i].guid == thing.guid) return true;
+        }
+        return false;
+    };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.x,player.y); });
     Controls.attachMoves(move);
@@ -97,14 +105,27 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             delete game.selected;
             storePlayer();
         },
-        thingIsCarried: function(thing) {
-            if(!thing) return false;
-            for(var i = 0; i < player.carried.length; i++) {
-                if(player.carried[i].guid == thing.guid) return true;
+        thingIsCarried: thingIsCarried,
+        thingAction: function(s,a) {
+            if(s.hasOwnProperty('t') && s.t.guid == s.s.guid) return; // Can't target self (maybe allow this?)
+            a = a == 'continue' ? player.needTarget : a;
+            var targets = s.hasOwnProperty('t') ? 1 : 0;
+            targets += s.hasOwnProperty('t2') ? 1 : 0;
+            targets += s.hasOwnProperty('t3') ? 1 : 0; // Replace with countProperties
+            if(Things.targetsRequired(a) > targets) {
+                player.needTarget = a;
+                return;
             }
-            return false;
+            if(Things.doAction(s,a)) {
+                for(var tKey in s) { if(!s.hasOwnProperty(tKey)) continue;
+                    if(!thingIsCarried(s[tKey])) {
+                        World.removeThing(s[tKey]); World.addThing(s[tKey]);
+                    }
+                }
+                player.needTarget = false;
+                storePlayer();
+            }
         },
-        thingAction: function(s,a) { if(Things.doAction(s,a)) storePlayer(); },
         move: move,
         player: player
     };
