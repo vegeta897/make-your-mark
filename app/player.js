@@ -2,7 +2,7 @@
 Application.Services.factory('Player',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
     Math.seedrandom();
-    var storedPlayer =/* localStorageService.get('player') || */
+    var storedPlayer = localStorageService.get('player') || 
         { x: Util.randomIntRange(-60,60), y: Util.randomIntRange(-60,60), 
             score: 0, guid: 'P'+Util.randomIntRange(0,1000000) };
     localStorageService.set('player',storedPlayer);
@@ -37,7 +37,6 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         if(!player.moving) return;
         moveStart = moveStart ? moveStart : tick;
         var progress = (tick - moveStart)/12;
-        //progress += (1-progress)/3; // Ease out
         switch(player.moving) {
             case 'up': player.offset.y = progress*-24; break;
             case 'left': player.offset.x = progress*-24; break;
@@ -81,8 +80,10 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             doMove(step,tick);
         },
         hasMoved: function() {
-            if(last.x != player.x || last.y != player.y || last.offset.x != player.offset.x || last.offset.y != player.offset.y) {
-                last.x = player.x; last.y = player.y; last.offset.x = player.offset.x; last.offset.y = player.offset.y;
+            if(last.x != player.x || last.y != player.y || 
+                last.offset.x != player.offset.x || last.offset.y != player.offset.y) {
+                last.x = player.x; last.y = player.y; 
+                last.offset.x = player.offset.x; last.offset.y = player.offset.y;
                 return true;
             } else { return false; }
         },

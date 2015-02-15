@@ -58,11 +58,11 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.high.fillStyle = 'rgba(240,240,240,1)';
                 c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
                 c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
-                var mods = '';
-                if(t.hasOwnProperty('mods')) { 
-                    for(var i = 0; i < t.mods.length; i++) { mods += Util.capitalize(t.mods[i]) + ' '; } 
+                var propsExtra = '';
+                if(t.hasOwnProperty('propsExtra')) { 
+                    for(var i = 0; i < t.propsExtra.length; i++) { propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
                 }
-                c.high.fillText(mods+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
+                c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                 c.high.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }

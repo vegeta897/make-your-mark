@@ -118,33 +118,29 @@ Application.Services.service('Util', function() {
                 if(array[i].guid == thing.guid) return true;
             }
         },
-        addThingMod: function(thing,mod) { 
-            if(thing.hasOwnProperty('mods')) {
-                if(jQuery.inArray(mod,thing.mods) < 0) thing.mods.push(mod);
-            }  else {
-                thing.mods = [mod];
+        subtractArrays: function(source,subtractor) { // Subtract members of first array from subtractor array
+            if(!source || !subtractor || source.length == 0 || subtractor.length == 0) return source;
+            var result = angular.copy(source);
+            for(var i = result.length-1; i >= 0; i--) {
+                if(jQuery.inArray(result[i],subtractor) >= 0) result.splice(i,1);
             }
-        },
-        thingHasMod: function(thing,mod) {
-            return thing.hasOwnProperty('mods') && jQuery.inArray(mod,thing.mods) >= 0;
+            return result;
         }
     }
 });
 
-Application.Filters.filter('capitalize', function() {
-    return function(input) {
-        if(!input) { return ''; }
-        var words = input.split(' '), result = '';
-        for(var i = 0; i < words.length; i++) {
-            result += words[i].substring(0,1).toUpperCase()+words[i].substring(1);
-            result += i == words.length - 1 ? '' : ' ';
+Application.Filters
+    .filter('capitalize', function() {
+        return function(input) { if(!input) { return ''; }
+            var words = input.split(' '), result = '';
+            for(var i = 0; i < words.length; i++) {
+                result += words[i].substring(0,1).toUpperCase()+words[i].substring(1);
+                result += i == words.length - 1 ? '' : ' ';
+            }
+            return result;
         }
-        return result;
-    }
-})
-    .filter('timeUnits', function() {
-        return function(input,exact) {
-            if(!input) { return 0; }
+    }).filter('timeUnits', function() {
+        return function(input,exact) { if(!input) { return 0; }
             var now = new Date().getTime();
             var seconds = Math.floor((now-input)/1000);
             if(seconds < 60 && exact) { return seconds; } // seconds
@@ -155,8 +151,7 @@ Application.Filters.filter('capitalize', function() {
         }
     })
     .filter('timeUnitsLabel', function() {
-        return function(input,exact) {
-            if(!input) { return ''; }
+        return function(input,exact) { if(!input) { return ''; }
             var now = new Date().getTime();
             var seconds = Math.floor((now-input)/1000);
             if(seconds < 60 && exact) { return seconds > 1 ? 'seconds' : 'second'; } // seconds
@@ -166,8 +161,13 @@ Application.Filters.filter('capitalize', function() {
             else { return seconds > 172799 ? 'days' : 'day'; } // days
         }
     }).filter('reverse', function() {
-        return function(items) {
-            if(!items) return items;
+        return function(items) { if(!items) return items;
             return items.slice().reverse();
+        }
+    }).filter('thingActions', function(Util) {
+        return function(thing) { if(!thing) return thing;
+            var actions = (angular.copy(thing.actions) || []).concat(thing.actionsExtra || []);
+            actions = Util.subtractArrays(actions,thing.actionsLost || []);
+            return actions;
         }
     });

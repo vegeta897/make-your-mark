@@ -47,21 +47,21 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         }
     };
     
-    // Initialize game
-    FireService.initServerTime(function(offset){
-        game.localServerOffset = offset;
-        game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1423000000000) / step);
-        last = performance.now();
-        Renderer.init(game);
-        World.initGame(game);
-        World.setPosition(game.player.x,game.player.y);
-        Interface.initGame(game);
-        Player.initGame(game);
-        setInterval(tick,step);
-        requestAnimationFrame(frame);
-    });
-    
     return {
-        game: game
+        game: game,
+        init: function() { // Initialize game
+            FireService.initServerTime(function(offset){
+                game.localServerOffset = offset;
+                game.ticks = Math.floor(((Date.now() + game.localServerOffset) - 1423000000000) / step);
+                last = performance.now();
+                Renderer.init(game);
+                World.initGame(game);
+                World.setPosition(game.player.x,game.player.y);
+                Interface.initGame(game);
+                Player.initGame(game);
+                setInterval(tick,step);
+                requestAnimationFrame(frame);
+            });
+        }
     };
 });

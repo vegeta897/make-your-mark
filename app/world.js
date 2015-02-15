@@ -74,11 +74,22 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                     var pos = Util.positionFromSeed(dKey);
                     var split = dropped[dKey].split(':');
                     var x = +split[0], y = +split[1];
-                    var mods = split[2];
-                    mods = mods ? mods.split(',') : mods;
+                    var propsExtra = split[2];
+                    propsExtra = propsExtra ? propsExtra.split(',') : propsExtra;
+                    var actionsExtra = split[3];
+                    actionsExtra = actionsExtra ? actionsExtra.split(',') : actionsExtra;
+                    var propsLost = split[4];
+                    propsLost = propsLost ? propsLost.split(',') : propsLost;
+                    var actionsLost = split[5];
+                    actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
+                    var changedTo = split[6];
                     dropped[dKey] = Things.spawnThing(pos.x,pos.y);
                     dropped[dKey].x = x; dropped[dKey].y = y;
-                    if(mods) dropped[dKey].mods = mods;
+                    if(changedTo) Things.changeThing(dropped[dKey],changedTo);
+                    if(propsExtra) dropped[dKey].propsExtra = propsExtra;
+                    if(actionsExtra) dropped[dKey].actionsExtra = actionsExtra;
+                    if(propsLost) dropped[dKey].propsLost = propsLost;
+                    if(actionsLost) dropped[dKey].actionsLost = actionsLost;
                 }
                 world.dropped = dropped || {};
                 applyRemovalsAndDrops();
@@ -107,22 +118,45 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             FireService.remove('dropped/'+thing.guid);
         },
         addThing: function(thing) {
+            //Things.changeThing(thing,thing.id);
             var origPos = Util.positionFromSeed(thing.guid);
-            if(origPos.x == thing.x && origPos.y == thing.y && !thing.hasOwnProperty('mods')) { 
-                FireService.remove('removed/'+thing.guid); // Dropped in original position with no mods
-            } else { // Dropped somewhere else and/or with mods
-                var mods = '';
-                if(thing.hasOwnProperty('mods')) {
-                    mods = ':';
-                    for(var m = 0; m < thing.mods.length; m++) {
-                        mods += m == thing.mods.length - 1 ? thing.mods[m] : thing.mods[m] + ',';
+            if(origPos.x == thing.x && origPos.y == thing.y && 
+                !thing.hasOwnProperty('propsExtra') && !thing.hasOwnProperty('propsLost') && 
+                !thing.hasOwnProperty('actionsExtra') && !thing.hasOwnProperty('actionsLost') &&
+                !thing.hasOwnProperty('changedFrom')) { 
+                FireService.remove('removed/'+thing.guid); // Dropped in original position with no changes
+            } else { // Dropped somewhere else and/or with changes
+                var mods = ':'; // Build mod line
+                if(thing.hasOwnProperty('propsExtra')) {
+                    for(var m = 0; m < thing.propsExtra.length; m++) {
+                        mods += m == thing.propsExtra.length - 1 ? 
+                            thing.propsExtra[m] : thing.propsExtra[m] + ',';
                     }
                 }
+                mods += ':';
+                if(thing.hasOwnProperty('actionsExtra')) {
+                    for(var l = 0; l < thing.actionsExtra.length; l++) {
+                        mods += l == thing.actionsExtra.length - 1 ?
+                            thing.actionsExtra[l] : thing.actionsExtra[l] + ',';
+                    }
+                }
+                mods += ':';
+                if(thing.hasOwnProperty('propsLost')) {
+                    for(var o = 0; o < thing.propsLost.length; o++) {
+                        mods += o == thing.propsLost.length - 1 ?
+                            thing.propsLost[o] : thing.propsLost[o] + ',';
+                    }
+                }
+                mods += ':';
+                if(thing.hasOwnProperty('actionsLost')) {
+                    for(var p = 0; p < thing.actionsLost.length; p++) {
+                        mods += p == thing.actionsLost.length - 1 ?
+                            thing.actionsLost[p] : thing.actionsLost[p] + ',';
+                    }
+                }
+                mods += thing.hasOwnProperty('changedFrom') ? ':'+thing.id : ':';
                 FireService.set('dropped/'+thing.guid,thing.x+':'+thing.y+mods);
             }
-        },
-        isRemoved: function(thing) {
-            return world.removed.hasOwnProperty(thing.guid);
         },
         worldReady: function() { return removedReady; },
         world: world
