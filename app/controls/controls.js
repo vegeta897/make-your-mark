@@ -6,10 +6,6 @@ Application.Directives.directive('controls',function() {
         replace: true,
         scope: {},
         controller: function($scope,Controls,Interface,Game,Player,Canvas,Util) {
-            $scope.moveUp = Controls.onUp;
-            $scope.moveLeft = Controls.onLeft;
-            $scope.moveRight = Controls.onRight;
-            $scope.moveDown = Controls.onDown;
             $scope.game = Game.game;
             $scope.selectThing = Interface.controlsSelectThing;
             $scope.thingIsSelected = function(thing) { return Game.game.selected && Game.game.selected.guid == thing.guid; };
@@ -44,11 +40,7 @@ Application.Services.factory('Controls',function(Interface,Canvas) {
 
     var onKey = function(e,key,pressed) {
         switch(key) {
-            // Movement keys
-            case KEY.W: input.kb.w = pressed; e.preventDefault(); break;
-            case KEY.A: input.kb.a = pressed; e.preventDefault(); break;
-            case KEY.S: input.kb.s = pressed; e.preventDefault(); break;
-            case KEY.D: input.kb.d = pressed; e.preventDefault(); break;
+            
         }
     };
     var onMouse = function(e,button,pressed) {
@@ -58,33 +50,22 @@ Application.Services.factory('Controls',function(Interface,Canvas) {
         }
     };
 
-    var MOVE = { w: 'up', a: 'left', s: 'down', d: 'right' };
-
     var cursor = Canvas.getCursor();
-    var onUp, onLeft, onRight, onDown;
     
     return {
-        attachMoves: function(move) {
-            onUp = function(){move('up');}; onLeft = function(){move('left');}; 
-            onRight = function(){move('right');}; onDown = function(){move('down');};
-        },
         processInput: function(game,Player) {
             for(var key in input.kb) { if(!input.kb.hasOwnProperty(key)) continue;
-                if(input.kb[key] && MOVE.hasOwnProperty(key)) {
-                    Player.move(MOVE[key]); break; 
-                }
+                
             }
             var io = Interface.updateCursor(cursor,input.mouse.left,input.mouse.right);
             
             if(input.mouse.left) {
-                if(cursor.quad && io.move) Player.move(cursor.quad);
+                //if(cursor.quad && io.move) Player.move(cursor.quad);
             }
             if(input.mouse.right) {
-                
+                if(io.move) Player.move(cursor);
             }
         },
-        onUp: function(){onUp();}, onLeft: function(){onLeft();}, 
-        onRight: function(){onRight();}, onDown: function(){onDown();}, 
         onKey: onKey, onMouse: onMouse
     };
 });

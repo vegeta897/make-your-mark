@@ -16,7 +16,7 @@ Application.Services.factory('Interface',function(World) {
         updateCursor: function(c,lmb,rmb) { // lmb,rmb = left/right mouse pressed
             // Generate hover list
             c.hover = {};
-            var underCursor = World.getThingsAt(c.x, c.y);
+            var underCursor = World.getThingsAt(0,0,c.x, c.y);
             var hoverSelect;
             for(var i = 0; i < underCursor.length; i++) {
                 c.hover[underCursor[i].guid] = underCursor[i];
@@ -25,17 +25,10 @@ Application.Services.factory('Interface',function(World) {
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
             // Select/Deselect things
             if(lmb && hoverSelect) game.selected = hoverSelect;
-            if(rmb) { delete game.selected; }
-            // Determine cursor quad
-            var co = { x: c.x - 444, y: c.y - 300 }; // Center-based cursor coords
-            if(c.x != '-' && Math.pow(co.x,2) + Math.pow(co.y,2) > 1296) {
-                if(co.y < 0 && Math.abs(co.x) <= Math.abs(co.y)) { c.quad = 'up'; }
-                else if(co.y >= 0 && Math.abs(co.x) <= Math.abs(co.y)) { c.quad = 'down'; }
-                else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { c.quad = 'left'; }
-                else { c.quad = 'right'; }
-            } else { c.quad = false; }
+            if(lmb && !hoverSelect) { delete game.selected; }
+            if(rmb) { /*delete game.selected;*/ }
             
-            return { move: !(lmb && hoverSelect) };
+            return { move: rmb };
         }
     };
 });

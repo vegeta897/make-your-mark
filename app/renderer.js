@@ -3,48 +3,55 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
 
     var c; // Canvas object
     var cursor = Canvas.cursor;
-    var game, world;
+    var game, world, pix;
     var renderArray = [];
 
     return {
-        init: function(g) { c = Canvas.getCanvases(); game = g; },
+        init: function(g) { c = Canvas.getCanvases(); game = g; pix = game.arena.pixels; },
         initWorld: function(w) { world = w; },
         drawBG: function(rt,step,tick) {
             Canvas.clearUnder();
             // Render background
-            for(var bgw = -1; bgw < game.arena.width+1; bgw++) {
-                for(var bgh = -1; bgh < game.arena.height+1; bgh++) {
-                    Math.seedrandom('bg'+Util.positionSeed(+game.player.x + +bgw, +game.player.y + +bgh));
+            for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) {
+                for(var w = 0; w < game.arena.width-4; w++) { for(var h = 0; h < game.arena.height-4; h++) {
+                    var tileX = sw*(game.arena.width-4) + w, tileY = sh*(game.arena.height-4) + h;
+                    if(tileX < -2 || tileX > game.arena.width || tileY < -2 || tileY > game.arena.height) continue;
+                    Math.seedrandom('bg'+Util.positionSeed(+game.player.sx+sw, +game.player.sy+sh, w, h));
                     var tileChance = Math.random();
                     if(tileChance > 0.1) { continue; }
                     else if(tileChance < 0.002) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
                     else if(tileChance < 0.005) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
                     else if(tileChance < 0.02) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.04)'; }
                     else {c.mainUnder.fillStyle = 'rgba(0,0,0,0.02)'; }
-                    c.mainUnder.fillRect(bgw*game.arena.pixels-game.player.offset.x,bgh*game.arena.pixels-game.player.offset.y,
-                        game.arena.pixels,game.arena.pixels);
-                }
-            }
+                    c.mainUnder.fillRect((tileX+2)*pix,(tileY+2)*pix,pix,pix);
+                } }
+            } }
         },
         drawFrame: function(rt,step,tick) {
-            Canvas.clear();
-            Canvas.clearHigh();
-            if(!c.main) return;
+            if(!c.main) return; Canvas.clear(); Canvas.clearHigh();
+            // Render sector buffer
+            var buffer = pix*2;
+            c.high.fillStyle = 'rgba(47,56,60,0.48)';
+            c.high.fillRect(0,0, c.highCanvas.width,buffer);
+            c.high.fillRect(0,buffer, buffer, c.highCanvas.height-buffer);
+            c.high.fillRect(c.highCanvas.width - buffer,buffer, buffer, c.highCanvas.height-buffer*2);
+            c.high.fillRect(buffer,c.highCanvas.height-buffer, c.highCanvas.width, buffer);
             // Render things
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
+                if(t.removed && !t.dropped) continue; // If object removed
+                var tdx = (t.sx - game.player.sx)*(game.arena.width-4) + t.x, 
+                    tdy = (t.sy - game.player.sy)*(game.arena.height-4) + t.y;
+                if(tdx < -2 || tdx >= game.arena.width || tdy < -2 || tdy >= game.arena.height) continue;
                 c.main.fillStyle = 'rgba(0,0,0,0.07)';
-                var drawX = (t.relative.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x;
-                var drawY = (t.relative.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y;
-                var grid = drawX+':'+drawY;
+                var drawX = (tdx+2) * pix, drawY = (tdy+2) * pix;
                 c.main.fillRect(drawX+6,drawY+6,12,12);
-                if(t.removed && !t.dropped) continue; // If object removed, it's just a shadow
                 c.main.fillStyle = '#6699aa';
                 c.main.fillRect(drawX+7,drawY+7,10,10);
                 c.main.fillStyle = '#112244';
                 c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                var letterFix = t.name[0] == 'R' ? 1 : 0;
+                var letterFix = jQuery.inArray(t.name[0],['R','H','B']) >= 0 ? 1 : 0;
                 c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
@@ -60,57 +67,45 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
                 var propsExtra = '';
                 if(t.hasOwnProperty('propsExtra')) { 
-                    for(var i = 0; i < t.propsExtra.length; i++) { propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
+                    for(var i = 0; i < t.propsExtra.length; i++) { 
+                        propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
                 }
+                var grid = drawX+':'+drawY;
                 c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                 c.high.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
             // Render players
-            for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue; 
-                var p = world.players[pKey], self = pKey == game.player.guid;
-                if(!Util.isInArea(game.player.x,game.player.y, p.x, p.y,game.arena.width,game.arena.height)) continue;
-                var diff = Util.getXYdiff(game.player.x, game.player.y, p.x, p.y);
-                var off = self ? 0 : 1; // Don't apply movement offset to self
-                var pdx = (diff.x + Math.floor(game.arena.width / 2)) * game.arena.pixels-game.player.offset.x*off;
-                var pdy = (diff.y + Math.floor(game.arena.height / 2)) * game.arena.pixels-game.player.offset.y*off;
-                c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
-                c.main.beginPath();
-                c.main.arc(pdx+game.arena.pixels/2, pdy+game.arena.pixels/2, 8, 0, 2 * Math.PI, false);
-                c.main.fill();
-            }
-            // Render player
-            //for(var i = 0; i < renderArray.length; i++) {
-            //    renderArray[i](c);
-            //}
-            // Render move arrow
-            if(cursor.quad) {
-                c.high.fillStyle = 'rgba(255,255,255,0.1)';
-                c.high.beginPath();
-                switch(cursor.quad) {
-                    case 'up':
-                        c.high.moveTo(c.highCanvas.width/2, c.highCanvas.height/2 - 50);
-                        c.high.lineTo(c.highCanvas.width/2 + 20, c.highCanvas.height/2 - 30);
-                        c.high.lineTo(c.highCanvas.width/2 - 20, c.highCanvas.height/2 - 30);
-                        break;
-                    case 'down':
-                        c.high.moveTo(c.highCanvas.width/2, c.highCanvas.height/2 + 50);
-                        c.high.lineTo(c.highCanvas.width/2 + 20, c.highCanvas.height/2 + 30);
-                        c.high.lineTo(c.highCanvas.width/2 - 20, c.highCanvas.height/2 + 30);
-                        break;
-                    case 'left':
-                        c.high.moveTo(c.highCanvas.width/2 - 50, c.highCanvas.height/2);
-                        c.high.lineTo(c.highCanvas.width/2 - 30, c.highCanvas.height/2 + 20);
-                        c.high.lineTo(c.highCanvas.width/2 - 30, c.highCanvas.height/2 - 20);
-                        break;
-                    case 'right':
-                        c.high.moveTo(c.highCanvas.width/2 + 50, c.highCanvas.height/2);
-                        c.high.lineTo(c.highCanvas.width/2 + 30, c.highCanvas.height/2 + 20);
-                        c.high.lineTo(c.highCanvas.width/2 + 30, c.highCanvas.height/2 - 20);
-                        break;
+            for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
+                var p = world.players[pKey];
+                var pdx = (p.sx - game.player.sx)*(game.arena.width-4) + p.x,
+                    pdy = (p.sy - game.player.sy)*(game.arena.height-4) + p.y;
+                if(pdx < -2 || pdx >= game.arena.width || pdy < -2 || pdy >= game.arena.height) continue;
+                var drawPX = (pdx+2) * pix+game.player.offset.x, drawPY = (pdy+2) * pix+game.player.offset.y;
+                if(game.player.guid == pKey) {
+                    c.high.strokeStyle = 'rgba(121,255,207,0.08)'; c.high.lineWidth = 3;
+                    c.high.beginPath(); c.high.moveTo(drawPX+pix/2,drawPY+pix/2);
+                    c.high.lineTo(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2);
+                    c.high.stroke();
+                    // Render cursor highlight
+                    if(cursor.x != '-') { c.high.fillStyle = 'rgba(121,255,207,1)';
+                        c.high.globalCompositeOperation = 'destination-out'; c.high.beginPath();
+                        c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
+                            6, 0, 2 * Math.PI, false);
+                        c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
+                        c.high.closePath(); c.high.fill();
+                        c.high.globalCompositeOperation = 'source-over'; c.high.beginPath();
+                        c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
+                            6, 0, 2 * Math.PI, false);
+                        c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
+                    }
                 }
-                c.high.fill();
+                c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
+                c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
             }
+            
+            // Render move arrow
+            
         },
         addRender: function(r) { renderArray.push(r); }
     };

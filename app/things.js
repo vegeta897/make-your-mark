@@ -3,36 +3,44 @@ Application.Services.factory('Things',function(Util) {
     
     var SIZE = { MICRO: 1, TINY: 2, SMALL: 3, MEDIUM: 4, LARGE: 5, HUGE: 6 };
     
-    var things = {
-        pencil: { name: 'Pencil', size: SIZE.TINY, common: 100,
-            desc: 'A fine writing utensil.', actions: ['break'], 
-            props: ['hard','sharp'] },
-        paper: { name: 'Paper', size: SIZE.TINY, common: 200,
+    var THINGS = {
+        pencil: { name: 'Pencil', size: SIZE.TINY, common: 1000,
+            desc: 'A fine writing utensil.', actions: ['break','write'], 
+            props: ['hard','sharp','long'] },
+        paper: { name: 'Paper', size: SIZE.TINY, common: 2000,
             desc: 'Flat, white, rectangular, flimsy.', actions: ['tear','fold'], 
-            props: ['flat','cuttable'] },
-        rock: { name: 'Rock', size: SIZE.SMALL, common: 150, 
-            desc: 'About the size of your fist, it could do some damage.', 
-            props: ['hard'] },
-        scissors: { name: 'Scissors', size: SIZE.SMALL, common: 40,
+            props: ['flat','cuttable','pencil-works'] },
+        rock: { name: 'Rock', size: SIZE.SMALL, common: 1500,
+            desc: 'About the size of your fist, it could do some damage.', actions: ['smash'],
+            props: ['hard','pencil-works'] },
+        stone: { name: 'Stone', size: SIZE.TINY, common: 2500,
+            desc: 'Smaller than a rock. That\'s it.',
+            props: ['hard','pencil-works'] },
+        shovel: { name: 'Shovel', size: SIZE.LARGE, common: 200,
+            desc: 'Great for digging holes.', actions: ['smash'],
+            props: ['hard','thin','long'] },
+        hammer: { name: 'Hammer', size: SIZE.MEDIUM, common: 250,
+            desc: 'THWACK!', actions: ['smash'],
+            props: ['hard','thin','long'] },
+        scissors: { name: 'Scissors', size: SIZE.SMALL, common: 400,
             desc: 'One pair of one scissors.', actions: ['break','cut'], 
             props: ['hard','sharp'] },
         paperSnowflake: { name: 'Paper Snowflake', size: SIZE.TINY, common: 1,
             desc: 'Did a grade schooler make this?', actions: ['tear'],
-            props: ['flat','cuttable'] }
+            props: ['flat','cuttable','pencil-works'] },
+        banana: { name: 'Banana', size: SIZE.SMALL, common: 250,
+            desc: 'Just like the monkeys eat!', actions: ['peel'],
+            props: ['cuttable','fragile','soft'] }
     };
     
-    for(var tKey in things) { if(!things.hasOwnProperty(tKey)) { continue; } things[tKey].id = tKey; } // Assign IDs
+    for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs
     
     var changeThing = function(thing,changeTo) {
-        var newThing = angular.copy(things[changeTo]);
+        var newThing = angular.copy(THINGS[changeTo]);
         thing.changedFrom = thing.id;
         thing.id = newThing.id; thing.name = newThing.name; thing.size = newThing.size; thing.common = newThing.common;
         thing.desc = newThing.desc; thing.actions = newThing.actions; thing.props = newThing.props;
         delete thing.propsExtra; delete thing.propsLost; delete thing.actionsExtra; delete thing.actionsLost;
-    };
-    
-    var changeThingTest = function(thing,changeTo) {
-        delete thing.propsExtra; delete things.propsLost; delete things.actionsExtra; delete things.actionsLost;
     };
     
     var hasOneProp = function(t,props) { // Thing has at least one of these properties/propsExtra
@@ -56,8 +64,8 @@ Application.Services.factory('Things',function(Util) {
         if(jQuery.inArray(x,thing[lost]) >= 0) thing[lost].splice(jQuery.inArray(x,thing[lost]),1);
         if(jQuery.inArray(x,thing[extra]) < 0 && 
             jQuery.inArray(x,thing[stock]) < 0) thing[extra].push(x);
-        if(thing[lost].length == 0) delete things[lost];
-        if(thing[extra].length == 0) delete things[extra];
+        if(thing[lost].length == 0) delete THINGS[lost];
+        if(thing[extra].length == 0) delete THINGS[extra];
     };
 
     var removeX = function(thing,x,stock,extra,lost) {
@@ -66,8 +74,8 @@ Application.Services.factory('Things',function(Util) {
         if(jQuery.inArray(x,thing[extra]) >= 0) thing[extra].splice(jQuery.inArray(x,thing[extra]),1);
         if(jQuery.inArray(x,thing[lost]) < 0 &&
             jQuery.inArray(x,thing[stock]) >= 0) thing[lost].push(x);
-        if(thing[lost].length == 0) delete things[lost];
-        if(thing[extra].length == 0) delete things[extra];
+        if(thing[lost].length == 0) delete THINGS[lost];
+        if(thing[extra].length == 0) delete THINGS[extra];
     };
 
     var addProps = function(thing,props) {
@@ -87,21 +95,29 @@ Application.Services.factory('Things',function(Util) {
         for(var i = 0; i < actions.length; i++) removeX(thing,actions[i],'actions','actionsExtra','actionsLost'); 
     };
     
-    var actions = { // t.s = Self, t.t = Target
-        'break': { t: 0, do: function(t) { addProps(t.s,'broken'); removeActions(t.s,['break','cut']); } },
-        'tear': { t: 0, do: function(t) { addProps(t.s,'torn'); 
+    var ACTIONS = { // t.s = Self, t.t = Target
+        'break': { t: 0, 'do': function(t) { addProps(t.s,'broken'); removeActions(t.s,['break','cut']); } },
+        'tear': { t: 0, 'do': function(t) { addProps(t.s,'torn'); 
             removeProps(t.s,'folded'); removeActions(t.s,['tear','fold','unfold']); } },
-        'fold': { t: 0, do: function(t) { addProps(t.s,'folded'); 
+        'fold': { t: 0, 'do': function(t) { addProps(t.s,'folded'); 
             removeActions(t.s,'fold'); addActions(t.s,'unfold'); } },
-        'unfold': { t: 0, do: function(t) {
+        'unfold': { t: 0, 'do': function(t) {
             if(t.s.id == 'paper' && hasOneProp(t.s,'cut')) { changeThing(t.s,'paperSnowflake'); return; }
             removeProps(t.s,'folded'); removeActions(t.s,'unfold'); addActions(t.s,'fold');
         } },
-        'cut': { t: 1, do: function(t) { 
-            if(hasOneProp(t.t,'cuttable')) {
-                if(hasOneProp(t.t,['flat','thin'])) { addProps(t.t,'cut'); removeActions(t.t,['tear','fold']) } 
-                else addProps(t.t,'scarred');
-            } else { addProps(t.t,'scratched'); }
+        'cut': { t: 1, 'do': function(t) { 
+            if(hasOneProp(t.t,'cuttable')) { addProps(t.t,'cut'); removeActions(t.t,['tear','fold']); } 
+            else { addProps(t.t,'scratched'); }
+        } },
+        'smash': { t: 1, 'do': function(t) {
+            if(hasOneProp(t.t,'fragile') && !hasOneProp(t.t,'smashed')) { 
+                if(hasOneProp(t.t,'soft')) { addProps(t.t,'smashed'); } else { addProps(t.t,'broken'); } } 
+        } },
+        'peel': { t: 0, 'do': function(t) {
+            removeActions(t.s,'peel'); addProps(t.s,'peeled'); // TODO: Create banana peel object
+        } },
+        'write': { t: 1, 'do': function(t) {
+            if(hasOneProp(t.t,'pencil-works')) { addProps(t.t,'written-on'); } // TODO: Writing messages
         } }
     };
     
@@ -109,23 +125,24 @@ Application.Services.factory('Things',function(Util) {
     
     var totalCommon = function() {
         var total = 0;
-        for(var key in things) { if(!things.hasOwnProperty(key)) continue;
-            total += things[key].common;
-            things[key].key = key;
-            thingsArray.push(things[key]);
+        for(var key in THINGS) { if(!THINGS.hasOwnProperty(key)) continue;
+            total += THINGS[key].common;
+            THINGS[key].key = key;
+            thingsArray.push(THINGS[key]);
         }
         return total;
     }();
     
-    var spawnThing = function(x,y) {
-        Math.seedrandom('thing'+Util.positionSeed(x,y));
+    var spawnThing = function(sx,sy,x,y) {
+        Math.seedrandom('thing'+Util.positionSeed(sx,sy,x,y));
         var target = Util.randomIntRange(1,totalCommon);
         var total = 0;
         for(var i = 0; i < thingsArray.length; i++) {
             total += thingsArray[i].common;
             if(total < target) continue;
             var newThing = angular.copy(thingsArray[i]);
-            newThing.x = x; newThing.y = y; newThing.guid = Util.positionSeed(x,y)/*+':'+(guid++)*/;
+            newThing.sx = sx; newThing.sy = sy; newThing.x = x; newThing.y = y; 
+            newThing.guid = Util.positionSeed(sx,sy,x,y);
             return newThing;
         }
     };
@@ -147,7 +164,7 @@ Application.Services.factory('Things',function(Util) {
                 actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
                 var changedTo = th[i].split(':')[5];
                 var pos = Util.positionFromSeed(guid);
-                th[i] = spawnThing(pos.x,pos.y);
+                th[i] = spawnThing(pos.sx,pos.sy,pos.x,pos.y);
                 if(changedTo) changeThing(th[i],changedTo);
                 if(propsExtra) th[i].propsExtra = propsExtra;
                 if(actionsExtra) th[i].actionsExtra = actionsExtra;
@@ -193,13 +210,13 @@ Application.Services.factory('Things',function(Util) {
             }
             return th;
         },
-        targetsRequired: function(a) { return actions[a].t; },
+        targetsRequired: function(a) { return ACTIONS[a].t; },
         doAction: function(t,a) {
             var allActions = Util.subtractArrays((t.s.actions || []).concat(t.s.actionsExtra || []), t.s.actionsLost);
             if(jQuery.inArray(a, allActions) < 0) { return false; } // Object doesn't have this action
-            if((actions[a].t == 1 && t.hasOwnProperty('t')) || 
-                (actions[a].t == 0)) { 
-                actions[a].do(t); return true;
+            if((ACTIONS[a].t == 1 && t.hasOwnProperty('t')) || 
+                (ACTIONS[a].t == 0)) { 
+                ACTIONS[a].do(t); return true;
             }
         }
     };

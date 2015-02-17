@@ -24,13 +24,7 @@ h2 { color: #f2f5eb; }
 .controls .upper button.action:hover { background: #418241; color: #e6fae7;  border-color: #2c592f; }
 .controls .upper button.action:active { background: #5fae5d; color: #d4f8d6;  border-color: #408446; }
 
-.controls .movement button { background: #626F73; border-color: #3C4244; border-radius: 16px; color: #ABC9CF; transition: background 0.25s, color 0.1s, border-color 0.1s; }
-.controls .movement button:hover { background: #79888c; color: #badbe0; transition: background 0.05s, color 0.02s, border-color 0.02s; }
-.controls .movement button:active { background: #7f9094; color: #a7c0c2; transition: background 0.05s, color 0.02s, border-color 0.02s; }
-#moveUp { border-top-left-radius: 48px; border-top-right-radius: 48px; } 
-#moveLeft { border-top-left-radius: 48px; border-bottom-left-radius: 48px; }
-#moveRight { border-top-right-radius: 48px; border-bottom-right-radius: 48px; } 
-#moveDown { border-bottom-left-radius: 48px; border-bottom-right-radius: 48px; }
+.controls .minimap { background: #373C3D; }
 
 strong { font-weight: bold; font-size: 1.1em; }
 .muted { color: #858a71; }

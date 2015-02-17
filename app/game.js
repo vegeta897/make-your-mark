@@ -26,7 +26,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
     var frame = function() {
         var rt = performance.now() - last;
         game.frames++; game.frameCount++;
-        if(Player.hasMoved()) {
+        if(Player.newSector()) {
             Renderer.drawBG(rt,step,game.ticks);
         }
         if(!game.rendered) {
@@ -56,7 +56,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
                 last = performance.now();
                 Renderer.init(game);
                 World.initGame(game);
-                World.setPosition(game.player.x,game.player.y);
+                //World.setPosition(game.player.x,game.player.y);
                 Interface.initGame(game);
                 Player.initGame(game);
                 setInterval(tick,step);

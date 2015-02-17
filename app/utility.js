@@ -99,24 +99,27 @@ Application.Services.service('Util', function() {
             input = input.replace(/[^\d.-]/g, '').replace('..','.').replace('..','.').replace('-','');
             return input > max ? max : input < min ? min : input;
         },
-        positionSeed: function(x,y) {
-            return ("000000" + (+x+500000)).slice(-6)+("000000" + (+y+500000)).slice(-6);
+        positionSeed: function(sx,sy,x,y) {
+            return ("0000" + (+sx+5000)).slice(-4)+("0000" + (+sy+5000)).slice(-4) +
+                ("00" + (+x)).slice(-2)+("00" + (+y)).slice(-2);
         },
         positionFromSeed: function(seed) {
-            return { x: +seed.substr(0,6)-500000, y: +seed.slice(6)-500000 };
+            return { sx: +seed.substr(0,4)-5000, sy: +seed.substr(4,4)-5000,
+                x: +seed.substr(8,2), y: +seed.substr(10,2) };
         },
         isInArea: function(x1,y1,x2,y2,w,h) { // Is XY1 within a rectangular area WxH centered on XY2
             return Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2;
         },
         getXYdiff: function(x1,y1,x2,y2) { return { x: +x2 - +x1, y: +y2 - +y1 }; }, // XY diff between 2 points
+        getDistance: function(x1,y1,x2,y2) { // Get distance between 2 points
+            return Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        },
         getFastDistance: function(x1,y1,x2,y2) { // Get distance squared between 2 points
             return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
         },
         thingInArray: function(thing,array) {
             if(!thing || !array) return false;
-            for(var i = 0; i < array.length; i++) {
-                if(array[i].guid == thing.guid) return true;
-            }
+            for(var i = 0; i < array.length; i++) { if(array[i].guid == thing.guid) return true; }
         },
         subtractArrays: function(source,subtractor) { // Subtract members of first array from subtractor array
             if(!source || !subtractor || source.length == 0 || subtractor.length == 0) return source;

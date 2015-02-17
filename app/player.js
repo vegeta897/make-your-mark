@@ -1,19 +1,21 @@
 'use strict';
 Application.Services.factory('Player',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
+    var revision = 1; // Stored player data format revision
     Math.seedrandom();
-    var storedPlayer = localStorageService.get('player') || 
-        { x: Util.randomIntRange(-60,60), y: Util.randomIntRange(-60,60), 
-            score: 0, guid: 'P'+Util.randomIntRange(0,1000000) };
+    var storedPlayer = localStorageService.get('player');
+    storedPlayer = storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
+        { sx: Util.randomIntRange(-10,10), sy: Util.randomIntRange(-10,10), x: 16, y: 10,
+            score: 0, guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
-    var player = { 
-        x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, 
+    var player = {
+        sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, 
         input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant'),
         carried: Things.expandThings(storedPlayer.carried) || []
     };
     var last = { offset: {  } };
-    var moveStart, doneMoving, game;
+    var moveStart, doneMoving, game, tick;
     
     //Renderer.addRender(function(c) {
     //    c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
@@ -24,37 +26,39 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
     //});
     
     var storePlayer = function() {
-        var storedPlayer = { x: player.x, y: player.y, score: player.score, guid: player.guid,
-            carried: Things.shrinkThings(player.carried) };
+        var storedPlayer = { sx: player.sx, sy: player.sy, x: player.x, y: player.y, 
+            score: player.score, guid: player.guid, carried: Things.shrinkThings(player.carried), rv: revision };
         localStorageService.set('player',storedPlayer);
     };
     
-    var move = function(dir) {
-        player.moving = !player.moving ? dir : player.moving;
+    var move = function(c) {
+        if(c.x == '-' || c.y == '-') return;
+        var moveX = Math.floor(c.x/24)- 2, moveY = Math.floor(c.y/24)-2;
+        if(!player.moving && player.x == moveX && player.y == moveY) return;
+        if(!player.moving || player.moving.x != moveX || player.moving.y != moveY) moveStart = tick;
+        player.moving = { x: moveX, y: moveY };
     };
     
-    var doMove = function(step,tick) {
+    var doMove = function(step) {
         if(!player.moving) return;
-        moveStart = moveStart ? moveStart : tick;
-        var progress = (tick - moveStart)/12;
-        switch(player.moving) {
-            case 'up': player.offset.y = progress*-24; break;
-            case 'left': player.offset.x = progress*-24; break;
-            case 'right': player.offset.x = progress*24; break;
-            case 'down': player.offset.y = progress*24; break;
-        }
-        doneMoving = progress >= 1;
+        var mx = player.moving.x, my = player.moving.y;
+        var total = Util.getDistance(player.x*24+player.offset.x,player.y*24+player.offset.y,
+                mx*24,my*24)/2.4;
+        var progress = (tick - moveStart)/total;
+        var diff = Util.getXYdiff(player.x*24+player.offset.x,player.y*24+player.offset.y,
+            mx*24,my*24);
+        player.offset.x += diff.x * (1/total); player.offset.y += diff.y * (1/total);
+        doneMoving = total < 1;
         if(!doneMoving) return;
         moveStart = false; doneMoving = false;
-        switch(player.moving) {
-            case 'up': player.y--; break;
-            case 'left': player.x--; break;
-            case 'right': player.x++; break;
-            case 'down': player.y++; break;
-        }
+        var aw = game.arena.width - 4, ah = game.arena.height - 4;
+        player.sx += mx >= aw ? 1 : mx < 0 ? -1 : 0;
+        player.sy += my >= ah ? 1 : my < 0 ? -1 : 0;
+        player.x = mx >= aw ? mx - aw : mx < 0 ? aw + mx : mx;
+        player.y = my >= ah ? my - ah : my < 0 ? ah + my : my;
         storePlayer();
-        FireService.set('players/'+player.guid,player.x+':'+player.y);
-        player.vicinity = World.setPosition(player.x,player.y);
+        FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
+        player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
         player.moving = false; player.offset.x = 0; player.offset.y = 0;
     };
 
@@ -66,24 +70,30 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         return false;
     };
     
-    World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.x,player.y); });
+    World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
     Controls.attachMoves(move);
     
     return {
         initGame: function(g) {
             game = g;
-            player.vicinity = World.setPosition(player.x,player.y);
-            FireService.set('players/'+player.guid,player.x+':'+player.y);
-            console.log('Player:',player.guid,player.x+':'+player.y);
+            player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
+            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
+            console.log('Player:',player.guid,player.sx+':'+player.sy);
         },
-        update: function(step,tick) {
-            doMove(step,tick);
+        update: function(step,t) {
+            tick = t; doMove(step);
         },
         hasMoved: function() {
-            if(last.x != player.x || last.y != player.y || 
+            if(last.sx != player.sx || last.sy != player.sy || 
                 last.offset.x != player.offset.x || last.offset.y != player.offset.y) {
-                last.x = player.x; last.y = player.y; 
+                last.sx = player.sx; last.sy = player.sy; 
                 last.offset.x = player.offset.x; last.offset.y = player.offset.y;
+                return true;
+            } else { return false; }
+        },
+        newSector: function() {
+            if(last.sx != player.sx || last.sy != player.sy) {
+                last.sx = player.sx; last.sy = player.sy;
                 return true;
             } else { return false; }
         },
