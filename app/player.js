@@ -71,7 +71,6 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
-    Controls.attachMoves(move);
     
     return {
         initGame: function(g) {
