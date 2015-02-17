@@ -60,6 +60,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                     };
                 }
                 world.players = players;
+                // TODO: Animate movement of other players
             });
             FireService.onValue('removed',function(removed) {
                 for(var rKey in removed) { if(!removed.hasOwnProperty(rKey)) continue;

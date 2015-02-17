@@ -5,13 +5,14 @@ Application.Directives.directive('canvas',function() {
         templateUrl: 'app/canvas/canvas.html',
         replace: true,
         scope: {},
-        controller: function($scope,Canvas) {
+        controller: function($scope,Canvas,Controls) {
             this.init = function(mcv,mucv,hcv,hucv,mc,muc,hc,huc) {
                 Canvas.attachCanvases({
                     main: mc, mainUnder: muc, high: hc, highUnder: huc,
                     mainCanvas: mcv, mainUnderCanvas: mucv, highCanvas: hcv, highUnderCanvas: hucv
                 });
                 Canvas.initListeners(jQuery(hcv)[0]);
+                jQuery(hcv).mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
             };
         },
         link: function(scope,elem,attrs,ctrl) {
@@ -23,10 +24,8 @@ Application.Directives.directive('canvas',function() {
             var muc = mucv.getContext ? mucv.getContext('2d') : null;
             var hc = hcv.getContext ? hcv.getContext('2d') : null;
             var huc = hucv.getContext ? hucv.getContext('2d') : null;
-
             hcv.onselectstart = function() { return false; }; // Disable selecting and right clicking
             jQuery('body').on('contextmenu', '#highCanvas', function(){ return false; });
-
             ctrl.init(mcv,mucv,hcv,hucv,mc,muc,hc,huc);
         }
     }

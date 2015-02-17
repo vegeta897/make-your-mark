@@ -19,12 +19,9 @@ Application.Directives.directive('controls',function() {
             $scope.isInReach = function(thing) {
                 return Player.thingIsCarried(thing) || Util.thingInArray(thing,Player.player.vicinity);
             };
-            
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
-            jQuery('#highCanvas').mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
             jQuery(window).mouseup(function(e) { return Controls.onMouse(e, e.which, false); });
-            // TODO: Sometimes mouse down event handler doesn't initialize
         }
     }
 });
