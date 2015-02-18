@@ -15,7 +15,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         carried: Things.expandThings(storedPlayer.carried) || []
     };
     var last = { offset: {  } };
-    var moveStart, doneMoving, game, tick;
+    var game, tick;
     
     //Renderer.addRender(function(c) {
     //    c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
@@ -35,22 +35,16 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         if(c.x == '-' || c.y == '-') return;
         var moveX = Math.floor(c.x/24)- 2, moveY = Math.floor(c.y/24)-2;
         if(!player.moving && player.x == moveX && player.y == moveY) return;
-        if(!player.moving || player.moving.x != moveX || player.moving.y != moveY) moveStart = tick;
         player.moving = { x: moveX, y: moveY };
     };
     
-    var doMove = function(step) {
+    var doMove = function() {
         if(!player.moving) return;
         var mx = player.moving.x, my = player.moving.y;
-        var total = Util.getDistance(player.x*24+player.offset.x,player.y*24+player.offset.y,
-                mx*24,my*24)/2.4;
-        var progress = (tick - moveStart)/total;
-        var diff = Util.getXYdiff(player.x*24+player.offset.x,player.y*24+player.offset.y,
-            mx*24,my*24);
+        var total = Util.getDistance(player.x*24+player.offset.x,player.y*24+player.offset.y,mx*24,my*24)/2.4;
+        var diff = Util.getXYdiff(player.x*24+player.offset.x,player.y*24+player.offset.y,mx*24,my*24);
         player.offset.x += diff.x * (1/total); player.offset.y += diff.y * (1/total);
-        doneMoving = total < 1;
-        if(!doneMoving) return;
-        moveStart = false; doneMoving = false;
+        if(total >= 1) return;
         var aw = game.arena.width - 4, ah = game.arena.height - 4;
         player.sx += mx >= aw ? 1 : mx < 0 ? -1 : 0;
         player.sy += my >= ah ? 1 : my < 0 ? -1 : 0;
@@ -80,7 +74,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
             console.log('Player:',player.guid,player.sx+':'+player.sy);
         },
         update: function(step,t) {
-            tick = t; doMove(step);
+            tick = t; doMove();
         },
         hasMoved: function() {
             if(last.sx != player.sx || last.sy != player.sy || 

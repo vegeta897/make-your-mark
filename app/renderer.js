@@ -36,6 +36,23 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             c.high.fillRect(0,buffer, buffer, c.highCanvas.height-buffer);
             c.high.fillRect(c.highCanvas.width - buffer,buffer, buffer, c.highCanvas.height-buffer*2);
             c.high.fillRect(buffer,c.highCanvas.height-buffer, c.highCanvas.width, buffer);
+            // Render cursor highlight
+            if(cursor.x != '-') {
+                c.high.fillStyle = 'rgba(121,255,207,0.12)';
+                c.high.beginPath();
+                c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
+                    pix/2, 0, 2 * Math.PI, false);
+                c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
+                c.high.closePath(); c.high.fill();
+                c.high.fillStyle = 'rgba(121,255,207,1)';
+                c.high.globalCompositeOperation = 'destination-out';
+                c.high.beginPath();
+                c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
+                    pix/2-3, 0, 2 * Math.PI, false);
+                c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
+                c.high.closePath(); c.high.fill();
+                c.high.globalCompositeOperation = 'source-over';
+            }
             // Render things
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
@@ -82,29 +99,27 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     pdy = (p.sy - game.player.sy)*(game.arena.height-4) + p.y;
                 if(pdx < -2 || pdx >= game.arena.width || pdy < -2 || pdy >= game.arena.height) continue;
                 var drawPX = (pdx+2) * pix+game.player.offset.x, drawPY = (pdy+2) * pix+game.player.offset.y;
-                if(game.player.guid == pKey) {
+                // Render player move path
+                if(game.player.guid == pKey && game.player.moving) {
                     c.high.strokeStyle = 'rgba(121,255,207,0.08)'; c.high.lineWidth = 3;
                     c.high.beginPath(); c.high.moveTo(drawPX+pix/2,drawPY+pix/2);
-                    c.high.lineTo(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2);
+                    c.high.lineTo((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2);
                     c.high.stroke();
-                    // Render cursor highlight
-                    if(cursor.x != '-') { c.high.fillStyle = 'rgba(121,255,207,1)';
-                        c.high.globalCompositeOperation = 'destination-out'; c.high.beginPath();
-                        c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
-                            6, 0, 2 * Math.PI, false);
-                        c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
-                        c.high.closePath(); c.high.fill();
-                        c.high.globalCompositeOperation = 'source-over'; c.high.beginPath();
-                        c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
-                            6, 0, 2 * Math.PI, false);
-                        c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
-                    }
+                    c.high.fillStyle = 'rgba(121,255,207,1)';
+                    c.high.globalCompositeOperation = 'destination-out'; c.high.beginPath();
+                    c.high.arc((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2,
+                        6, 0, 2 * Math.PI, false);
+                    c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
+                    c.high.closePath(); c.high.fill();
+                    c.high.globalCompositeOperation = 'source-over'; c.high.beginPath();
+                    c.high.arc((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2,
+                        6, 0, 2 * Math.PI, false);
+                    c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
                 }
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
             }
             
-            // Render move arrow
             
         },
         addRender: function(r) { renderArray.push(r); }
