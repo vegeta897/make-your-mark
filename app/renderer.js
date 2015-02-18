@@ -98,9 +98,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 var pdx = (p.sx - game.player.sx)*(game.arena.width-4) + p.x,
                     pdy = (p.sy - game.player.sy)*(game.arena.height-4) + p.y;
                 if(pdx < -2 || pdx >= game.arena.width || pdy < -2 || pdy >= game.arena.height) continue;
-                var drawPX = (pdx+2) * pix+game.player.offset.x, drawPY = (pdy+2) * pix+game.player.offset.y;
+                var drawPX = (pdx+2) * pix, drawPY = (pdy+2) * pix;
                 // Render player move path
                 if(game.player.guid == pKey && game.player.moving) {
+                    drawPX += game.player.offset.x; drawPY += +game.player.offset.y;
                     c.high.strokeStyle = 'rgba(121,255,207,0.08)'; c.high.lineWidth = 3;
                     c.high.beginPath(); c.high.moveTo(drawPX+pix/2,drawPY+pix/2);
                     c.high.lineTo((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2);
