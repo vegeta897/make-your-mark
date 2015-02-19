@@ -9,7 +9,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
     Renderer.initWorld(world);
     
     var generateThings = function() {
-        world.things = [];
+        world.things = []; //return;
         for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // 9 sectors
             for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
                 var seed = Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h);
@@ -104,8 +104,11 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         setPosition: function(sx,sy,x,y) {
             var osx = position.sx, osy = position.sy;
             position.sx = sx; position.sy = sy; position.x = x; position.y = y;
-            if(osx != sx || osy != sy) { generateThings(); applyRemovalsAndDrops(); }
+            //if(osx != sx || osy != sy) { generateThings(); applyRemovalsAndDrops(); }
             return getVicinity();
+        },
+        newSector: function() {
+            generateThings(); applyRemovalsAndDrops();
         },
         getThingsAt: function(sx,sy,x,y,type) {
             var things = []; if(x == '-') return things;

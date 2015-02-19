@@ -10,7 +10,8 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
     var player = {
-        sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, 
+        sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, 
+        offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
         input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant'),
         carried: Things.expandThings(storedPlayer.carried) || []
     };
@@ -39,6 +40,15 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
     };
     
     var doMove = function() {
+        if(player.sectorMove.x != 0 || player.sectorMove.y != 0) player.sectorMove.done = false;
+        if(player.sectorMove.x != 0) player.sectorMove.x *= Math.abs(player.sectorMove.x) < 0.6 ? 0.85 : 0.95;
+        if(player.sectorMove.y != 0) player.sectorMove.y *= Math.abs(player.sectorMove.y) < 0.6 ? 0.85 : 0.95;
+        player.sectorMove.x = Math.abs(player.sectorMove.x) < 0.005 ? 0 : player.sectorMove.x;
+        player.sectorMove.y = Math.abs(player.sectorMove.y) < 0.005 ? 0 : player.sectorMove.y;
+        if(player.sectorMove.x == 0 && player.sectorMove.y == 0 && 
+            player.sectorMove.rendered && !player.sectorMove.done) {
+            World.newSector(); player.sectorMove.done = true;
+        }
         if(!player.moving) return;
         var mx = player.moving.x, my = player.moving.y;
         var total = Util.getDistance(player.x*24+player.offset.x,player.y*24+player.offset.y,mx*24,my*24)/2.4;
@@ -46,8 +56,8 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         player.offset.x += diff.x * (1/total); player.offset.y += diff.y * (1/total);
         if(total >= 1) return;
         var aw = game.arena.width - 4, ah = game.arena.height - 4;
-        player.sx += mx >= aw ? 1 : mx < 0 ? -1 : 0;
-        player.sy += my >= ah ? 1 : my < 0 ? -1 : 0;
+        player.sectorMove = { x: mx >= aw ? 1 : mx < 0 ? -1 : 0, y: my >= ah ? 1 : my < 0 ? -1 : 0 };
+        player.sx += player.sectorMove.x; player.sy += player.sectorMove.y;
         player.x = mx >= aw ? mx - aw : mx < 0 ? aw + mx : mx;
         player.y = my >= ah ? my - ah : my < 0 ? ah + my : my;
         storePlayer();
@@ -70,6 +80,7 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
         initGame: function(g) {
             game = g;
             player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
+            World.newSector();
             FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
             console.log('Player:',player.guid,player.sx+':'+player.sy);
         },
