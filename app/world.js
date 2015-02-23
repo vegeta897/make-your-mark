@@ -23,9 +23,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
     var getVicinity = function() {
         var vicinity = [];
         for(var vt = 0; vt < world.things.length; vt++) {
-            var tx = (world.things[vt].sx - position.sx) * (game.arena.width - 4) + world.things[vt].x,
-                ty = (world.things[vt].sy - position.sy) * (game.arena.height - 4) + world.things[vt].y;
-            if(Util.getFastDistance(tx,ty,position.x,position.y) <= 1 && 
+            if(world.things[vt].sx != position.sx || world.things[vt].sy != position.sy) continue;
+            if(Util.getFastDistance(world.things[vt].x,world.things[vt].y,position.x,position.y) <= 1 && 
                 (!world.things[vt].removed || world.things[vt].dropped)) {
                 vicinity.push(world.things[vt]);
             }
@@ -111,7 +110,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             generateThings(); applyRemovalsAndDrops();
         },
         getThingsAt: function(sx,sy,x,y,type) {
-            var things = []; if(x == '-') return things;
+            var things = []; if(x == '-' || position.sx != sx || position.sy != sy) return things;
             var gameX = Math.floor(x/24)-2, gameY = Math.floor(y/24)-2;
             for(var i = 0; i < world.things.length; i++) {
                 var tx = (world.things[i].sx - position.sx) * (game.arena.width - 4) + world.things[i].x,
