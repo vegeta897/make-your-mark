@@ -4,7 +4,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c; // Canvas object
     var cursor = Canvas.cursor;
     var game, world, pix;
-    var renderArray = [], lastSO = { };
+    var lastSO = { };
     
     return {
         init: function(g) { c = Canvas.getCanvases(); game = g; pix = game.arena.pixels; },
@@ -23,7 +23,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         var bgDrawX = (tileX+2)*pix+so.x, bgDrawY = (tileY+2)*pix+so.y;
                         if(bgDrawX < pix*-1 || bgDrawX >= c.mainCanvas.width || 
                             bgDrawY < pix*-1 || bgDrawY >= c.mainCanvas.height) continue;
-                        Math.seedrandom('bg'+Util.positionSeed(+game.player.sx+sw, +game.player.sy+sh, w, h));
+                        Math.seedrandom('bg'+Util.positionSeed(+game.player.osx+sw, +game.player.osy+sh, w, h));
                         var tileChance = Math.random(); if(tileChance > 0.05) continue;
                         else if(tileChance < 0.002) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
                         else if(tileChance < 0.005) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
@@ -61,8 +61,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
                 if(t.removed && !t.dropped) continue; // If object removed
-                var tdx = (t.sx - game.player.sx)*(game.arena.width-4) + t.x, 
-                    tdy = (t.sy - game.player.sy)*(game.arena.height-4) + t.y;
+                var tdx = (t.sx - game.player.osx)*(game.arena.width-4) + t.x, 
+                    tdy = (t.sy - game.player.osy)*(game.arena.height-4) + t.y;
                 c.main.fillStyle = 'rgba(0,0,0,0.07)';
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
                 if(drawX <= pix || drawX >= c.mainCanvas.width - pix
@@ -104,35 +104,34 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render players
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 var p = world.players[pKey];
-                var pdx = (p.sx - game.player.sx)*(game.arena.width-4) + p.x,
-                    pdy = (p.sy - game.player.sy)*(game.arena.height-4) + p.y;
+                var pdx = (p.osx - game.player.osx)*(game.arena.width-4) + p.ox,
+                    pdy = (p.osy - game.player.osy)*(game.arena.height-4) + p.oy;
                 var drawPX = (pdx+2) * pix+so.x, drawPY = (pdy+2) * pix+so.y;
                 if(drawPX < pix*-1 || drawPX > c.mainCanvas.width
                     || drawPY < pix*-1 || drawPY > c.mainCanvas.height) continue;
+                drawPX += +p.offset.x; drawPY += +p.offset.y;
                 // Render player move path
-                if(game.player.guid == pKey && game.player.moving) {
-                    drawPX += game.player.offset.x; drawPY += +game.player.offset.y;
+                if(game.player.guid == pKey && p.moving) {
+                    var mx = p.x + (p.sx - p.osx) * (game.arena.width-4), 
+                        my = p.y + (p.sy - p.osy) * (game.arena.height-4);
                     c.high.strokeStyle = 'rgba(121,255,207,0.08)'; c.high.lineWidth = 3;
                     c.high.beginPath(); c.high.moveTo(drawPX+pix/2,drawPY+pix/2);
-                    c.high.lineTo((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2);
+                    c.high.lineTo((mx+2)*pix+pix/2, (my+2)*pix+pix/2);
                     c.high.stroke();
                     c.high.fillStyle = 'rgba(121,255,207,1)';
                     c.high.globalCompositeOperation = 'destination-out'; c.high.beginPath();
-                    c.high.arc((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2,
+                    c.high.arc((mx+2)*pix+pix/2, (my+2)*pix+pix/2,
                         6, 0, 2 * Math.PI, false);
                     c.high.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false);
                     c.high.closePath(); c.high.fill();
                     c.high.globalCompositeOperation = 'source-over'; c.high.beginPath();
-                    c.high.arc((game.player.moving.x+2)*pix+pix/2, (game.player.moving.y+2)*pix+pix/2,
+                    c.high.arc((mx+2)*pix+pix/2, (my+2)*pix+pix/2,
                         6, 0, 2 * Math.PI, false);
                     c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
                 }
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
             }
-            
-            
-        },
-        addRender: function(r) { renderArray.push(r); }
+        }
     };
 });

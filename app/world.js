@@ -3,7 +3,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
 
     var position = { sx: 0, sy: 0, x: 0, y: 0 };
     var game;
-    var world = { things: [], removed: {}, dropped: {} };
+    var world = { things: [], removed: {}, dropped: {}, players: {} };
     var removedReady = false, droppedReady = false, onRemoved;
     
     Renderer.initWorld(world);
@@ -49,18 +49,6 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
     return {
         initGame: function(g) {
             game = g;
-            FireService.onValue('players',function(players) {
-                for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
-                    Math.seedrandom(pKey);
-                    players[pKey] = {
-                        guid: pKey, sx: +players[pKey].split(':')[0], sy: +players[pKey].split(':')[1],
-                        x: +players[pKey].split(':')[2], y: +players[pKey].split(':')[3],
-                        color: Util.randomColor('vibrant')
-                    };
-                }
-                world.players = players;
-                // TODO: Animate movement of other players
-            });
             FireService.onValue('removed',function(removed) {
                 for(var rKey in removed) { if(!removed.hasOwnProperty(rKey)) continue;
                     var pos = Util.positionFromSeed(rKey);
@@ -110,6 +98,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             generateThings(); applyRemovalsAndDrops();
         },
         getThingsAt: function(sx,sy,x,y,type) {
+            sx = type == 'cursor' ? position.sx : sx; sy = type == 'cursor' ? position.sy : sy;
             var things = []; if(x == '-' || position.sx != sx || position.sy != sy) return things;
             var gameX = Math.floor(x/24)-2, gameY = Math.floor(y/24)-2;
             for(var i = 0; i < world.things.length; i++) {

@@ -1,9 +1,9 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService,Renderer,Player,Controls,World,Interface) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Players,Controls,World,Interface) {
 
     var game = {
         arena: {width: 37, height: 25, pixels: 24}, fps: 60, rendered: true,
-        objects: {}, player: Player.player
+        objects: {}, player: Players.player
     };
 
     game.localServerOffset = 0; game.tickCount = 0;
@@ -37,8 +37,8 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
     
     var update = function(step,dt,now) {
         if(!World.worldReady()) return;
-        Controls.processInput(game,Player);
-        Player.update(step,game.ticks);
+        Controls.processInput(game,Players);
+        Players.update(step,game.ticks);
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;
             game.tickCount = 0; game.frameCount = 0;
@@ -56,7 +56,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
                 World.initGame(game);
                 //World.setPosition(game.player.x,game.player.y);
                 Interface.initGame(game);
-                Player.initGame(game);
+                Players.initGame(game);
                 setInterval(tick,step);
                 requestAnimationFrame(frame);
             });

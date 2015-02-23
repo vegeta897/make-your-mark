@@ -5,19 +5,19 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls,Interface,Game,Player,Canvas,Util) {
+        controller: function($scope,Controls,Interface,Game,Players,Canvas,Util) {
             $scope.game = Game.game;
             $scope.selectThing = Interface.controlsSelectThing;
             $scope.thingIsSelected = function(thing) { return Game.game.selected && Game.game.selected.guid == thing.guid; };
             $scope.onThing = Interface.controlsOnThing;
             $scope.offThing = Interface.controlsOffThing;
             $scope.isOnThing = function(thing) { return Canvas.getCursor().hover.hasOwnProperty(thing.guid); };
-            $scope.takeThing = Player.takeThing;
-            $scope.dropThing = Player.dropThing;
-            $scope.thingIsCarried = Player.thingIsCarried;
-            $scope.thingAction = Player.thingAction;
+            $scope.takeThing = Players.takeThing;
+            $scope.dropThing = Players.dropThing;
+            $scope.thingIsCarried = Players.thingIsCarried;
+            $scope.thingAction = Players.thingAction;
             $scope.isInReach = function(thing) {
-                return Player.thingIsCarried(thing) || Util.thingInArray(thing,Player.player.vicinity);
+                return Players.thingIsCarried(thing) || Util.thingInArray(thing,Players.player.vicinity);
             };
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
@@ -50,17 +50,17 @@ Application.Services.factory('Controls',function(Interface,Canvas) {
     var cursor = Canvas.getCursor();
     
     return {
-        processInput: function(game,Player) {
+        processInput: function(game,Players) {
             for(var key in input.kb) { if(!input.kb.hasOwnProperty(key)) continue;
                 
             }
             var io = Interface.updateCursor(cursor,input.mouse.left,input.mouse.right);
             
             if(input.mouse.left) {
-                //if(cursor.quad && io.move) Player.move(cursor.quad);
+                //if(cursor.quad && io.move) Players.move(cursor.quad);
             }
             if(input.mouse.right) {
-                if(io.move) Player.move(cursor);
+                if(io.move) Players.move(cursor);
             }
         },
         onKey: onKey, onMouse: onMouse
