@@ -25,6 +25,7 @@
             <strong>Move around</strong> with right click.<br />
             <strong>Select things</strong> with left click.
         </p>
+        <p><button ng-click="game.paused = !game.paused">{{ game.paused ? 'Unpause' : 'Pause' }}</button></p>
         <dl>
             <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
             <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>

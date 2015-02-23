@@ -65,8 +65,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     tdy = (t.sy - game.player.sy)*(game.arena.height-4) + t.y;
                 c.main.fillStyle = 'rgba(0,0,0,0.07)';
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
-                if(drawX < pix*2 || drawX > c.mainCanvas.width - pix*2
-                    || drawY < pix*2 || drawY > c.mainCanvas.height - pix*2) continue;
+                if(drawX <= pix || drawX >= c.mainCanvas.width - pix
+                    || drawY <= pix || drawY >= c.mainCanvas.height - pix) continue;
                 c.main.fillRect(drawX+6,drawY+6,12,12);
                 c.main.fillStyle = '#6699aa';
                 c.main.fillRect(drawX+7,drawY+7,10,10);
@@ -96,6 +96,11 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.high.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
+            // Erase things from buffer
+            c.main.clearRect(0,0, c.mainCanvas.width,buffer);
+            c.main.clearRect(0,buffer, buffer, c.mainCanvas.height-buffer);
+            c.main.clearRect(c.mainCanvas.width - buffer,buffer, buffer, c.mainCanvas.height-buffer*2);
+            c.main.clearRect(buffer,c.mainCanvas.height-buffer, c.mainCanvas.width, buffer);
             // Render players
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 var p = world.players[pKey];

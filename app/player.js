@@ -41,10 +41,10 @@ Application.Services.factory('Player',function(Renderer,Controls,World,Util,Thin
     
     var doMove = function() {
         if(player.sectorMove.x != 0 || player.sectorMove.y != 0) player.sectorMove.done = false;
-        if(player.sectorMove.x != 0) player.sectorMove.x *= Math.abs(player.sectorMove.x) < 0.6 ? 0.85 : 0.95;
-        if(player.sectorMove.y != 0) player.sectorMove.y *= Math.abs(player.sectorMove.y) < 0.6 ? 0.85 : 0.95;
-        player.sectorMove.x = Math.abs(player.sectorMove.x) < 0.005 ? 0 : player.sectorMove.x;
-        player.sectorMove.y = Math.abs(player.sectorMove.y) < 0.005 ? 0 : player.sectorMove.y;
+        if(player.sectorMove.x != 0) player.sectorMove.x *= 0.9-(Math.abs(player.sectorMove.x)/50);
+        if(player.sectorMove.y != 0) player.sectorMove.y *= 0.9-(Math.abs(player.sectorMove.y)/50);
+        player.sectorMove.x = Math.abs(player.sectorMove.x) < 0.002 ? 0 : player.sectorMove.x;
+        player.sectorMove.y = Math.abs(player.sectorMove.y) < 0.002 ? 0 : player.sectorMove.y;
         if(player.sectorMove.x == 0 && player.sectorMove.y == 0 && 
             player.sectorMove.rendered && !player.sectorMove.done) {
             World.newSector(); player.sectorMove.done = true;
