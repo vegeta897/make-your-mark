@@ -38,7 +38,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         }
         for(var t = 0; t < world.things.length; t++) {
             var th = world.things[t];
-            if(world.removed.hasOwnProperty(th.guid)) th.removed = true;
+            th.removed = world.removed.hasOwnProperty(th.guid);
             if(world.dropped.hasOwnProperty(th.guid)) {
                 var d = world.dropped[th.guid];
                 th.dropped = true; th.sx = d.sx; th.sy = d.sy; th.x = d.x; th.y = d.y;

@@ -11,16 +11,16 @@ Application.Services.factory('Things',function(Util) {
             desc: 'Flat, white, rectangular, flimsy.', actions: ['tear','fold'], 
             props: ['flat','cuttable','pencil-works'] },
         rock: { name: 'Rock', size: SIZE.SMALL, common: 1500,
-            desc: 'About the size of your fist, it could do some damage.', actions: ['smash'],
+            desc: 'About the size of your fist, it could do some damage.',
             props: ['hard','pencil-works'] },
         stone: { name: 'Stone', size: SIZE.TINY, common: 2500,
             desc: 'Smaller than a rock. That\'s it.',
             props: ['hard','pencil-works'] },
         shovel: { name: 'Shovel', size: SIZE.LARGE, common: 200,
-            desc: 'Great for digging holes.', actions: ['smash'],
+            desc: 'Great for digging holes.', actions: ['swing'],
             props: ['hard','thin','long'] },
         hammer: { name: 'Hammer', size: SIZE.MEDIUM, common: 250,
-            desc: 'THWACK!', actions: ['smash'],
+            desc: 'THWACK!', actions: ['swing'],
             props: ['hard','thin','long'] },
         scissors: { name: 'Scissors', size: SIZE.SMALL, common: 400,
             desc: 'One pair of one scissors.', actions: ['break','cut'], 
@@ -109,8 +109,8 @@ Application.Services.factory('Things',function(Util) {
             if(hasOneProp(t.t,'cuttable')) { addProps(t.t,'cut'); removeActions(t.t,['tear','fold']); } 
             else { addProps(t.t,'scratched'); }
         } },
-        'smash': { t: 1, 'do': function(t) {
-            if(hasOneProp(t.t,'fragile') && !hasOneProp(t.t,'smashed')) { 
+        'swing': { t: 1, 'do': function(t) {
+            if(hasOneProp(t.t,'fragile') && !hasOneProp(t.t,['smashed','broken'])) { 
                 if(hasOneProp(t.t,'soft')) { addProps(t.t,'smashed'); } else { addProps(t.t,'broken'); } } 
         } },
         'peel': { t: 0, 'do': function(t) {

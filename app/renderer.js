@@ -87,7 +87,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
                 c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
                 var propsExtra = '';
-                if(t.hasOwnProperty('propsExtra')) { 
+                if(t.propsExtra) { 
                     for(var i = 0; i < t.propsExtra.length; i++) { 
                         propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
                 }
