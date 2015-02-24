@@ -77,6 +77,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                     actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
                     var changedTo = split[8];
                     dropped[dKey] = Things.spawnThing(pos.sx,pos.sy,pos.x,pos.y);
+                    var child = dKey.split('-');
+                    if(child.length > 1) dropped[dKey] = Things.createChild(dropped[dKey],child[1],child[2]);
                     dropped[dKey].sx = sx; dropped[dKey].sy = sy; dropped[dKey].x = x; dropped[dKey].y = y;
                     if(changedTo) Things.changeThing(dropped[dKey],changedTo);
                     if(propsExtra) dropped[dKey].propsExtra = propsExtra;
@@ -116,11 +118,11 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         },
         addThing: function(thing) {
             //Things.changeThing(thing,thing.id);
-            var origPos = Util.positionFromSeed(thing.guid);
+            var child = thing.guid.split('-');
+            var origPos = Util.positionFromSeed(child[0]);
             if(origPos.sx == thing.sx && origPos.sy == thing.sy && origPos.x == thing.x && origPos.y == thing.y &&
-                !thing.propsExtra && !thing.propsLost && 
-                !thing.actionsExtra && !thing.actionsLost &&
-                !thing.changedFrom) { 
+                !thing.propsExtra && !thing.propsLost && !thing.actionsExtra && !thing.actionsLost &&
+                !thing.changedFrom && child.length < 2) { 
                 FireService.remove('removed/'+thing.guid); // Dropped in original position with no changes
             } else { // Dropped somewhere else and/or with changes
                 var mods = ':'; // Build mod line

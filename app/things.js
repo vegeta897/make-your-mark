@@ -30,7 +30,10 @@ Application.Services.factory('Things',function(Util) {
             props: ['flat','cuttable','pencil-works'] },
         banana: { name: 'Banana', size: SIZE.SMALL, common: 250,
             desc: 'Just like the monkeys eat!', actions: ['peel'],
-            props: ['cuttable','fragile','soft'] }
+            props: ['cuttable','fragile','soft'] },
+        bananaPeel: { name: 'Banana Peel', size: SIZE.SMALL, common: 10,
+            desc: 'Watch your step.',
+            props: ['cuttable','soft'] }
     };
     
     for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs
@@ -41,6 +44,13 @@ Application.Services.factory('Things',function(Util) {
         thing.id = newThing.id; thing.name = newThing.name; thing.size = newThing.size; thing.common = newThing.common;
         thing.desc = newThing.desc; thing.actions = newThing.actions; thing.props = newThing.props;
         delete thing.propsExtra; delete thing.propsLost; delete thing.actionsExtra; delete thing.actionsLost;
+    };
+    
+    var createChild = function(thing,child,id) {
+        var newThing = angular.copy(THINGS[child]);
+        newThing.guid = thing.guid+'-'+child+'-'+id;
+        newThing.sx = thing.sx; newThing.sy = thing.sy; newThing.x = thing.x; newThing.y = thing.y;
+        return newThing;
     };
     
     var hasOneProp = function(t,props) { // Thing has at least one of these properties/propsExtra
@@ -114,7 +124,7 @@ Application.Services.factory('Things',function(Util) {
                 if(hasOneProp(t.t,'soft')) { addProps(t.t,'smashed'); } else { addProps(t.t,'broken'); } } 
         } },
         'peel': { t: 0, 'do': function(t) {
-            removeActions(t.s,'peel'); addProps(t.s,'peeled'); // TODO: Create banana peel object
+            removeActions(t.s,'peel'); addProps(t.s,'peeled'); t.c = createChild(t.s,'bananaPeel',1);
         } },
         'write': { t: 1, 'do': function(t) {
             if(hasOneProp(t.t,'pencil-works')) { addProps(t.t,'written-on'); } // TODO: Writing messages
@@ -153,7 +163,7 @@ Application.Services.factory('Things',function(Util) {
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
-                var guid = th[i].split(':')[0];
+                var guid = th[i].split(':')[0].split('-')[0];
                 var propsExtra = th[i].split(':')[1];
                 propsExtra = propsExtra ? propsExtra.split(',') : propsExtra;
                 var actionsExtra = th[i].split(':')[2];
@@ -164,7 +174,9 @@ Application.Services.factory('Things',function(Util) {
                 actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
                 var changedTo = th[i].split(':')[5];
                 var pos = Util.positionFromSeed(guid);
+                var child = th[i].split(':')[0].split('-');
                 th[i] = spawnThing(pos.sx,pos.sy,pos.x,pos.y);
+                if(child.length > 1) th[i] = createChild(th[i],child[1],child[2]);
                 if(changedTo) changeThing(th[i],changedTo);
                 if(propsExtra) th[i].propsExtra = propsExtra;
                 if(actionsExtra) th[i].actionsExtra = actionsExtra;
@@ -218,6 +230,7 @@ Application.Services.factory('Things',function(Util) {
                 (ACTIONS[a].t == 0)) { 
                 ACTIONS[a].do(t); return true;
             }
-        }
+        },
+        createChild: createChild
     };
 });

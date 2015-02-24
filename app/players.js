@@ -111,8 +111,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             });
         },
         update: function(step,t) {
-            tick = t; 
-            //doMove(player);
+            tick = t;
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 doMove(world.players[pKey]);
             }
