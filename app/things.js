@@ -178,34 +178,34 @@ Application.Services.factory('Things',function(Util) {
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
                 var guidExtra = th[i].guid + ':';
-                if(th[i].hasOwnProperty('propsExtra')) {
+                if(th[i].propsExtra) {
                     for(var m = 0; m < th[i].propsExtra.length; m++) {
                         guidExtra += m == th[i].propsExtra.length - 1 ? 
                             th[i].propsExtra[m] : th[i].propsExtra[m] + ',';
                     }
                 }
                 guidExtra += ':';
-                if(th[i].hasOwnProperty('actionsExtra')) {
+                if(th[i].actionsExtra) {
                     for(var n = 0; n < th[i].actionsExtra.length; n++) {
                         guidExtra += n == th[i].actionsExtra.length - 1 ?
                             th[i].actionsExtra[n] : th[i].actionsExtra[n] + ',';
                     }
                 }
                 guidExtra += ':';
-                if(th[i].hasOwnProperty('propsLost')) {
+                if(th[i].propsLost) {
                     for(var o = 0; o < th[i].propsLost.length; o++) {
                         guidExtra += o == th[i].propsLost.length - 1 ?
                             th[i].propsLost[o] : th[i].propsLost[o] + ',';
                     }
                 }
                 guidExtra += ':';
-                if(th[i].hasOwnProperty('actionsLost')) {
+                if(th[i].actionsLost) {
                     for(var p = 0; p < th[i].actionsLost.length; p++) {
                         guidExtra += p == th[i].actionsLost.length - 1 ?
                             th[i].actionsLost[p] : th[i].actionsLost[p] + ',';
                     }
                 }
-                guidExtra += th[i].hasOwnProperty('changedFrom') ? ':'+th[i].id : ':';
+                guidExtra += th[i].changedFrom ? ':'+th[i].id : ':';
                 th[i] = guidExtra;
             }
             return th;

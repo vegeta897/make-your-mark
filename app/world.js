@@ -40,8 +40,10 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             var th = world.things[t];
             if(world.removed.hasOwnProperty(th.guid)) th.removed = true;
             if(world.dropped.hasOwnProperty(th.guid)) {
-                th.dropped = true; th.sx = world.dropped[th.guid].sx; th.sy = world.dropped[th.guid].sy;
-                th.x = world.dropped[th.guid].x; th.y = world.dropped[th.guid].y;
+                var d = world.dropped[th.guid];
+                th.dropped = true; th.sx = d.sx; th.sy = d.sy; th.x = d.x; th.y = d.y;
+                th.propsExtra = d.propsExtra; th.propsLost = d.propsLost; 
+                th.actionsExtra = d.actionsExtra; th.actionsLost = d.actionsLost;
             } else { delete th.dropped; }
         }
     };
@@ -116,40 +118,40 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             //Things.changeThing(thing,thing.id);
             var origPos = Util.positionFromSeed(thing.guid);
             if(origPos.sx == thing.sx && origPos.sy == thing.sy && origPos.x == thing.x && origPos.y == thing.y &&
-                !thing.hasOwnProperty('propsExtra') && !thing.hasOwnProperty('propsLost') && 
-                !thing.hasOwnProperty('actionsExtra') && !thing.hasOwnProperty('actionsLost') &&
-                !thing.hasOwnProperty('changedFrom')) { 
+                !thing.propsExtra && !thing.propsLost && 
+                !thing.actionsExtra && !thing.actionsLost &&
+                !thing.changedFrom) { 
                 FireService.remove('removed/'+thing.guid); // Dropped in original position with no changes
             } else { // Dropped somewhere else and/or with changes
                 var mods = ':'; // Build mod line
-                if(thing.hasOwnProperty('propsExtra')) {
+                if(thing.propsExtra) {
                     for(var m = 0; m < thing.propsExtra.length; m++) {
                         mods += m == thing.propsExtra.length - 1 ? 
                             thing.propsExtra[m] : thing.propsExtra[m] + ',';
                     }
                 }
                 mods += ':';
-                if(thing.hasOwnProperty('actionsExtra')) {
+                if(thing.actionsExtra) {
                     for(var l = 0; l < thing.actionsExtra.length; l++) {
                         mods += l == thing.actionsExtra.length - 1 ?
                             thing.actionsExtra[l] : thing.actionsExtra[l] + ',';
                     }
                 }
                 mods += ':';
-                if(thing.hasOwnProperty('propsLost')) {
+                if(thing.propsLost) {
                     for(var o = 0; o < thing.propsLost.length; o++) {
                         mods += o == thing.propsLost.length - 1 ?
                             thing.propsLost[o] : thing.propsLost[o] + ',';
                     }
                 }
                 mods += ':';
-                if(thing.hasOwnProperty('actionsLost')) {
+                if(thing.actionsLost) {
                     for(var p = 0; p < thing.actionsLost.length; p++) {
                         mods += p == thing.actionsLost.length - 1 ?
                             thing.actionsLost[p] : thing.actionsLost[p] + ',';
                     }
                 }
-                mods += thing.hasOwnProperty('changedFrom') ? ':'+thing.id : ':';
+                mods += thing.changedFrom ? ':'+thing.id : ':';
                 FireService.set('dropped/'+thing.guid,thing.sx+':'+thing.sy+':'+thing.x+':'+thing.y+mods);
             }
         },
