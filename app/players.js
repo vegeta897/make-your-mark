@@ -44,15 +44,17 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         player.y = moveY >= ah ? moveY - ah : moveY < 0 ? ah + moveY : moveY;
         if(!moved) return;
         FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
+        player.vicinity = [];
     };
     
     var doMove = function(p) {
         if(p.hasOwnProperty('sectorMove')) {
-            if(p.sectorMove.x != 0 || p.sectorMove.y != 0) p.sectorMove.done = false;
+            if(p.sectorMove.x != 0 || p.sectorMove.y != 0) { p.sectorMove.done = false; delete game.selected; }
             if(p.sectorMove.x != 0) p.sectorMove.x *= 0.9-(Math.abs(p.sectorMove.x)/50);
             if(p.sectorMove.y != 0) p.sectorMove.y *= 0.9-(Math.abs(p.sectorMove.y)/50);
-            p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.002 ? 0 : p.sectorMove.x;
-            p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.002 ? 0 : p.sectorMove.y;
+            // TODO: Move this easing stuff to the renderer, make this decrease constant
+            p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
+            p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
             if(p.sectorMove.x == 0 && p.sectorMove.y == 0 &&
                 p.sectorMove.rendered && !p.sectorMove.done) { World.newSector(); p.sectorMove.done = true; }
         }

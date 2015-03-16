@@ -103,8 +103,10 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         },
         getThingsAt: function(sx,sy,x,y,type) {
             sx = type == 'cursor' ? position.sx : sx; sy = type == 'cursor' ? position.sy : sy;
-            var things = []; if(x == '-' || position.sx != sx || position.sy != sy) return things;
+            var things = []; 
+            if(x == '-' || position.sx != sx || position.sy != sy) return things;
             var gameX = Math.floor(x/24)-2, gameY = Math.floor(y/24)-2;
+            if(type == 'cursor' && (gameX >= game.arena.width - 4 || gameY >= game.arena.height - 4 || gameX < 0 || gameY < 0)) return things;
             for(var i = 0; i < world.things.length; i++) {
                 var tx = (world.things[i].sx - position.sx) * (game.arena.width - 4) + world.things[i].x,
                     ty = (world.things[i].sy - position.sy) * (game.arena.height - 4) + world.things[i].y;

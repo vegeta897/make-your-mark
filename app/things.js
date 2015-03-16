@@ -33,7 +33,10 @@ Application.Services.factory('Things',function(Util) {
             props: ['cuttable','fragile','soft'] },
         bananaPeel: { name: 'Banana Peel', size: SIZE.SMALL, common: 10,
             desc: 'Watch your step.',
-            props: ['cuttable','soft'] }
+            props: ['cuttable','soft'] },
+        guitar: { name: 'Guitar', size: SIZE.LARGE, common: 1,
+            desc: '6-string acoustic.', actions: ['break'],
+            props: ['hard','long','pencil-works'] }
     };
     
     for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs

@@ -1,13 +1,14 @@
 'use strict';
 Application.Services.factory('Renderer',function(Canvas,Util) {
 
-    var c; // Canvas object
+    var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
-    var game, world, pix;
+    var game, world, pix, mmWidth, mmHeight;
     var lastSO = { };
     
     return {
         init: function(g) { c = Canvas.getCanvases(); game = g; pix = game.arena.pixels; },
+        initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
         drawFrame: function(rt,step,tick) {
             if(!c.main) return; Canvas.clear(); Canvas.clearHigh();
@@ -132,6 +133,15 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
             }
+            // Render minimap
+            if(!mmWidth) return;
+            cmm.clearRect(0,0,mmWidth,mmHeight);
+            var mmw = mmWidth / 3, mmh = mmHeight / 3;
+            cmm.fillStyle = 'rgba(47,56,60,0.48)';
+            cmm.fillRect(0,0, mmWidth,mmh);
+            cmm.fillRect(0,mmh, mmw, mmHeight-mmh);
+            cmm.fillRect(mmWidth - mmw,mmh, mmw, mmHeight-mmh*2);
+            cmm.fillRect(mmw,mmHeight-mmh, mmWidth-mmw, mmh);
         }
     };
 });

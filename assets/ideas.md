@@ -22,3 +22,8 @@ Making marks causes surrounding ground area to colorize to player's color
     Better marks cause further/stronger spread
     
 Players can set up "traps" that may have ill-effects on other players
+
+Metagame ideas:
+
+    Theft? AI guards with deterministic routines based on global tick?
+    Something on a sector by sector basis?

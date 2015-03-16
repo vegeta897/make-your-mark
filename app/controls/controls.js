@@ -5,7 +5,7 @@ Application.Directives.directive('controls',function() {
         templateUrl: 'app/controls/controls.html',
         replace: true,
         scope: {},
-        controller: function($scope,Controls,Interface,Game,Players,Canvas,Util) {
+        controller: function($scope,Controls,Interface,Game,Players,Canvas,Util,Renderer) {
             $scope.game = Game.game;
             $scope.selectThing = Interface.controlsSelectThing;
             $scope.thingIsSelected = function(thing) { return Game.game.selected && Game.game.selected.guid == thing.guid; };
@@ -22,6 +22,14 @@ Application.Directives.directive('controls',function() {
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery(window).mouseup(function(e) { return Controls.onMouse(e, e.which, false); });
+            this.initMinimap = Renderer.initMinimap;
+        },
+        link: function(scope,elem,attrs,ctrl) {
+            var mmcv = document.getElementById('minimap');
+            var mmc = mmcv.getContext ? mmcv.getContext('2d') : null;
+            mmcv.onselectstart = function() { return false; }; // Disable selecting and right clicking
+            jQuery('body').on('contextmenu', '#minimap', function(){ return false; });
+            ctrl.initMinimap(mmcv,mmc);
         }
     }
 });
