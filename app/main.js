@@ -17,4 +17,6 @@ Application.Controllers.controller('Main', function($scope,$timeout,Game,World,P
     $scope.world = World.world;
     $scope.cursor = Canvas.cursor;
     $scope.player = Players.player;
+    
+    $scope.clearPlayerData = Players.clearPlayerData;
 });

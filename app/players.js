@@ -4,7 +4,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     var revision = 2; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
-    storedPlayer = storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
+    storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
         { sx: Util.randomIntRange(-10,10), sy: Util.randomIntRange(-10,10), x: 16, y: 10,
             score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
     localStorageService.set('player',storedPlayer);
@@ -173,6 +173,10 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 player.needTarget = false;
                 storePlayer();
             }
+        },
+        clearPlayerData: function() {
+            localStorageService.remove('player');
+            FireService.remove('players/'+player.guid);
         },
         move: move,
         player: player

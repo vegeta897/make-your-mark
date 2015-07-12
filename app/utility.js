@@ -127,6 +127,11 @@ Application.Services.service('Util', function() {
                 if(jQuery.inArray(result[i],subtractor) >= 0) result.splice(i,1);
             }
             return result;
+        },
+        propertyNamesToArray: function(object) { // Return an array containing all property names
+            var array = [];
+            for(var key in object) { if(object.hasOwnProperty(key)) array.push(key); }
+            return array;
         }
     }
 });

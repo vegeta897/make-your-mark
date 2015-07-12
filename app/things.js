@@ -9,9 +9,9 @@ Application.Services.factory('Things',function(Util) {
         SCRATCHED:'scratched', SHARP:'sharp', SMASHED:'smashed', SOFT:'soft', THIN:'thin', 
         TORN:'torn', WRITTEN_ON:'written-on'
     };
-    
+    // TODO: Maybe have properties alone dictate what actions can be performed, eg. scissors have "cutting-device"
     var actions = {
-        BREAK:'break', FOLD:'fold', PEEL:'peel', SWING:'swing', TEAR:'tear', UNFOLD:'unfold', WRITE:'write'
+        BREAK:'break', CUT:'cut', FOLD:'fold', PEEL:'peel', SWING:'swing', TEAR:'tear', UNFOLD:'unfold', WRITE:'write'
     };
     
     var THINGS = {
@@ -45,7 +45,7 @@ Application.Services.factory('Things',function(Util) {
         bananaPeel: { name: 'Banana Peel', size: sizes.SMALL, common: 10,
             desc: 'Watch your step.',
             props: [props.CUTTABLE,props.SOFT] },
-        guitar: { name: 'Guitar', size: sizes.LARGE, common: 1,
+        guitar: { name: 'Guitar', size: sizes.LARGE, common: 30,
             desc: '6-string acoustic.', actions: [actions.BREAK],
             props: [props.HARD,props.LONG,props.PENCIL_WORKS] }
     };
@@ -238,7 +238,8 @@ Application.Services.factory('Things',function(Util) {
         },
         targetsRequired: function(a) { return actionList[a].t; },
         doAction: function(t,a) {
-            var allActions = Util.subtractArrays((t.s.actions || []).concat(t.s.actionsExtra || []), t.s.actionsLost);
+            var allActions = Util.subtractArrays((t.s.actions || []).concat(t.s.actionsExtra || []), 
+                t.s.actionsLost || []);
             if(jQuery.inArray(a, allActions) < 0) { return false; } // Object doesn't have this action
             if((actionList[a].t == 1 && t.hasOwnProperty('t')) || 
                 (actionList[a].t == 0)) {
@@ -246,7 +247,90 @@ Application.Services.factory('Things',function(Util) {
             }
         },
         newSeek: function() { // Pick a random thing with a random property
-            return { name: Util.pickInObject(THINGS), property: props[Util.pickInObject(props)] };            
+            var beganAt = performance.now();
+            console.log('beginning seek pick at:',beganAt);
+            var allThings = Util.propertyNamesToArray(THINGS);
+            var allProps = Util.propertyNamesToArray(props);
+            var triedProps = [];
+            var validProperty = false;
+            var target = { name: Util.pickInArray(allThings) };
+            var triedThings = [target.name];
+            console.log('picked',[target.name],'- beginning property selection');
+            var fail = 0;
+            while(!validProperty && fail < 500) {
+                var availableProps = Util.subtractArrays(allProps,triedProps);
+                console.log('available properties in pool:',availableProps);
+                if(availableProps.length == 0) { // No more properties to try
+                    triedProps = [];
+                    availableProps = allProps;
+                    var availableThings = Util.subtractArrays(allThings,triedThings);
+                    var pickedThing = Util.pickInArray(availableThings);
+                    triedThings.push(pickedThing);
+                    target = { name: pickedThing };
+                    console.log('tried objects:',triedThings);
+                    console.log('all properties tried, picking new object:',[target.name]);
+                }
+                var pickedProp = Util.pickInArray(availableProps);
+                triedProps.push(pickedProp);
+                target.property = props[pickedProp];
+                console.log('picked',[target.property],'- beginning property checks');
+                console.log('valid property test #'+(fail+1));
+                // Check if thing already has this property
+                while(hasOneProp(THINGS[target.name],[target.property])) {
+                    target.property = props[Util.pickInObject(props)];
+                    console.log('object already has this property, trying',[target.property]);
+                }
+                console.log('object does not already have this property, beginning action tests');
+                // Perform all actions on/with object to see if this property is attainable
+                for(var key in actionList) { if(!actionList.hasOwnProperty(key)) continue;
+                    console.log('testing action:',[key]);
+                    var targetThing = angular.copy(THINGS[target.name]);
+                    // Skip if this object can't perform this self-action
+                    if(actionList[key].t == 0 && jQuery.inArray(key, targetThing.actions || []) < 0) {
+                        console.log('object doesn\'t have this self-action');
+                        continue;
+                    }
+                    var t = { t: targetThing, s: targetThing };
+                    console.log('performing action:',[key]);
+                    actionList[key].do(t);
+                    if(hasOneProp(targetThing,[target.property])) {
+                        console.log('property attained in first iteration');
+                        console.log('total time spent:',beganAt-performance.now());
+                        return target;
+                    }
+                    // Secondary actions do not seem to be necessary yet
+                    //console.log('primary action not sufficient, trying secondary');
+                    //// If thing doesn't have property after this action, try another iteration
+                    //for(var key2 in actionList) { if(!actionList.hasOwnProperty(key2)) continue;
+                    //    console.log('testing secondary action:',[key2]);
+                    //    var targetThing2 = angular.copy(targetThing);
+                    //    // Skip if this object can't perform this self-action
+                    //    console.log('actions:',targetThing2.actions);
+                    //    var allActions = Util.subtractArrays((targetThing2.actions || [])
+                    //            .concat(targetThing2.actionsExtra || []), targetThing2.actionsLost || []);
+                    //    console.log('all actions:',allActions);
+                    //    if(actionList[key2].t == 0 && jQuery.inArray(key2, allActions) < 0) {
+                    //        console.log('object doesn\'t have this self-action');
+                    //        continue;
+                    //    }
+                    //    var t2 = { t: targetThing2, s: targetThing2 };
+                    //    console.log('performing second action:',[key2]);
+                    //    actionList[key2].do(t2);
+                    //    if(hasOneProp(targetThing2,[target.property])) {
+                    //        console.log('property attained in second iteration');
+                    //        console.log('total time spent:',beganAt-performance.now());
+                    //        return target;
+                    //    }
+                    //    console.log('secondary action not sufficient, trying another');
+                    //}
+                    //console.log('primary and secondary actions failed, trying another primary');
+                }
+                console.log('all actions tried, picking new property');
+                fail++;
+            }
+            console.log('failed to pick suitable object+property in 500 tries');
+            console.log('total time spent:',beganAt-performance.now());
+            return target;
         },
         createChild: createChild
     };
