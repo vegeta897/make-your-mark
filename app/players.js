@@ -1,18 +1,19 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 1; // Stored player data format revision
+    var revision = 2; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
         { sx: Util.randomIntRange(-10,10), sy: Util.randomIntRange(-10,10), x: 16, y: 10,
-            score: 0, guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
+            score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
     var player = {
         sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, 
         offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
-        input: {}, score: +storedPlayer.score, guid: storedPlayer.guid, color: Util.randomColor('vibrant'),
+        input: {}, score: +storedPlayer.score, cash: +storedPlayer.cash, seeking: storedPlayer.seeking, 
+        guid: storedPlayer.guid, color: Util.randomColor('vibrant'), 
         carried: Things.expandThings(storedPlayer.carried) || []
     };
     var last = { offset: {  } };
@@ -28,7 +29,8 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     
     var storePlayer = function() {
         var storedPlayer = { sx: player.sx, sy: player.sy, x: player.x, y: player.y, 
-            score: player.score, guid: player.guid, carried: Things.shrinkThings(player.carried), rv: revision };
+            score: player.score, cash: player.cash, seeking: player.seeking, guid: player.guid, 
+            carried: Things.shrinkThings(player.carried), rv: revision };
         localStorageService.set('player',storedPlayer);
     };
     
@@ -152,20 +154,20 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             storePlayer();
         },
         thingIsCarried: thingIsCarried,
-        thingAction: function(s,a) {
-            if(s.hasOwnProperty('t') && s.t.guid == s.s.guid) return; // Can't target self (maybe allow this?)
-            a = a == 'continue' ? player.needTarget : a;
-            var targets = s.hasOwnProperty('t') ? 1 : 0;
-            targets += s.hasOwnProperty('t2') ? 1 : 0;
-            targets += s.hasOwnProperty('t3') ? 1 : 0; // Replace with countProperties
-            if(Things.targetsRequired(a) > targets) {
-                player.needTarget = a;
+        thingAction: function(thing,action) {
+            if(thing.hasOwnProperty('t') && thing.t.guid == thing.s.guid) return; // Can't target self (maybe allow this?)
+            action = action == 'continue' ? player.needTarget : action;
+            var targets = thing.hasOwnProperty('t') ? 1 : 0;
+            targets += thing.hasOwnProperty('t2') ? 1 : 0;
+            targets += thing.hasOwnProperty('t3') ? 1 : 0; // Replace with countProperties
+            if(Things.targetsRequired(action) > targets) {
+                player.needTarget = action;
                 return;
             }
-            if(Things.doAction(s,a)) {
-                for(var tKey in s) { if(!s.hasOwnProperty(tKey)) continue;
-                    if(!thingIsCarried(s[tKey])) {
-                        World.removeThing(s[tKey]); World.addThing(s[tKey]);
+            if(Things.doAction(thing,action)) {
+                for(var tKey in thing) { if(!thing.hasOwnProperty(tKey)) continue;
+                    if(!thingIsCarried(thing[tKey])) {
+                        World.removeThing(thing[tKey]); World.addThing(thing[tKey]);
                     }
                 }
                 player.needTarget = false;

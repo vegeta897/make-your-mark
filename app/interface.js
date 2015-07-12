@@ -27,7 +27,7 @@ Application.Services.factory('Interface',function(World) {
             if(lmb && hoverSelect) game.selected = hoverSelect;
             if(lmb && !hoverSelect) { delete game.selected; }
             if(rmb) { /*delete game.selected;*/ }
-            
+            // TODO: Double left click to take thing
             return { move: rmb };
         }
     };

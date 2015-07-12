@@ -120,30 +120,30 @@ Application.Services.factory('Things',function(Util) {
     };
     
     var actionList = {}; // t.s = Self, t.t = Target
-    actionList[actions.BREAK] = { 
-        t: 0, 'do': function(t) { addProps(t.s,props.BROKEN); removeActions(t.s,[actions.BREAK,actions.CUT]); } };
+    actionList[actions.BREAK] = { t: 0, 'do': function(t) { 
+        addProps(t.s,props.BROKEN); removeActions(t.s,[actions.BREAK,actions.CUT]); } };
     actionList[actions.TEAR] = { t: 0, 'do': function(t) { addProps(t.s,props.TORN); 
-            removeProps(t.s,props.FOLDED); removeActions(t.s,[actions.TEAR,actions.FOLD,actions.UNFOLD]); } };
+        removeProps(t.s,props.FOLDED); removeActions(t.s,[actions.TEAR,actions.FOLD,actions.UNFOLD]); } };
     actionList[actions.FOLD] = { t: 0, 'do': function(t) { addProps(t.s,props.FOLDED); 
-            removeActions(t.s,actions.FOLD); addActions(t.s,actions.UNFOLD); } };
+        removeActions(t.s,actions.FOLD); addActions(t.s,actions.UNFOLD); } };
     actionList[actions.UNFOLD] = { t: 0, 'do': function(t) {
-            if(t.s.id == 'paper' && hasOneProp(t.s,props.CUT)) { changeThing(t.s,'paperSnowflake'); return; }
-            removeProps(t.s,props.FOLDED); removeActions(t.s,actions.UNFOLD); addActions(t.s,actions.FOLD);
-        } };
+        if(t.s.id == 'paper' && hasOneProp(t.s,props.CUT)) { changeThing(t.s,'paperSnowflake'); return; }
+        removeProps(t.s,props.FOLDED); removeActions(t.s,actions.UNFOLD); addActions(t.s,actions.FOLD);
+    } };
     actionList[actions.CUT] = { t: 1, 'do': function(t) { 
-            if(hasOneProp(t.t,props.CUTTABLE)) { addProps(t.t,props.CUT); removeActions(t.t,[actions.TEAR,actions.FOLD]); } 
-            else { addProps(t.t,props.SCRATCHED); }
-        } };
+        if(hasOneProp(t.t,props.CUTTABLE)) { addProps(t.t,props.CUT); removeActions(t.t,[actions.TEAR,actions.FOLD]); } 
+        else { addProps(t.t,props.SCRATCHED); }
+    } };
     actionList[actions.SWING] = { t: 1, 'do': function(t) {
-            if(hasOneProp(t.t,props.FRAGILE) && !hasOneProp(t.t,[props.SMASHED,props.BROKEN])) { 
-                if(hasOneProp(t.t,props.SOFT)) { addProps(t.t,props.SMASHED); } else { addProps(t.t,props.BROKEN); } } 
-        } };
+        if(hasOneProp(t.t,props.FRAGILE) && !hasOneProp(t.t,[props.SMASHED,props.BROKEN])) { 
+            if(hasOneProp(t.t,props.SOFT)) { addProps(t.t,props.SMASHED); } else { addProps(t.t,props.BROKEN); } } 
+    } };
     actionList[actions.PEEL] = { t: 0, 'do': function(t) {
-            removeActions(t.s,actions.PEEL); addProps(t.s,props.PEELED); t.c = createChild(t.s,'bananaPeel',1);
-        } };
+        removeActions(t.s,actions.PEEL); addProps(t.s,props.PEELED); t.c = createChild(t.s,'bananaPeel',1);
+    } };
     actionList[actions.WRITE] = { t: 1, 'do': function(t) {
-            if(hasOneProp(t.t,props.PENCIL_WORKS)) { addProps(t.t,props.WRITTEN_ON); } // TODO: Writing messages
-        } };
+        if(hasOneProp(t.t,props.PENCIL_WORKS)) { addProps(t.t,props.WRITTEN_ON); } // TODO: Writing messages
+    } };
     
     var thingsArray = [];
     
@@ -244,6 +244,9 @@ Application.Services.factory('Things',function(Util) {
                 (actionList[a].t == 0)) {
                 actionList[a].do(t); return true;
             }
+        },
+        newSeek: function() { // Pick a random thing with a random property
+            return { name: Util.pickInObject(THINGS), property: props[Util.pickInObject(props)] };            
         },
         createChild: createChild
     };

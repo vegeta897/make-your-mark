@@ -1,5 +1,5 @@
 'use strict';
-Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Canvas,FireService) {
+Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Canvas,FireService) {
 
     $scope.version = 0.005; $scope.versionName = 'Mark Attack';
     FireService.onceGlobal('version',function(ver) {
@@ -16,5 +16,5 @@ Application.Controllers.controller('Main', function($scope,$timeout,Game,World,C
     $scope.game = Game.game;
     $scope.world = World.world;
     $scope.cursor = Canvas.cursor;
-    
+    $scope.player = Players.player;
 });

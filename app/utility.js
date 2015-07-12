@@ -87,10 +87,9 @@ Application.Services.service('Util', function() {
             }
             return descending ? keys.sort().reverse() : keys.sort();
         },
-        pickInObject: function(object) { // Return a random property from input object (attach name)
+        pickInObject: function(object) { // Return a random property name from input object
             var array = [];
-            for(var key in object) { if(object.hasOwnProperty(key)) {
-                var property = object[key]; array.push(property); } }
+            for(var key in object) { if(object.hasOwnProperty(key)) array.push(key); }
             return pickInArray(array);
         },
         flip: function() { return Math.random() > 0.5; }, // Flip a coin
@@ -172,5 +171,10 @@ Application.Filters
             var actions = (angular.copy(thing.actions) || []).concat(thing.actionsExtra || []);
             actions = Util.subtractArrays(actions,thing.actionsLost || []);
             return actions;
+        }
+    })
+    .filter('properVowelConsonant', function() {
+        return function(input) { if(!input) { return ''; }
+            return jQuery.inArray(input[0],['a','e','i','o','u']) >= 0 ? 'an' : 'a';
         }
     });

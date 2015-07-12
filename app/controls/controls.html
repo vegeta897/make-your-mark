@@ -1,6 +1,7 @@
 <div class="controls">
     <div class="upper">
         <section ng-show="game.player.vicinity.length > 0" class="clearfix">
+            <!-- TODO: Click and drag to pick up/drop things and do actions -->
             <h2>Vicinity</h2>
             <button class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="game.player.needTarget ? thingAction({s:game.selected,t:thing},'continue') : selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing), targetable: game.player.needTarget && !thingIsSelected(thing) }"><span ng-repeat="extraProp in thing.propsExtra">{{ extraProp + ' ' | capitalize }}</span>{{ thing.name }}</button>
         </section>
