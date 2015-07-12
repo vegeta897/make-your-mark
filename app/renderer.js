@@ -4,13 +4,14 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var bgTiles = [];
+    var bgTiles = [], spriteThing, spriteCursor;
     var lastSO = { };
     
     return {
         init: function(g) { 
             c = Canvas.getCanvases(); game = g; pix = game.arena.pixels;
             mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
+            // Create BG tiles
             var bgTileAlphas = [0.1,0.08,0.04,0.02];
             for(var i = 0; i < 4; i++) {
                 bgTiles.push(document.createElement('canvas'));
@@ -19,6 +20,28 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 ctx.fillStyle = 'rgba(0,0,0,'+bgTileAlphas[i]+')';
                 ctx.fillRect(0,0,pix,pix);
             }
+            // Create sprite for things (with no letter)
+            spriteThing = document.createElement('canvas');
+            spriteThing.width = 12; spriteThing.height = 12;
+            var spriteThingContext = spriteThing.getContext('2d');
+            spriteThingContext.fillStyle = 'rgba(0,0,0,0.07)';
+            spriteThingContext.fillRect(0,0,12,12);
+            spriteThingContext.fillStyle = '#6699aa';
+            spriteThingContext.fillRect(1,1,10,10);
+            // Create sprite for mouse cursor highlight
+            spriteCursor = document.createElement('canvas');
+            spriteCursor.width = pix; spriteCursor.height = pix;
+            var spriteCursorContext = spriteCursor.getContext('2d');
+            spriteCursorContext.fillStyle = 'rgba(121,255,207,0.12)';
+            spriteCursorContext.beginPath();
+            spriteCursorContext.arc(pix/2, pix/2, pix/2, 0, 2 * Math.PI, false);
+            spriteCursorContext.closePath(); spriteCursorContext.fill();
+            spriteCursorContext.fillStyle = 'rgba(121,255,207,1)';
+            spriteCursorContext.globalCompositeOperation = 'destination-out';
+            spriteCursorContext.beginPath();
+            spriteCursorContext.arc(pix/2, pix/2, pix/2-3, 0, 2 * Math.PI, false);
+            spriteCursorContext.closePath(); spriteCursorContext.fill();
+            spriteCursorContext.globalCompositeOperation = 'source-over';
         },
         initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
@@ -53,20 +76,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             c.high.fillRect(mWidth - buffer,buffer, buffer, mHeight-buffer*2);
             c.high.fillRect(buffer,mHeight-buffer, mWidth, buffer);
             // Render cursor highlight
-            if(cursor.x != '-') {
-                c.high.fillStyle = 'rgba(121,255,207,0.12)';
-                c.high.beginPath();
-                c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
-                    pix/2, 0, 2 * Math.PI, false);
-                c.high.closePath(); c.high.fill();
-                c.high.fillStyle = 'rgba(121,255,207,1)';
-                c.high.globalCompositeOperation = 'destination-out';
-                c.high.beginPath();
-                c.high.arc(parseInt(cursor.x/pix)*pix+pix/2, parseInt(cursor.y/pix)*pix+pix/2,
-                    pix/2-3, 0, 2 * Math.PI, false);
-                c.high.closePath(); c.high.fill();
-                c.high.globalCompositeOperation = 'source-over';
-            }
+            if(cursor.x != '-') c.high.drawImage(spriteCursor,parseInt(cursor.x/pix)*pix,parseInt(cursor.y/pix)*pix);
             // Render things
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
@@ -74,13 +84,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 if(t.removed && !t.dropped) continue; // If object removed
                 var tdx = (t.sx - game.player.osx)*(game.arena.width-4) + t.x, 
                     tdy = (t.sy - game.player.osy)*(game.arena.height-4) + t.y;
-                c.main.fillStyle = 'rgba(0,0,0,0.07)';
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
-                c.main.fillRect(drawX+6,drawY+6,12,12);
-                c.main.fillStyle = '#6699aa';
-                c.main.fillRect(drawX+7,drawY+7,10,10);
+                c.main.drawImage(spriteThing,drawX+6,drawY+6);
                 c.main.fillStyle = '#112244';
                 c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
                 var letterFix = jQuery.inArray(t.name[0],['R','H','B']) >= 0 ? 1 : 0;
