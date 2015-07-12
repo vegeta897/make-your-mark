@@ -3,34 +3,44 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
 
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
-    var game, world, pix, mmWidth, mmHeight;
+    var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
+    var bgTiles = [];
     var lastSO = { };
     
     return {
-        init: function(g) { c = Canvas.getCanvases(); game = g; pix = game.arena.pixels; },
+        init: function(g) { 
+            c = Canvas.getCanvases(); game = g; pix = game.arena.pixels;
+            mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
+            var bgTileAlphas = [0.1,0.08,0.04,0.02];
+            for(var i = 0; i < 4; i++) {
+                bgTiles.push(document.createElement('canvas'));
+                bgTiles[i].width = pix; bgTiles[i].height = pix;
+                var ctx = bgTiles[i].getContext('2d');
+                ctx.fillStyle = 'rgba(0,0,0,'+bgTileAlphas[i]+')';
+                ctx.fillRect(0,0,pix,pix);
+            }
+        },
         initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
         drawFrame: function(rt,step,tick) {
             if(!c.main) return; Canvas.clear(); Canvas.clearHigh();
-            var drawBG = lastSO.x != game.player.sectorMove.x || lastSO.y != game.player.sectorMove.y;
-            var so = { x: game.player.sectorMove.x * (c.mainCanvas.width - pix*4), 
-                y: game.player.sectorMove.y * (c.mainCanvas.height - pix*4) };
-            if(drawBG) { // Render background
+            var so = { x: game.player.sectorMove.x * (mWidth - pix*4), 
+                y: game.player.sectorMove.y * (mHeight - pix*4) };
+            if(lastSO.x != game.player.sectorMove.x || lastSO.y != game.player.sectorMove.y) { // Render background
                 lastSO.x = game.player.sectorMove.x; lastSO.y = game.player.sectorMove.y;
                 Canvas.clearUnder();
                 for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) {
                     for(var w = 0; w < game.arena.width-4; w++) { for(var h = 0; h < game.arena.height-4; h++) {
                         var tileX = sw*(game.arena.width-4) + w, tileY = sh*(game.arena.height-4) + h;
                         var bgDrawX = (tileX+2)*pix+so.x, bgDrawY = (tileY+2)*pix+so.y;
-                        if(bgDrawX < pix*-1 || bgDrawX >= c.mainCanvas.width || 
-                            bgDrawY < pix*-1 || bgDrawY >= c.mainCanvas.height) continue;
+                        if(bgDrawX < pix*-1 || bgDrawX >= 888 || 
+                            bgDrawY < pix*-1 || bgDrawY >= 600) continue;
                         Math.seedrandom('bg'+Util.positionSeed(+game.player.osx+sw, +game.player.osy+sh, w, h));
-                        var tileChance = Math.random(); if(tileChance > 0.05) continue;
-                        else if(tileChance < 0.002) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.1)'; }
-                        else if(tileChance < 0.005) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.08)'; }
-                        else if(tileChance < 0.02) {c.mainUnder.fillStyle = 'rgba(0,0,0,0.04)'; }
-                        else {c.mainUnder.fillStyle = 'rgba(0,0,0,0.02)'; }
-                        c.mainUnder.fillRect(bgDrawX,bgDrawY,pix,pix);
+                        var tileChance = Math.random();
+                        if(tileChance < 0.002) {c.mainUnder.drawImage(bgTiles[0],bgDrawX,bgDrawY); }
+                        else if(tileChance < 0.004) {c.mainUnder.drawImage(bgTiles[1],bgDrawX,bgDrawY); }
+                        else if(tileChance < 0.06) {c.mainUnder.drawImage(bgTiles[2],bgDrawX,bgDrawY); }
+                        else if(tileChance < 0.1) {c.mainUnder.drawImage(bgTiles[3],bgDrawX,bgDrawY); }
                     } }
                 } }
                 if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
@@ -38,10 +48,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
-            c.high.fillRect(0,0, c.highCanvas.width,buffer);
-            c.high.fillRect(0,buffer, buffer, c.highCanvas.height-buffer);
-            c.high.fillRect(c.highCanvas.width - buffer,buffer, buffer, c.highCanvas.height-buffer*2);
-            c.high.fillRect(buffer,c.highCanvas.height-buffer, c.highCanvas.width, buffer);
+            c.high.fillRect(0,0, mWidth,buffer);
+            c.high.fillRect(0,buffer, buffer, mHeight-buffer);
+            c.high.fillRect(mWidth - buffer,buffer, buffer, mHeight-buffer*2);
+            c.high.fillRect(buffer,mHeight-buffer, mWidth, buffer);
             // Render cursor highlight
             if(cursor.x != '-') {
                 c.high.fillStyle = 'rgba(121,255,207,0.12)';
@@ -66,8 +76,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     tdy = (t.sy - game.player.osy)*(game.arena.height-4) + t.y;
                 c.main.fillStyle = 'rgba(0,0,0,0.07)';
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
-                if(drawX <= pix || drawX >= c.mainCanvas.width - pix
-                    || drawY <= pix || drawY >= c.mainCanvas.height - pix) continue;
+                if(drawX <= pix || drawX >= mWidth - pix
+                    || drawY <= pix || drawY >= mHeight - pix) continue;
                 c.main.fillRect(drawX+6,drawY+6,12,12);
                 c.main.fillStyle = '#6699aa';
                 c.main.fillRect(drawX+7,drawY+7,10,10);
@@ -98,18 +108,18 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
             // Erase things from buffer
-            c.main.clearRect(0,0, c.mainCanvas.width,buffer);
-            c.main.clearRect(0,buffer, buffer, c.mainCanvas.height-buffer);
-            c.main.clearRect(c.mainCanvas.width - buffer,buffer, buffer, c.mainCanvas.height-buffer*2);
-            c.main.clearRect(buffer,c.mainCanvas.height-buffer, c.mainCanvas.width, buffer);
+            c.main.clearRect(0,0, mWidth,buffer);
+            c.main.clearRect(0,buffer, buffer, mHeight-buffer);
+            c.main.clearRect(mWidth - buffer,buffer, buffer, mHeight-buffer*2);
+            c.main.clearRect(buffer,mHeight-buffer, mWidth, buffer);
             // Render players
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 var p = world.players[pKey];
                 var pdx = (p.osx - game.player.osx)*(game.arena.width-4) + p.ox,
                     pdy = (p.osy - game.player.osy)*(game.arena.height-4) + p.oy;
                 var drawPX = (pdx+2) * pix+so.x, drawPY = (pdy+2) * pix+so.y;
-                if(drawPX < pix*-1 || drawPX > c.mainCanvas.width
-                    || drawPY < pix*-1 || drawPY > c.mainCanvas.height) continue;
+                if(drawPX < pix*-1 || drawPX > mWidth
+                    || drawPY < pix*-1 || drawPY > mHeight) continue;
                 drawPX += +p.offset.x; drawPY += +p.offset.y;
                 // Render player move path
                 if(game.player.guid == pKey && p.moving) {
