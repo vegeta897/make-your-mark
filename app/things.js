@@ -4,35 +4,39 @@ Application.Services.factory('Things',function(Util) {
     var sizes = { MICRO: 1, TINY: 2, SMALL: 3, MEDIUM: 4, LARGE: 5, HUGE: 6 };
     
     var props = {
-        BROKEN:'broken', CUT:'cut', CUTTABLE:'cuttable', FLAT:'flat', FOLDED:'folded', 
-        FRAGILE:'fragile', HARD:'hard', LONG:'long', PEELED:'peeled', PENCIL_WORKS:'pencil-works',
-        SCRATCHED:'scratched', SHARP:'sharp', SMASHED:'smashed', SOFT:'soft', THIN:'thin', 
+        BROKEN:'broken', CHEWED:'chewed', CUT:'cut', CUTTABLE:'cuttable', FLAT:'flat', FOLDED:'folded', 
+        FRAGILE:'fragile', HARD:'hard', LONG:'long', PEELED:'peeled', PENCIL_WORKS:'pencil-works', POPPED:'popped',
+        SAWABLE:'sawable', SCRATCHED:'scratched', SHARP:'sharp', SMASHED:'smashed', SOFT:'soft', THIN:'thin', 
         TORN:'torn', WRITTEN_ON:'written-on'
     };
     // TODO: Maybe have properties alone dictate what actions can be performed, eg. scissors have "cutting-device"
     var actions = {
-        BREAK:'break', CUT:'cut', FOLD:'fold', PEEL:'peel', SWING:'swing', TEAR:'tear', UNFOLD:'unfold', WRITE:'write'
+        BREAK:'break', CHEW:'chew', CUT:'cut', EAT:'eat', ERASE:'erase', FOLD:'fold', PEEL:'peel', POP:'pop',
+        SWING:'swing', TEAR:'tear', UNFOLD:'unfold', WRITE:'write'
     };
     
     var THINGS = {
-        pencil: { name: 'Pencil', size: sizes.TINY, common: 1000,
+        pencil: { name: 'Pencil', size: sizes.TINY, common: 500,
             desc: 'A fine writing utensil.', actions: [actions.BREAK,actions.WRITE], 
+            props: [props.HARD,props.SHARP,props.LONG,props.SAWABLE] },
+        pen: { name: 'Pen', size: sizes.TINY, common: 350,
+            desc: 'A finer writing utensil.', actions: [actions.WRITE],
             props: [props.HARD,props.SHARP,props.LONG] },
-        paper: { name: 'Paper', size: sizes.TINY, common: 2000,
+        paper: { name: 'Paper', size: sizes.TINY, common: 500,
             desc: 'Flat, white, rectangular, flimsy.', actions: [actions.TEAR,actions.FOLD], 
             props: [props.FLAT,props.CUTTABLE,props.PENCIL_WORKS] },
-        rock: { name: 'Rock', size: sizes.SMALL, common: 1500,
+        rock: { name: 'Rock', size: sizes.SMALL, common: 400,
             desc: 'About the size of your fist, it could do some damage.',
             props: [props.HARD,props.PENCIL_WORKS] },
-        stone: { name: 'Stone', size: sizes.TINY, common: 2500,
+        stone: { name: 'Stone', size: sizes.TINY, common: 500,
             desc: 'Smaller than a rock. That\'s it.',
             props: [props.HARD,props.PENCIL_WORKS] },
         shovel: { name: 'Shovel', size: sizes.LARGE, common: 200,
             desc: 'Great for digging holes.', actions: [actions.SWING],
-            props: [props.HARD,props.THIN,props.LONG] },
+            props: [props.HARD,props.THIN,props.LONG,props.SAWABLE] },
         hammer: { name: 'Hammer', size: sizes.MEDIUM, common: 250,
             desc: 'THWACK!', actions: [actions.SWING],
-            props: [props.HARD,props.THIN,props.LONG] },
+            props: [props.HARD,props.THIN,props.LONG,props.SAWABLE] },
         scissors: { name: 'Scissors', size: sizes.SMALL, common: 400,
             desc: 'One pair of one scissors.', actions: [actions.BREAK,actions.CUT], 
             props: [props.HARD,props.SHARP] },
@@ -40,14 +44,47 @@ Application.Services.factory('Things',function(Util) {
             desc: 'Did a grade schooler make this?', actions: [actions.TEAR],
             props: [props.FLAT,props.CUTTABLE,props.PENCIL_WORKS] },
         banana: { name: 'Banana', size: sizes.SMALL, common: 250,
-            desc: 'Just like the monkeys eat!', actions: [actions.PEEL],
-            props: [props.CUTTABLE,props.FRAGILE,props.SOFT] },
+            desc: 'Just like the monkeys eat!', actions: [actions.PEEL,actions.CHEW],
+            props: [props.CUTTABLE,props.SOFT,props.SAWABLE] },
         bananaPeel: { name: 'Banana Peel', size: sizes.SMALL, common: 10,
-            desc: 'Watch your step.',
+            desc: 'Watch your step.', actions: [actions.CHEW],
             props: [props.CUTTABLE,props.SOFT] },
         guitar: { name: 'Guitar', size: sizes.LARGE, common: 30,
             desc: '6-string acoustic.', actions: [actions.BREAK],
-            props: [props.HARD,props.LONG,props.PENCIL_WORKS] }
+            props: [props.HARD,props.LONG,props.PENCIL_WORKS,props.SAWABLE] },
+        stick: { name: 'Stick', size: sizes.MEDIUM, common: 450,
+            desc: 'Like from a tree!', actions: [actions.BREAK],
+            props: [props.HARD,props.LONG,props.THIN,props.CUTTABLE,props.SAWABLE] },
+        television: { name: 'Television', size: sizes.LARGE, common: 30,
+            desc: 'Not HD.',
+            props: [props.HARD,props.FRAGILE] },
+        cellphone: { name: 'Cellphone', size: sizes.SMALL, common: 200,
+            desc: 'Or "mobile phone" if you\'re across the pond.',
+            props: [props.HARD,props.FRAGILE] },
+        chewingGum: { name: 'Gum', size: sizes.TINY, common: 100,
+            desc: 'Spearmint chewing gum to freshen your breath.', actions: [actions.CHEW],
+            props: [props.SOFT,props.CUTTABLE,props.FLAT] },
+        saw: { name: 'Saw', size: sizes.MEDIUM, common: 150,
+            desc: 'Have you seen this saw?', actions: [actions.CUT],
+            props: [props.HARD,props.FLAT,props.LONG] },
+        eraser: { name: 'Eraser', size: sizes.TINY, common: 300,
+            desc: 'Of classic pink parallelogram variety.', actions: [actions.ERASE],
+            props: [props.HARD,props.CUTTABLE,props.SAWABLE,props.PENCIL_WORKS] },
+        bubbleWrap: { name: 'Bubble Wrap', size: sizes.MEDIUM, common: 30,
+            desc: 'You know what to do.', actions: [actions.POP,actions.FOLD],
+            props: [props.CUTTABLE,props.FLAT] },
+        mirror: { name: 'Mirror', size: sizes.MEDIUM, common: 80,
+            desc: 'A brightly colored circle stares back at you.', actions: [actions.BREAK],
+            props: [props.HARD,props.FLAT] },
+        axe: { name: 'Axe', size: sizes.LARGE, common: 200,
+            desc: 'You didn\'t axe for this.', actions: [actions.SWING],
+            props: [props.HARD,props.THIN,props.LONG,props.SAWABLE,props.SHARP] },
+        coin: { name: 'Coin', size: sizes.TINY, common: 30,
+            desc: 'A golden coin embossed with the letters "MYM".',
+            props: [props.HARD,props.FLAT] },
+        cookie: { name: 'Cookie', size: sizes.TINY, common: 10,
+            desc: 'Dotted with chocolate chips. Possibly stale.', actions: [actions.EAT],
+            props: [props.SOFT,props.FLAT] }
     };
     
     for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs
@@ -131,19 +168,26 @@ Application.Services.factory('Things',function(Util) {
         removeProps(t.s,props.FOLDED); removeActions(t.s,actions.UNFOLD); addActions(t.s,actions.FOLD);
     } };
     actionList[actions.CUT] = { t: 1, 'do': function(t) { 
-        if(hasOneProp(t.t,props.CUTTABLE)) { addProps(t.t,props.CUT); removeActions(t.t,[actions.TEAR,actions.FOLD]); } 
+        if(t.s.id != 'saw' && hasOneProp(t.t,props.CUTTABLE) || (t.s.id == 'saw' && hasOneProp(t.t,props.SAWABLE))) { 
+            addProps(t.t,props.CUT); removeActions(t.t,[actions.TEAR,actions.FOLD]); } 
         else { addProps(t.t,props.SCRATCHED); }
     } };
-    actionList[actions.SWING] = { t: 1, 'do': function(t) {
-        if(hasOneProp(t.t,props.FRAGILE) && !hasOneProp(t.t,[props.SMASHED,props.BROKEN])) { 
+    actionList[actions.SWING] = { t: 1, 'do': function(t) { // TODO: Add durability to determine if item breaks
+        if(t.t.id == 'bubbleWrap') { addProps(t.t,props.POPPED); }
+        if(hasOneProp(t.t,[props.FRAGILE,props.SOFT]) && !hasOneProp(t.t,[props.SMASHED,props.BROKEN])) { 
             if(hasOneProp(t.t,props.SOFT)) { addProps(t.t,props.SMASHED); } else { addProps(t.t,props.BROKEN); } } 
     } };
     actionList[actions.PEEL] = { t: 0, 'do': function(t) {
-        removeActions(t.s,actions.PEEL); addProps(t.s,props.PEELED); t.c = createChild(t.s,'bananaPeel',1);
+        removeActions(t.s,actions.PEEL); addActions(t.s,actions.EAT); addProps(t.s,props.PEELED); 
+        t.c = createChild(t.s,'bananaPeel',1);
     } };
     actionList[actions.WRITE] = { t: 1, 'do': function(t) {
         if(hasOneProp(t.t,props.PENCIL_WORKS)) { addProps(t.t,props.WRITTEN_ON); } // TODO: Writing messages
     } };
+    actionList[actions.CHEW] = { t: 0, 'do': function(t) { addProps(t.t,props.CHEWED); } };
+    actionList[actions.ERASE] = { t: 1, 'do': function(t) { removeProps(t.t,props.WRITTEN_ON); } };
+    actionList[actions.POP] = { t: 0, 'do': function(t) { addProps(t.t,props.POPPED); } };
+    actionList[actions.EAT] = { t: 0, 'do': function(t) { t.r = t.s } };
     
     var thingsArray = [];
     
@@ -283,11 +327,9 @@ Application.Services.factory('Things',function(Util) {
                 console.log('object does not already have this property, beginning action tests');
                 // Perform all actions on/with object to see if this property is attainable
                 for(var key in actionList) { if(!actionList.hasOwnProperty(key)) continue;
-                    console.log('testing action:',[key]);
                     var targetThing = angular.copy(THINGS[target.name]);
                     // Skip if this object can't perform this self-action
                     if(actionList[key].t == 0 && jQuery.inArray(key, targetThing.actions || []) < 0) {
-                        console.log('object doesn\'t have this self-action');
                         continue;
                     }
                     var t = { t: targetThing, s: targetThing };

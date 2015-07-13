@@ -90,7 +90,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.drawImage(spriteThing,drawX+6,drawY+6);
                 c.main.fillStyle = '#112244';
                 c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                var letterFix = jQuery.inArray(t.name[0],['R','H','B','G']) >= 0 ? 1 : 0;
+                var letterFix = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
                 c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;

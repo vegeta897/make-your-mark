@@ -5,7 +5,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
-        { sx: Util.randomIntRange(-10,10), sy: Util.randomIntRange(-10,10), x: 16, y: 10,
+        { sx: Util.randomIntRange(-5,5), sy: Util.randomIntRange(-5,5), x: 16, y: 10,
             score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
@@ -94,8 +94,16 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 return true;
             }
         }
-        console.log('player does not have seeked object');
         return false;
+    };
+    
+    var removeFromCarried = function(thing) {
+        for(var i = 0; i < player.carried.length; i++) {
+            if(player.carried[i].guid == thing.guid) {
+                player.carried.splice(i,1); break;
+            }
+        }
+        if(game.selected.guid == thing.guid) delete game.selected;
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
@@ -155,20 +163,15 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             thing.removed = true;
             player.carried.push(thing);
             World.removeThing(thing);
-            delete game.selected;
+            if(game.selected.guid == thing.guid) delete game.selected;
             storePlayer();
             checkSeek();
         },
         dropThing: function(thing) {
             thing.removed = false;
-            for(var i = 0; i < player.carried.length; i++) {
-                if(player.carried[i].guid == thing.guid) {
-                    player.carried.splice(i,1); break;
-                }
-            }
+            removeFromCarried(thing);
             thing.x = player.x; thing.y = player.y;
             World.addThing(thing);
-            delete game.selected;
             storePlayer();
         },
         thingIsCarried: thingIsCarried,
@@ -183,10 +186,18 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 return;
             }
             if(Things.doAction(thing,action)) {
-                for(var tKey in thing) { if(!thing.hasOwnProperty(tKey)) continue;
+                if(thing.c) { // If a child was created, set its position to the player's
+                    thing.c.sx = player.sx; thing.c.sy = player.sy;
+                    thing.c.x = player.x; thing.c.y = player.y;
+                }
+                for(var tKey in thing) { if(!thing.hasOwnProperty(tKey) || tKey == 'r') continue;
                     if(!thingIsCarried(thing[tKey])) {
                         World.removeThing(thing[tKey]); World.addThing(thing[tKey]);
                     }
+                }
+                if(thing.r) { // If removing something
+                    removeFromCarried(thing.r);
+                    World.removeThing(thing.r);
                 }
                 player.needTarget = false;
                 storePlayer();

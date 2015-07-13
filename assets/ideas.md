@@ -23,6 +23,8 @@ Making marks causes surrounding ground area to colorize to player's color
     
 Players can set up "traps" that may have ill-effects on other players
 
+Players can get bikes/skateboards to move faster
+
 Metagame ideas:
 
     Theft? AI guards with deterministic routines based on global tick?
