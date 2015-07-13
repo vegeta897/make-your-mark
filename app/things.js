@@ -248,16 +248,16 @@ Application.Services.factory('Things',function(Util) {
         },
         newSeek: function() { // Pick a random thing with a random property
             var beganAt = performance.now();
+            Math.seedrandom();
             console.log('beginning seek pick at:',beganAt);
             var allThings = Util.propertyNamesToArray(THINGS);
             var allProps = Util.propertyNamesToArray(props);
             var triedProps = [];
-            var validProperty = false;
             var target = { name: Util.pickInArray(allThings) };
             var triedThings = [target.name];
             console.log('picked',[target.name],'- beginning property selection');
             var fail = 0;
-            while(!validProperty && fail < 500) {
+            while(fail < 500) {
                 var availableProps = Util.subtractArrays(allProps,triedProps);
                 console.log('available properties in pool:',availableProps);
                 if(availableProps.length == 0) { // No more properties to try
@@ -296,6 +296,7 @@ Application.Services.factory('Things',function(Util) {
                     if(hasOneProp(targetThing,[target.property])) {
                         console.log('property attained in first iteration');
                         console.log('total time spent:',beganAt-performance.now());
+                        target.properName = THINGS[target.name].name;
                         return target;
                     }
                     // Secondary actions do not seem to be necessary yet
@@ -330,6 +331,7 @@ Application.Services.factory('Things',function(Util) {
             }
             console.log('failed to pick suitable object+property in 500 tries');
             console.log('total time spent:',beganAt-performance.now());
+            target.properName = THINGS[target.name].name;
             return target;
         },
         createChild: createChild

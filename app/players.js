@@ -82,6 +82,22 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         return false;
     };
     
+    var checkSeek = function() {
+        for(var i = 0; i < player.carried.length; i++) {
+            var carriedProps = Util.subtractArrays((player.carried[i].props || [])
+                    .concat(player.carried[i].propsExtra || []), player.carried[i].propsLost || []);
+            if(player.carried[i].name == player.seeking.properName && 
+                jQuery.inArray(player.seeking.property,carriedProps) >= 0) {
+                console.log('player has seeked object!!!');
+                player.cash += 100;
+                player.seeking = Things.newSeek();
+                return true;
+            }
+        }
+        console.log('player does not have seeked object');
+        return false;
+    };
+    
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
     
     return {
@@ -91,6 +107,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             World.newSector();
             FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
             console.log('Player:',player.guid,player.sx+':'+player.sy);
+            checkSeek();
 
             FireService.onValue('players',function(players) {
                 for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
@@ -140,6 +157,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             World.removeThing(thing);
             delete game.selected;
             storePlayer();
+            checkSeek();
         },
         dropThing: function(thing) {
             thing.removed = false;
@@ -173,6 +191,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 player.needTarget = false;
                 storePlayer();
             }
+            checkSeek();
         },
         clearPlayerData: function() {
             localStorageService.remove('player');

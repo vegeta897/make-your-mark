@@ -25,7 +25,7 @@
             <strong>Move</strong> around with <strong>right</strong> click.<br />
             <strong>Select</strong> things with <strong>left</strong> click.
         </p>
-        <p>You are seeking {{ player.seeking.property | properVowelConsonant }} <strong>{{ player.seeking.property }} {{ player.seeking.name }}</strong>.</p>
+        <p>You are seeking {{ player.seeking.property | properVowelConsonant }} <strong>{{ player.seeking.property | capitalize }} {{ player.seeking.properName }}</strong>.</p>
         <p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>
         <p>
             <button ng-click="game.paused = !game.paused">{{ game.paused ? 'Unpause' : 'Pause' }}</button>
