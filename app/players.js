@@ -116,8 +116,8 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
             console.log('Player:',player.guid,player.sx+':'+player.sy);
             checkSeek();
-
             FireService.onValue('players',function(players) {
+                if(!players) players = {};
                 for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
                     if(pKey == player.guid) { players[pKey] = player; continue; }
                     var sx = +players[pKey].split(':')[0], sy = +players[pKey].split(':')[1],

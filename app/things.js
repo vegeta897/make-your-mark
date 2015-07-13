@@ -186,7 +186,7 @@ Application.Services.factory('Things',function(Util) {
     } };
     actionList[actions.CHEW] = { t: 0, 'do': function(t) { addProps(t.t,props.CHEWED); } };
     actionList[actions.ERASE] = { t: 1, 'do': function(t) { removeProps(t.t,props.WRITTEN_ON); } };
-    actionList[actions.POP] = { t: 0, 'do': function(t) { addProps(t.t,props.POPPED); } };
+    actionList[actions.POP] = { t: 0, 'do': function(t) { addProps(t.s,props.POPPED); } };
     actionList[actions.EAT] = { t: 0, 'do': function(t) { t.r = t.s } };
     
     var thingsArray = [];
