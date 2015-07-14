@@ -170,6 +170,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         dropThing: function(thing) {
             thing.removed = false;
             removeFromCarried(thing);
+            thing.sx = player.sx; thing.sy = player.sy;
             thing.x = player.x; thing.y = player.y;
             World.addThing(thing);
             storePlayer();
