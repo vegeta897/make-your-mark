@@ -4,13 +4,19 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var bgTiles = [], spriteThing, spriteCursor;
+    var sprites, spriteList, bgTiles = [], spriteThing, spriteCursor;
     var lastSO = { };
     
     return {
         init: function(g) { 
             c = Canvas.getCanvases(); game = g; pix = game.arena.pixels;
             mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
+            // Load sprite sheet
+            sprites = new Image();
+            sprites.src = 'img/sprites.png';
+            spriteList = ['pencil','pen','paper','rock','stone','shovel','hammer','scissors','paperSnowflake',
+                'banana','banana-peeled','bananaPeel','guitar','stick','television','cellphone','chewingGum',
+                'eraser','coin','cookie','bubbleWrap','mirror','saw','axe'];
             // Create BG tiles
             var bgTileAlphas = [0.1,0.08,0.04,0.02];
             for(var i = 0; i < 4; i++) {
@@ -87,18 +93,26 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
-                c.main.drawImage(spriteThing,drawX+6,drawY+6);
-                c.main.fillStyle = '#112244';
-                c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                var letterFix = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
-                c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
+                if(jQuery.inArray(t.id,spriteList) >= 0) { // If this object has a sprite
+                    var spriteName = t.id;
+                    if(jQuery.inArray('peeled',t.propsExtra) >= 0) spriteName += '-peeled';
+                    var spriteX = 24 * jQuery.inArray(spriteName,spriteList) % 408,
+                        spriteY = 24 * Math.floor(jQuery.inArray(spriteName,spriteList) / 17);
+                    c.main.drawImage(sprites,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
+                } else { // No sprite, draw letter box
+                    c.main.drawImage(spriteThing,drawX+6,drawY+6);
+                    c.main.fillStyle = '#112244';
+                    c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
+                    var letterFix = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
+                    c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
+                }
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
                 c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
                     'rgba(200,230,255,0.8)' : 'rgba(150,200,255,0.5)';
                 c.main.beginPath();
-                c.main.moveTo(drawX + 4,drawY + 4); c.main.lineTo(drawX + 20,drawY + 4);
-                c.main.lineTo(drawX + 20,drawY + 20); c.main.lineTo(drawX + 4,drawY + 20);
+                c.main.moveTo(drawX + 0,drawY + 0); c.main.lineTo(drawX + 24,drawY + 0);
+                c.main.lineTo(drawX + 24,drawY + 24); c.main.lineTo(drawX + 0,drawY + 24);
                 c.main.closePath(); c.main.stroke();
                 c.high.font = '14px Verdana'; c.high.textAlign = 'center';
                 c.high.fillStyle = 'rgba(240,240,240,1)';

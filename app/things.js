@@ -19,7 +19,7 @@ Application.Services.factory('Things',function(Util) {
         pencil: { name: 'Pencil', size: sizes.TINY, common: 500,
             desc: 'A fine writing utensil.', actions: [actions.BREAK,actions.WRITE], 
             props: [props.HARD,props.SHARP,props.LONG,props.SAWABLE] },
-        pen: { name: 'Pen', size: sizes.TINY, common: 350,
+        pen: { name: 'Pen', size: sizes.TINY, common: 350, // TODO: Can't be erased
             desc: 'A finer writing utensil.', actions: [actions.WRITE],
             props: [props.HARD,props.SHARP,props.LONG] },
         paper: { name: 'Paper', size: sizes.TINY, common: 500,
