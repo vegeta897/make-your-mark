@@ -34,6 +34,7 @@ h2 { font-size: 1.5em; margin-bottom: 8px; }
 dl dt { line-height: 1.2em; }
 p { margin-bottom: 1em; line-height: 1.2em; }
 button:focus { outline: 0; }
+label input { margin-left: 4px; }
 
 .ng-hide { transition: all 0s !important; }
 .clearfix { overflow: auto; }

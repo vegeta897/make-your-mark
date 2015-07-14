@@ -28,7 +28,7 @@
         <p>You are seeking {{ player.seeking.property | properVowelConsonant }} <strong>{{ player.seeking.property | capitalize }} {{ player.seeking.properName }}</strong>.</p>
         <p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>
         <p>
-            <label>Name:
+            <label>Name
                 <input type="text" name="playerName" ng-model="player.name" size="12" maxlength="20">
             </label>
         </p>

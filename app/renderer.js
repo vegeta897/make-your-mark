@@ -48,9 +48,6 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             spriteCursorContext.arc(pix/2, pix/2, pix/2-3, 0, 2 * Math.PI, false);
             spriteCursorContext.closePath(); spriteCursorContext.fill();
             spriteCursorContext.globalCompositeOperation = 'source-over';
-
-
-            c.high.font = '14px Verdana'; c.high.textAlign = 'center';
         },
         initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
@@ -123,8 +120,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
                     'rgba(200,230,255,0.8)' : 'rgba(150,200,255,0.5)';
                 c.main.beginPath();
-                c.main.moveTo(drawX + 0,drawY + 0); c.main.lineTo(drawX + 24,drawY + 0);
-                c.main.lineTo(drawX + 24,drawY + 24); c.main.lineTo(drawX + 0,drawY + 24);
+                c.main.moveTo(drawX,drawY); c.main.lineTo(drawX + pix,drawY);
+                c.main.lineTo(drawX + pix,drawY + pix); c.main.lineTo(drawX,drawY + pix);
                 c.main.closePath(); c.main.stroke();
                 c.high.fillStyle = 'rgba(240,240,240,1)';
                 c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
@@ -135,6 +132,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
                 }
                 var grid = drawX+':'+drawY;
+                c.high.font = '14px Verdana'; c.high.textAlign = 'center';
                 c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                 c.high.shadowBlur = 0;
                 hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
@@ -183,7 +181,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.high.shadowBlur = 3;
                     c.high.shadowOffsetX = 0;
                     c.high.shadowOffsetY = 0;
-                    c.high.fillText(p.name, drawPX + 12, drawPY - 4);
+                    c.high.font = '11px Verdana'; c.high.textAlign = 'center';
+                    c.high.fillText(p.name, drawPX + 12, drawPY - 1);
                     c.high.shadowBlur = 0;
                 }
             }
