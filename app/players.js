@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 2; // Stored player data format revision
+    var revision = 3; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
@@ -13,23 +13,15 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, 
         offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
         input: {}, score: +storedPlayer.score, cash: +storedPlayer.cash, seeking: storedPlayer.seeking, 
-        guid: storedPlayer.guid, color: Util.randomColor('vibrant'), 
+        guid: storedPlayer.guid, color: Util.randomColor('vibrant'), name: storedPlayer.name,
         carried: Things.expandThings(storedPlayer.carried) || []
     };
-    var last = { offset: {  } };
+    var playerSpeed = 4, last = { offset: {  } };
     var game, world, tick;
-    
-    //Renderer.addRender(function(c) {
-    //    c.main.fillStyle = 'rgba('+player.color.rgb.r+','+player.color.rgb.g+','+player.color.rgb.b+',0.8)';
-    //    var width = c.mainCanvas.width, height = c.mainCanvas.height;
-    //    c.main.beginPath();
-    //    c.main.arc(width/2, height/2, 8, 0, 2 * Math.PI, false);
-    //    c.main.fill();
-    //});
     
     var storePlayer = function() {
         var storedPlayer = { sx: player.sx, sy: player.sy, x: player.x, y: player.y, 
-            score: player.score, cash: player.cash, seeking: player.seeking, guid: player.guid, 
+            score: player.score, cash: player.cash, seeking: player.seeking, guid: player.guid, name: player.name,
             carried: Things.shrinkThings(player.carried), rv: revision };
         localStorageService.set('player',storedPlayer);
     };
@@ -45,15 +37,16 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         player.x = moveX >= aw ? moveX - aw : moveX < 0 ? aw + moveX : moveX;
         player.y = moveY >= ah ? moveY - ah : moveY < 0 ? ah + moveY : moveY;
         if(!moved) return;
-        FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
+        var storedName = player.name && player.name.trim() != '' ? ':' + player.name : '';
+        FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
         player.vicinity = [];
     };
     
     var doMove = function(p) {
         if(p.hasOwnProperty('sectorMove')) {
             if(p.sectorMove.x != 0 || p.sectorMove.y != 0) { p.sectorMove.done = false; delete game.selected; }
-            if(p.sectorMove.x != 0) p.sectorMove.x *= 0.9-(Math.abs(p.sectorMove.x)/50);
-            if(p.sectorMove.y != 0) p.sectorMove.y *= 0.9-(Math.abs(p.sectorMove.y)/50);
+            if(p.sectorMove.x != 0) p.sectorMove.x *= 0.85;
+            if(p.sectorMove.y != 0) p.sectorMove.y *= 0.85;
             // TODO: Move this easing stuff to the renderer, make this decrease constant
             p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
             p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
@@ -65,7 +58,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         if(!p.moving) return;
         var aw = game.arena.width - 4, ah = game.arena.height - 4;
         var mx = p.x + (p.sx - p.osx) * aw, my = p.y + (p.sy - p.osy) * ah;
-        var total = Util.getDistance(p.ox*24+p.offset.x,p.oy*24+p.offset.y, mx*24, my*24)/2.4;
+        var total = Util.getDistance(p.ox*24+p.offset.x,p.oy*24+p.offset.y, mx*24, my*24)/playerSpeed;
         var diff = Util.getXYdiff(p.ox*24+p.offset.x,p.oy*24+p.offset.y, mx*24, my*24);
         p.offset.x += diff.x * (1/total); p.offset.y += diff.y * (1/total);
         if(total >= 1) return;
@@ -113,7 +106,8 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             game = g; world = World.world;
             player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
             World.newSector();
-            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y);
+            var storedName = player.name && player.name.trim() != '' ? ':' + player.name : '';
+            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
             console.log('Player:',player.guid,player.sx+':'+player.sy);
             checkSeek();
             FireService.onValue('players',function(players) {
@@ -128,10 +122,11 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                         oy = world.players[pKey] ? world.players[pKey].oy : y,
                         osx = world.players[pKey] ? world.players[pKey].osx : sx,
                         osy = world.players[pKey] ? world.players[pKey].osy : sy;
+                    var name = players[pKey].split(':').length == 5 ? players[pKey].split(':')[4] : pKey;
                     Math.seedrandom(pKey);
                     players[pKey] = {
                         guid: pKey, sx: sx, sy: sy, x: x, y: y, moving: moving,
-                        ox: ox, oy: oy, osx: osx, osy: osy,
+                        ox: ox, oy: oy, osx: osx, osy: osy, name: name,
                         offset: world.players[pKey] ? world.players[pKey].offset : { x: 0, y: 0 },
                         color: Util.randomColor('vibrant')
                     };

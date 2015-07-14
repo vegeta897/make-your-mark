@@ -48,13 +48,16 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             spriteCursorContext.arc(pix/2, pix/2, pix/2-3, 0, 2 * Math.PI, false);
             spriteCursorContext.closePath(); spriteCursorContext.fill();
             spriteCursorContext.globalCompositeOperation = 'source-over';
+
+
+            c.high.font = '14px Verdana'; c.high.textAlign = 'center';
         },
         initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
         drawFrame: function(rt,step,tick) {
             if(!c.main) return; Canvas.clear(); Canvas.clearHigh();
-            var so = { x: game.player.sectorMove.x * (mWidth - pix*4), 
-                y: game.player.sectorMove.y * (mHeight - pix*4) };
+            var so = { x: Math.floor(game.player.sectorMove.x * (mWidth - pix*4)), 
+                y: Math.floor(game.player.sectorMove.y * (mHeight - pix*4)) };
             if(lastSO.x != game.player.sectorMove.x || lastSO.y != game.player.sectorMove.y) { // Render background
                 lastSO.x = game.player.sectorMove.x; lastSO.y = game.player.sectorMove.y;
                 Canvas.clearUnder();
@@ -74,6 +77,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 } }
                 if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
             }
+            // Render minimap
+            if(!mmWidth) return;
+            cmm.clearRect(0,0,mmWidth,mmHeight);
+            cmm.fillStyle = 'rgba(47,56,60,0.48)';
+            cmm.fillRect(0,0,mmWidth,mmHeight);
+            var mmw = mmWidth / 9, mmh = mmHeight / 9;
+            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
@@ -106,6 +116,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     var letterFix = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
                     c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
                 }
+                cmm.fillStyle = '#6699aa';
+                cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
                 c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
@@ -114,7 +126,6 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.moveTo(drawX + 0,drawY + 0); c.main.lineTo(drawX + 24,drawY + 0);
                 c.main.lineTo(drawX + 24,drawY + 24); c.main.lineTo(drawX + 0,drawY + 24);
                 c.main.closePath(); c.main.stroke();
-                c.high.font = '14px Verdana'; c.high.textAlign = 'center';
                 c.high.fillStyle = 'rgba(240,240,240,1)';
                 c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
                 c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
@@ -163,16 +174,19 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
+                cmm.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
+                cmm.fillRect(Math.round(drawPX/pix)-3+mmw*4,Math.round(drawPY/pix)-3+mmh*4,3,3);
+                // Render other player's names
+                if(game.player.guid != pKey) {
+                    c.high.fillStyle = 'rgba(240,240,240,1)';
+                    c.high.shadowColor = 'rgba(0,0,0,1)';
+                    c.high.shadowBlur = 3;
+                    c.high.shadowOffsetX = 0;
+                    c.high.shadowOffsetY = 0;
+                    c.high.fillText(p.name, drawPX + 12, drawPY - 4);
+                    c.high.shadowBlur = 0;
+                }
             }
-            // Render minimap
-            if(!mmWidth) return;
-            cmm.clearRect(0,0,mmWidth,mmHeight);
-            var mmw = mmWidth / 3, mmh = mmHeight / 3;
-            cmm.fillStyle = 'rgba(47,56,60,0.48)';
-            cmm.fillRect(0,0, mmWidth,mmh);
-            cmm.fillRect(0,mmh, mmw, mmHeight-mmh);
-            cmm.fillRect(mmWidth - mmw,mmh, mmw, mmHeight-mmh*2);
-            cmm.fillRect(mmw,mmHeight-mmh, mmWidth-mmw, mmh);
         }
     };
 });
