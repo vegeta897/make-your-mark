@@ -34,9 +34,10 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
     
     var applyRemovalsAndDrops = function() {
         for(var dKey in world.dropped) { if(!world.dropped.hasOwnProperty(dKey)) continue;
-            if(!Util.thingInArray(world.dropped[dKey],world.things)) {
+            var thingsIndex = Util.thingInArray(world.dropped[dKey],world.things);
+            if(thingsIndex < 0) {
                 world.things.push(world.dropped[dKey]);
-            }
+            } else { world.things[thingsIndex] = world.dropped[dKey]; }
         }
         for(var t = 0; t < world.things.length; t++) {
             var th = world.things[t];

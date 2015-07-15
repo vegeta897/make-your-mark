@@ -17,7 +17,7 @@ Application.Directives.directive('controls',function() {
             $scope.thingIsCarried = Players.thingIsCarried;
             $scope.thingAction = Players.thingAction;
             $scope.isInReach = function(thing) {
-                return Players.thingIsCarried(thing) || Util.thingInArray(thing,Players.player.vicinity);
+                return Players.thingIsCarried(thing) || Util.thingInArray(thing,Players.player.vicinity) >= 0;
             };
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);

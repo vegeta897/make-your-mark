@@ -117,8 +117,9 @@ Application.Services.service('Util', function() {
             return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
         },
         thingInArray: function(thing,array) {
-            if(!thing || !array) return false;
-            for(var i = 0; i < array.length; i++) { if(array[i].guid == thing.guid) return true; }
+            if(!thing || !array) return -1;
+            for(var i = 0; i < array.length; i++) { if(array[i].guid == thing.guid) return i; }
+            return -1;
         },
         subtractArrays: function(source,subtractor) { // Subtract members of first array from subtractor array
             if(!source || !subtractor || source.length == 0 || subtractor.length == 0) return source;

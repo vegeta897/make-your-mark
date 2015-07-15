@@ -156,7 +156,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             var hoverCount = {};
             for(var j = 0; j < world.things.length; j++) {
                 var t = world.things[j];
-                if(t.removed && !t.dropped) continue; // If object removed
+                if(t.removed && !t.dropped) continue; // Skip if object removed and not dropped
                 var tdx = (t.sx - game.player.osx)*(game.arena.width-4) + t.x, 
                     tdy = (t.sy - game.player.osy)*(game.arena.height-4) + t.y;
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;

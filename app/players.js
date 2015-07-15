@@ -51,8 +51,8 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
             p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
             if(p.sectorMove.x == 0 && p.sectorMove.y == 0 && p.sectorMove.rendered && !p.sectorMove.done) {
-                exploreSector(player.osx,player.osy);
                 World.newSector(); p.sectorMove.done = true;
+                exploreSector(player.osx,player.osy);
             }
         }
         if(!p.hasOwnProperty('ox')) {  p.ox = p.x; p.oy = p.y; p.osx = p.sx; p.osy = p.sy; }
@@ -104,7 +104,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     
     var exploreSector = function(sx,sy) {
         player.explored = player.explored ? player.explored : {};
-        player.explored[sx+','+sy] = 1;
+        player.explored[sx+','+sy] = 1; // TODO: Store number of things in sector
         storePlayer();
     };
     

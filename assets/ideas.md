@@ -25,6 +25,10 @@
   - Chance to create some special item when crafting?
 - **Add Item quality levels with colored names/icons**
   - Wrapped presents and chests that contain a random high quality item
+- Instanced player worlds so that one player doesn't dominate the server?
+  - Players can explore an instance together (created specifically for their combination of player IDs)
+    - Offers better loot?
+    - Need a way to fairly divide loot when 2+ players are exploring
 
 Metagame ideas:
 
