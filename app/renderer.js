@@ -144,7 +144,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     }
                 }
             }
-            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
+            cmm.fillStyle = 'rgba(47,56,60,0.8)';
+            cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
