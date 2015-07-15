@@ -142,7 +142,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     }
                 }
             }
-            if(game.player.osx == game.player.sx && game.player.osy == game.player.sy) cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
+            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
@@ -210,9 +210,11 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 var pdx = (p.osx - game.player.osx)*(game.arena.width-4) + p.ox,
                     pdy = (p.osy - game.player.osy)*(game.arena.height-4) + p.oy;
                 var drawPX = (pdx+2) * pix+so.x, drawPY = (pdy+2) * pix+so.y;
+                drawPX += +p.offset.x; drawPY += +p.offset.y;
+                cmm.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
+                cmm.fillRect(Math.round(drawPX/pix)-3+mmw*4,Math.round(drawPY/pix)-3+mmh*4,3,3);
                 if(drawPX < pix*-1 || drawPX > mWidth
                     || drawPY < pix*-1 || drawPY > mHeight) continue;
-                drawPX += +p.offset.x; drawPY += +p.offset.y;
                 // Render player move path
                 if(game.player.guid == pKey && p.moving) {
                     var mx = p.x + (p.sx - p.osx) * (game.arena.width-4), 
@@ -234,8 +236,6 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
-                cmm.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
-                cmm.fillRect(Math.round(drawPX/pix)-3+mmw*4,Math.round(drawPY/pix)-3+mmh*4,3,3);
                 // Render other player's names
                 if(game.player.guid != pKey) {
                     c.high.fillStyle = 'rgba(240,240,240,1)';

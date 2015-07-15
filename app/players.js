@@ -5,7 +5,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
-        { sx: Util.randomIntRange(-5,5), sy: Util.randomIntRange(-5,5), x: 16, y: 10,
+        { sx: Util.randomIntRange(-3,3), sy: Util.randomIntRange(-3,3), x: 16, y: 10,
             score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
@@ -51,7 +51,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
             p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
             if(p.sectorMove.x == 0 && p.sectorMove.y == 0 && p.sectorMove.rendered && !p.sectorMove.done) {
-                exploreSector(player.sx,player.sy);
+                exploreSector(player.osx,player.osy);
                 World.newSector(); p.sectorMove.done = true;
             }
         }
