@@ -4,7 +4,7 @@ Application.Services.factory('Things',function(Util) {
     var sizes = { MICRO: 1, TINY: 2, SMALL: 3, MEDIUM: 4, LARGE: 5, HUGE: 6 };
     
     var props = {
-        BROKEN:'broken', CHEWED:'chewed', CUT:'cut', CUTTABLE:'cuttable', FLAT:'flat', FOLDED:'folded', 
+        BRITTLE:'brittle', BROKEN:'broken', CHEWED:'chewed', CUT:'cut', CUTTABLE:'cuttable', FLAT:'flat', FOLDED:'folded', 
         FRAGILE:'fragile', HARD:'hard', LONG:'long', PEELED:'peeled', PENCIL_WORKS:'pencil-works', POPPED:'popped',
         SAWABLE:'sawable', SCRATCHED:'scratched', SHARP:'sharp', SMASHED:'smashed', SOFT:'soft', THIN:'thin', 
         TORN:'torn', WRITTEN_ON:'written-on'
@@ -64,27 +64,27 @@ Application.Services.factory('Things',function(Util) {
         chewingGum: { name: 'Gum', size: sizes.TINY, common: 100,
             desc: 'Spearmint chewing gum to freshen your breath.', actions: [actions.CHEW],
             props: [props.SOFT,props.CUTTABLE,props.FLAT] },
-        saw: { name: 'Saw', size: sizes.MEDIUM, common: 150,
-            desc: 'Have you seen this saw?', actions: [actions.CUT],
-            props: [props.HARD,props.FLAT,props.LONG] },
         eraser: { name: 'Eraser', size: sizes.TINY, common: 300,
             desc: 'Of classic pink parallelogram variety.', actions: [actions.ERASE],
             props: [props.HARD,props.CUTTABLE,props.SAWABLE,props.PENCIL_WORKS] },
+        coin: { name: 'Coin', size: sizes.TINY, common: 30,
+            desc: 'A golden coin embossed with the letters "MYM".',
+            props: [props.HARD,props.FLAT] },
+        cookie: { name: 'Cookie', size: sizes.TINY, common: 10,
+            desc: 'Dotted with chocolate chips. Possibly stale.', actions: [actions.EAT,actions.BREAK],
+            props: [props.SOFT,props.FLAT,props.BRITTLE] },
         bubbleWrap: { name: 'Bubble Wrap', size: sizes.MEDIUM, common: 30,
             desc: 'You know what to do.', actions: [actions.POP,actions.FOLD],
             props: [props.CUTTABLE,props.FLAT] },
         mirror: { name: 'Mirror', size: sizes.MEDIUM, common: 80,
             desc: 'A brightly colored circle stares back at you.', actions: [actions.BREAK],
             props: [props.HARD,props.FLAT] },
+        saw: { name: 'Saw', size: sizes.MEDIUM, common: 150,
+            desc: 'Have you seen this saw?', actions: [actions.CUT],
+            props: [props.HARD,props.FLAT,props.LONG] },
         axe: { name: 'Axe', size: sizes.LARGE, common: 200,
             desc: 'You didn\'t axe for this.', actions: [actions.SWING],
-            props: [props.HARD,props.THIN,props.LONG,props.SAWABLE,props.SHARP] },
-        coin: { name: 'Coin', size: sizes.TINY, common: 30,
-            desc: 'A golden coin embossed with the letters "MYM".',
-            props: [props.HARD,props.FLAT] },
-        cookie: { name: 'Cookie', size: sizes.TINY, common: 10,
-            desc: 'Dotted with chocolate chips. Possibly stale.', actions: [actions.EAT],
-            props: [props.SOFT,props.FLAT] }
+            props: [props.HARD,props.THIN,props.LONG,props.SHARP] }
     };
     
     for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs
@@ -139,40 +139,59 @@ Application.Services.factory('Things',function(Util) {
         if(thing[extra].length == 0) delete THINGS[extra];
     };
 
+    var createFullActionList = function(thing) { // Create alphabetized array of all actions a thing has
+        var allActions = (angular.copy(thing.actions) || []).concat(thing.actionsExtra || []);
+        allActions = Util.subtractArrays(allActions,thing.actionsLost || []);
+        return allActions.sort();
+    };
+
+    var createFullPropertyList = function(thing) { // Create alphabetized array of all properties a thing has
+        var allProps = (angular.copy(thing.props) || []).concat(thing.propsExtra || []);
+        allProps = Util.subtractArrays(allProps,thing.propsLost || []);
+        return allProps.sort();
+    };
+
     var addProps = function(thing,props) {
         if(typeof props == 'string' || props instanceof String) props = [props];
-        for(var i = 0; i < props.length; i++) addX(thing,props[i],'props','propsExtra','propsLost'); 
+        for(var i = 0; i < props.length; i++) addX(thing,props[i],'props','propsExtra','propsLost');
+        thing.allProps = createFullPropertyList(thing);
     };
     var removeProps = function(thing,props) {
         if(typeof props == 'string' || props instanceof String) props = [props];
-        for(var i = 0; i < props.length; i++) removeX(thing,props[i],'props','propsExtra','propsLost'); 
+        for(var i = 0; i < props.length; i++) removeX(thing,props[i],'props','propsExtra','propsLost');
+        thing.allProps = createFullPropertyList(thing);
     };
     var addActions = function(thing,actions) {
         if(typeof actions == 'string' || actions instanceof String) actions = [actions];
-        for(var i = 0; i < actions.length; i++) addX(thing,actions[i],'actions','actionsExtra','actionsLost'); 
+        for(var i = 0; i < actions.length; i++) addX(thing,actions[i],'actions','actionsExtra','actionsLost');
+        thing.allActions = createFullActionList(thing);
     };
     var removeActions = function(thing,actions) {
         if(typeof actions == 'string' || actions instanceof String) actions = [actions];
-        for(var i = 0; i < actions.length; i++) removeX(thing,actions[i],'actions','actionsExtra','actionsLost'); 
+        for(var i = 0; i < actions.length; i++) removeX(thing,actions[i],'actions','actionsExtra','actionsLost');
+        thing.allActions = createFullActionList(thing);
     };
     
     var actionList = {}; // t.s = Self, t.t = Target
     actionList[actions.BREAK] = { t: 0, 'do': function(t) { 
         addProps(t.s,props.BROKEN); removeActions(t.s,[actions.BREAK,actions.CUT]); } };
     actionList[actions.TEAR] = { t: 0, 'do': function(t) {
-        if(hasOneProp(t.t,props.CUT)) return;
-        addProps(t.s,props.TORN); 
+        if(hasOneProp(t.s,props.CUT)) return;
+        addProps(t.s,props.TORN);
         removeProps(t.s,props.FOLDED); removeActions(t.s,[actions.TEAR,actions.FOLD,actions.UNFOLD]); } };
-    actionList[actions.FOLD] = { t: 0, 'do': function(t) { addProps(t.s,props.FOLDED); 
-        removeActions(t.s,actions.FOLD); addActions(t.s,actions.UNFOLD); } };
+    actionList[actions.FOLD] = { t: 0, 'do': function(t) { 
+        if(hasOneProp(t.s,props.FOLDED)) return;
+        addProps(t.s,props.FOLDED); removeActions(t.s,actions.FOLD); addActions(t.s,actions.UNFOLD); } };
     actionList[actions.UNFOLD] = { t: 0, 'do': function(t) {
-        if(t.s.id == 'paper' && hasOneProp(t.s,props.CUT)) { changeThing(t.s,'paperSnowflake'); return; }
         removeProps(t.s,props.FOLDED); removeActions(t.s,actions.UNFOLD); addActions(t.s,actions.FOLD);
     } };
     actionList[actions.CUT] = { t: 1, 'do': function(t) { 
-        if(hasOneProp(t.t,props.TORN)) return;
+        if(hasOneProp(t.t,[props.TORN,props.SMASHED])) return;
+        if(hasOneProp(t.t,props.BRITTLE)) { addProps(t.t,props.BROKEN); return; }
+        if(t.t.id == 'paper' && hasOneProp(t.t,props.FOLDED)) { changeThing(t.s,'paperSnowflake'); return; }
         if(t.s.id != 'saw' && hasOneProp(t.t,props.CUTTABLE) || (t.s.id == 'saw' && hasOneProp(t.t,props.SAWABLE))) { 
-            addProps(t.t,props.CUT); removeActions(t.t,[actions.TEAR,actions.FOLD]); } 
+            addProps(t.t,props.CUT); removeProps(t.t,[props.SAWABLE,props.CUTTABLE,props.FOLDED]);
+            removeActions(t.t,[actions.TEAR,actions.FOLD,actions.BREAK]); }
         else { addProps(t.t,props.SCRATCHED); }
     } };
     actionList[actions.SWING] = { t: 1, 'do': function(t) { // TODO: Add durability to determine if item breaks
@@ -216,6 +235,8 @@ Application.Services.factory('Things',function(Util) {
             var newThing = angular.copy(thingsArray[i]);
             newThing.sx = sx; newThing.sy = sy; newThing.x = x; newThing.y = y; 
             newThing.guid = Util.positionSeed(sx,sy,x,y);
+            newThing.allProps = createFullPropertyList(newThing);
+            newThing.allActions = createFullActionList(newThing);
             return newThing;
         }
     };
@@ -245,6 +266,8 @@ Application.Services.factory('Things',function(Util) {
                 if(actionsExtra) th[i].actionsExtra = actionsExtra;
                 if(propsLost) th[i].propsLost = propsLost;
                 if(actionsLost) th[i].actionsLost = actionsLost;
+                th[i].allProps = createFullPropertyList(th[i]);
+                th[i].allActions = createFullActionList(th[i]);
             }
             return th;
         },
@@ -381,6 +404,6 @@ Application.Services.factory('Things',function(Util) {
             target.properName = THINGS[target.name].name;
             return target;
         },
-        createChild: createChild
+        createChild: createChild, createFullActionList: createFullActionList, createFullPropertyList: createFullPropertyList
     };
 });

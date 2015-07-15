@@ -34,7 +34,9 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
     
     var applyRemovalsAndDrops = function() {
         for(var dKey in world.dropped) { if(!world.dropped.hasOwnProperty(dKey)) continue;
-            if(!Util.thingInArray(world.dropped[dKey],world.things)) world.things.push(world.dropped[dKey]);
+            if(!Util.thingInArray(world.dropped[dKey],world.things)) {
+                world.things.push(world.dropped[dKey]);
+            }
         }
         for(var t = 0; t < world.things.length; t++) {
             var th = world.things[t];
@@ -44,6 +46,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                 th.dropped = true; th.sx = d.sx; th.sy = d.sy; th.x = d.x; th.y = d.y;
                 th.propsExtra = d.propsExtra; th.propsLost = d.propsLost; 
                 th.actionsExtra = d.actionsExtra; th.actionsLost = d.actionsLost;
+                th.allProps = Things.createFullPropertyList(th);
+                th.allActions = Things.createFullActionList(th);
             } else { delete th.dropped; }
         }
     };

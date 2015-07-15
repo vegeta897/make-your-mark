@@ -4,19 +4,73 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var sprites, spriteList, bgTiles = [], spriteThing, spriteCursor;
+    var spriteImg, spriteLibrary, bgTiles = [], spriteThing, spriteCursor;
     var lastSO = { };
+    
+    var findSprite = function(thing) {
+        var list = spriteLibrary.names[spriteLibrary.indexes[thing.id][0]]; // List of sprite mods
+        var basePosition = spriteLibrary.indexes[thing.id][1]; // Position of base sprite in sheet
+        var position = basePosition;
+        for(var m = 1; m < list.length; m++) { // Loop through mods (not counting base)
+            var modProps = list[m].split('+'); // Required props for this mod
+            var modAccepted = true;
+            for(var p = 0; p < modProps.length; p++) { // Loop through required props
+                var propVariants = modProps[p].split('|'); // Interchangeable properties (broken|cut)
+                var variantFound = false;
+                for(var v = 0; v < propVariants.length; v++) { // Loop through variants until one found
+                    if(jQuery.inArray(propVariants[v],thing.allProps) >= 0) {
+                        variantFound = true; break;
+                    }
+                }
+                if(!variantFound) { modAccepted = false; break; }
+            }
+            position = modAccepted ? basePosition + m : position;
+        }
+        return position;
+    };
     
     return {
         init: function(g) { 
             c = Canvas.getCanvases(); game = g; pix = game.arena.pixels;
             mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
             // Load sprite sheet
-            sprites = new Image();
-            sprites.src = 'img/sprites.png';
-            spriteList = ['pencil','pen','paper','rock','stone','shovel','hammer','scissors','paperSnowflake',
-                'banana','banana-peeled','bananaPeel','guitar','stick','television','cellphone','chewingGum',
-                'eraser','coin','cookie','bubbleWrap','mirror','saw','axe'];
+            spriteImg = new Image();
+            spriteImg.src = 'img/sprites.png';
+            spriteLibrary = {
+                indexes: {}, names: [
+                    ['pencil','chewed|scratched','broken|cut','broken|cut+chewed|scratched'],
+                    ['pen','scratched'],
+                    ['paper','folded','cut','torn','written-on','folded+written-on','cut+written-on','torn+written-on'],
+                    ['rock','scratched'],
+                    ['stone','scratched'],
+                    ['shovel','scratched','cut','cut+scratched'],
+                    ['hammer','scratched','cut','cut+scratched'],
+                    ['scissors','scratched','broken','broken+scratched'],
+                    ['paperSnowflake','cut','torn'],
+                    ['banana','cut','smashed','peeled','cut+peeled','peeled+smashed'],
+                    ['bananaPeel','cut','smashed'],
+                    ['guitar','scratched','broken','broken+scratched','cut','cut+scratched','written-on',
+                        'scratched+written-on','broken+written-on','broken+scratched+written-on','cut+written-on',
+                        'cut+scratched+written-on'],
+                    ['stick','cut|broken'],
+                    ['television','scratched','broken','broken+scratched'],
+                    ['cellphone','scratched','broken','broken+scratched'],
+                    ['chewingGum','cut','chewed','chewed+cut'],
+                    ['eraser','cut','written-on','cut+written-on'],
+                    ['coin','scratched'],
+                    ['cookie','broken'],
+                    ['bubbleWrap','cut','folded','popped','cut+popped','folded+popped'],
+                    ['mirror','scratched','broken','broken+scratched'],
+                    ['saw','scratched'],
+                    ['axe','scratched']
+                ]
+            };
+            var position = 0; // Build sprite name and position index list
+            for(var n = 0; n < spriteLibrary.names.length; n++) {
+                spriteLibrary.indexes[spriteLibrary.names[n][0]] = [n,position];
+                position += spriteLibrary.names[n].length
+            }
+                        
             // Create BG tiles
             var bgTileAlphas = [0.1,0.08,0.04,0.02];
             for(var i = 0; i < 4; i++) {
@@ -100,18 +154,17 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
-                if(jQuery.inArray(t.id,spriteList) >= 0) { // If this object has a sprite
-                    var spriteName = t.id;
-                    if(jQuery.inArray('peeled',t.propsExtra) >= 0) spriteName += '-peeled';
-                    var spriteX = 24 * jQuery.inArray(spriteName,spriteList) % 408,
-                        spriteY = 24 * Math.floor(jQuery.inArray(spriteName,spriteList) / 17);
-                    c.main.drawImage(sprites,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
+                if(spriteLibrary.indexes[t.id]) { // If this object has a sprite
+                    var spritePosition = findSprite(t);
+                    var spriteX = 24 * (spritePosition % 16),
+                        spriteY = 24 * Math.floor(spritePosition / 16);
+                    c.main.drawImage(spriteImg,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
                 } else { // No sprite, draw letter box
                     c.main.drawImage(spriteThing,drawX+6,drawY+6);
                     c.main.fillStyle = '#112244';
                     c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                    var letterFix = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
-                    c.main.fillText(t.name[0],drawX+11+letterFix,drawY+16);
+                    var kerning = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
+                    c.main.fillText(t.name[0],drawX+11+kerning,drawY+16);
                 }
                 cmm.fillStyle = '#6699aa';
                 cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);

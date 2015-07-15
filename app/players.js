@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 3; // Stored player data format revision
+    var revision = 4; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :

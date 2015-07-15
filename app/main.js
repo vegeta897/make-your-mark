@@ -1,7 +1,7 @@
 'use strict';
 Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Canvas,FireService) {
 
-    $scope.version = 0.008; $scope.versionName = 'Mark Zuckerberg';
+    $scope.version = 0.009; $scope.versionName = 'Mark Zuckerberg';
     FireService.onceGlobal('version',function(ver) {
         if($scope.version < ver) {
             $scope.needUpdate = true;

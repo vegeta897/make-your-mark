@@ -10,7 +10,10 @@ Application.Services.factory('Interface',function(World) {
         controlsOnThing: function(thing) { controls.hover = thing; },
         controlsOffThing: function(thing) { delete controls.hover; },
         controlsSelectThing: function(thing) {
-            if(game.selected && game.selected.guid == thing.guid) { delete game.selected; return; }
+            game.player.needTarget = false;
+            if(game.selected && game.selected.guid == thing.guid) { 
+                delete game.selected; return; 
+            }
             game.selected = thing;
         },
         updateCursor: function(c,lmb,rmb) { // lmb,rmb = left/right mouse pressed
@@ -24,8 +27,8 @@ Application.Services.factory('Interface',function(World) {
             }
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
             // Select/Deselect things
-            if(lmb && hoverSelect) game.selected = hoverSelect;
-            if(lmb && !hoverSelect) { delete game.selected; }
+            if(lmb && hoverSelect) { game.selected = hoverSelect; game.player.needTarget = false; }
+            if(lmb && !hoverSelect) { delete game.selected; game.player.needTarget = false; }
             if(rmb) { /*delete game.selected;*/ }
             // TODO: Double left click to take thing
             return { move: rmb };

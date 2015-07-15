@@ -2,6 +2,7 @@
     <div class="upper">
         <section ng-show="game.player.vicinity.length > 0" class="clearfix">
             <!-- TODO: Click and drag to pick up/drop things and do actions -->
+            <!-- TODO: Change inventory to grid-based with sprites as icons -->
             <h2>Vicinity</h2>
             <button class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="game.player.needTarget ? thingAction({s:game.selected,t:thing},'continue') : selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing), targetable: game.player.needTarget && !thingIsSelected(thing) }"><span ng-repeat="extraProp in thing.propsExtra">{{ extraProp + ' ' | capitalize }}</span>{{ thing.name }}</button>
         </section>
@@ -16,7 +17,7 @@
             <div ng-show="isInReach(game.selected)">
                 <button ng-click="takeThing(game.selected)" ng-show="!thingIsCarried(game.selected)">Take</button>
                 <button ng-click="dropThing(game.selected)" ng-show="thingIsCarried(game.selected)">Drop</button>
-                <button class="action" ng-repeat="action in game.selected | thingActions" ng-click="thingAction({s:game.selected},action)">{{ action | capitalize }}</button>
+                <button class="action" ng-repeat="action in game.selected.allActions" ng-click="thingAction({s:game.selected},action)">{{ action | capitalize }}</button>
             </div>
         </section>
     </div>

@@ -175,7 +175,7 @@ Application.Filters
         return function(thing) { if(!thing) return thing;
             var actions = (angular.copy(thing.actions) || []).concat(thing.actionsExtra || []);
             actions = Util.subtractArrays(actions,thing.actionsLost || []);
-            return actions;
+            return actions.sort();
         }
     })
     .filter('properVowelConsonant', function() {
