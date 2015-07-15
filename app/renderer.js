@@ -136,12 +136,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 for(var mmsy = -5; mmsy <= 5; mmsy++) {
                     var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)] || -1;
                     if(thingCount >= 0) {
-                        cmm.fillStyle = 'rgba(171,220,238,'+thingCount/100+')';
+                        cmm.fillStyle = 'rgba(171,220,238,'+(thingCount+1)/100+')';
                         cmm.fillRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
                     }
                 }
             }
+            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
             cmm.fillStyle = 'rgba(47,56,60,0.6)';
             cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
