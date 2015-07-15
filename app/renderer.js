@@ -131,8 +131,6 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render minimap
             if(!mmWidth) return;
             cmm.clearRect(0,0,mmWidth,mmHeight);
-            cmm.fillStyle = 'rgba(47,56,60,0.68)';
-            cmm.fillRect(0,0,mmWidth,mmHeight);
             var mmw = mmWidth / 9, mmh = mmHeight / 9;
             for(var mmsx = -5; mmsx <= 5; mmsx++) {
                 for(var mmsy = -5; mmsy <= 5; mmsy++) {
@@ -144,7 +142,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     }
                 }
             }
-            cmm.fillStyle = 'rgba(47,56,60,0.8)';
+            cmm.fillStyle = 'rgba(47,56,60,0.6)';
             cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
