@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 4; // Stored player data format revision
+    var revision = 5; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
@@ -14,7 +14,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
         input: {}, score: +storedPlayer.score, cash: +storedPlayer.cash, seeking: storedPlayer.seeking, 
         guid: storedPlayer.guid, color: Util.randomColor('vibrant'), name: storedPlayer.name,
-        carried: Things.expandThings(storedPlayer.carried) || []
+        carried: Things.expandThings(storedPlayer.carried) || [], explored: storedPlayer.explored
     };
     var playerSpeed = 4, last = { offset: {  } };
     var game, world, tick;
@@ -22,7 +22,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     var storePlayer = function() {
         var storedPlayer = { sx: player.sx, sy: player.sy, x: player.x, y: player.y, 
             score: player.score, cash: player.cash, seeking: player.seeking, guid: player.guid, name: player.name,
-            carried: Things.shrinkThings(player.carried), rv: revision };
+            carried: Things.shrinkThings(player.carried), rv: revision, explored: player.explored };
         localStorageService.set('player',storedPlayer);
     };
     
@@ -50,8 +50,10 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             // TODO: Move this easing stuff to the renderer, make this decrease constant
             p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
             p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
-            if(p.sectorMove.x == 0 && p.sectorMove.y == 0 &&
-                p.sectorMove.rendered && !p.sectorMove.done) { World.newSector(); p.sectorMove.done = true; }
+            if(p.sectorMove.x == 0 && p.sectorMove.y == 0 && p.sectorMove.rendered && !p.sectorMove.done) {
+                exploreSector(player.sx,player.sy);
+                World.newSector(); p.sectorMove.done = true;
+            }
         }
         if(!p.hasOwnProperty('ox')) {  p.ox = p.x; p.oy = p.y; p.osx = p.sx; p.osy = p.sy; }
         p.moving = p.ox != p.x || p.oy != p.y || p.osx != p.sx || p.osy != p.sy;
@@ -98,6 +100,12 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             }
         }
         if(game.selected.guid == thing.guid) delete game.selected;
+    };
+    
+    var exploreSector = function(sx,sy) {
+        player.explored = player.explored ? player.explored : {};
+        player.explored[sx+','+sy] = 1;
+        storePlayer();
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
@@ -150,12 +158,12 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 return true;
             } else { return false; }
         },
-        newSector: function() {
-            if(last.sx != player.sx || last.sy != player.sy) {
-                last.sx = player.sx; last.sy = player.sy;
-                return true;
-            } else { return false; }
-        },
+        //newSector: function() {
+        //    if(last.sx != player.sx || last.sy != player.sy) {
+        //        last.sx = player.sx; last.sy = player.sy;
+        //        return true;
+        //    } else { return false; }
+        //},
         takeThing: function(thing) {
             thing.removed = true;
             player.carried.push(thing);
@@ -215,6 +223,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
             player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
             World.newSector();
+            exploreSector(player.sx,player.sy);
         },
         move: move,
         player: player

@@ -134,7 +134,15 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             cmm.fillStyle = 'rgba(47,56,60,0.48)';
             cmm.fillRect(0,0,mmWidth,mmHeight);
             var mmw = mmWidth / 9, mmh = mmHeight / 9;
-            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
+            for(var mmsx = -5; mmsx <= 5; mmsx++) {
+                for(var mmsy = -5; mmsy <= 5; mmsy++) {
+                    if(game.player.explored && game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)]) {
+                        cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
+                            mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                    }
+                }
+            }
+            if(game.player.osx == game.player.sx && game.player.osy == game.player.sy) cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
@@ -166,8 +174,9 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     var kerning = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
                     c.main.fillText(t.name[0],drawX+11+kerning,drawY+16);
                 }
-                cmm.fillStyle = '#6699aa';
-                cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
+                // Draw on minimap
+                //cmm.fillStyle = '#6699aa';
+                //cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
                 // Draw hover/select box
                 if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
                 c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
