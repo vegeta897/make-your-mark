@@ -206,6 +206,16 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             localStorageService.remove('player');
             FireService.remove('players/'+player.guid);
         },
+        gotoPlayer: function(targetPlayer) {
+            player.x = targetPlayer.x; player.y = targetPlayer.y;
+            player.sx = targetPlayer.sx; player.sy = targetPlayer.sy;
+            player.ox = player.x; player.oy = player.y;
+            player.osx = player.sx; player.osy = player.sy;
+            var storedName = player.name && player.name.trim() != '' ? ':' + player.name : '';
+            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
+            player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y);
+            World.newSector();
+        },
         move: move,
         player: player
     };

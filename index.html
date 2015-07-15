@@ -33,6 +33,10 @@
             </label>
         </p>
         <p>
+            Teleport: 
+            <button ng-repeat="otherPlayer in world.players" ng-click="gotoPlayer(otherPlayer)" ng-hide="otherPlayer.guid == player.guid">{{ otherPlayer.name }}</button>
+        </p>
+        <p>
             <button ng-click="game.paused = !game.paused">{{ game.paused ? 'Unpause' : 'Pause' }}</button>
             <button ng-click="clearPlayerData()">Clear Player Data</button>
         </p>

@@ -33,6 +33,7 @@ h2 { font-size: 1.5em; margin-bottom: 8px; }
 .button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }
 p { margin-bottom: 1em; line-height: 1.2em; }
+p button { margin-right: 4px; }
 button:focus { outline: 0; }
 label input { margin-left: 4px; }
 
