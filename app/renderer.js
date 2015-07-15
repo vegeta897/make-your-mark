@@ -131,13 +131,15 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render minimap
             if(!mmWidth) return;
             cmm.clearRect(0,0,mmWidth,mmHeight);
-            cmm.fillStyle = 'rgba(47,56,60,0.48)';
+            cmm.fillStyle = 'rgba(47,56,60,0.68)';
             cmm.fillRect(0,0,mmWidth,mmHeight);
             var mmw = mmWidth / 9, mmh = mmHeight / 9;
             for(var mmsx = -5; mmsx <= 5; mmsx++) {
                 for(var mmsy = -5; mmsy <= 5; mmsy++) {
-                    if(game.player.explored && game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)]) {
-                        cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
+                    var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)] || -1;
+                    if(thingCount >= 0) {
+                        cmm.fillStyle = 'rgba(171,220,238,'+thingCount/100+')';
+                        cmm.fillRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
                     }
                 }

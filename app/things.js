@@ -321,17 +321,14 @@ Application.Services.factory('Things',function(Util) {
         newSeek: function() { // Pick a random thing with a random property
             var beganAt = performance.now();
             Math.seedrandom();
-            console.log('beginning seek pick at:',beganAt);
             var allThings = Util.propertyNamesToArray(THINGS);
             var allProps = Util.propertyNamesToArray(props);
             var triedProps = [];
             var target = { name: Util.pickInArray(allThings) };
             var triedThings = [target.name];
-            console.log('picked',[target.name],'- beginning property selection');
             var fail = 0;
             while(fail < 500) {
                 var availableProps = Util.subtractArrays(allProps,triedProps);
-                console.log('available properties in pool:',availableProps);
                 if(availableProps.length == 0) { // No more properties to try
                     triedProps = [];
                     availableProps = allProps;
@@ -339,20 +336,14 @@ Application.Services.factory('Things',function(Util) {
                     var pickedThing = Util.pickInArray(availableThings);
                     triedThings.push(pickedThing);
                     target = { name: pickedThing };
-                    console.log('tried objects:',triedThings);
-                    console.log('all properties tried, picking new object:',[target.name]);
                 }
                 var pickedProp = Util.pickInArray(availableProps);
                 triedProps.push(pickedProp);
                 target.property = props[pickedProp];
-                console.log('picked',[target.property],'- beginning property checks');
-                console.log('valid property test #'+(fail+1));
                 // Check if thing already has this property
                 while(hasOneProp(THINGS[target.name],[target.property])) {
                     target.property = props[Util.pickInObject(props)];
-                    console.log('object already has this property, trying',[target.property]);
                 }
-                console.log('object does not already have this property, beginning action tests');
                 // Perform all actions on/with object to see if this property is attainable
                 for(var key in actionList) { if(!actionList.hasOwnProperty(key)) continue;
                     var targetThing = angular.copy(THINGS[target.name]);
@@ -361,11 +352,8 @@ Application.Services.factory('Things',function(Util) {
                         continue;
                     }
                     var t = { t: targetThing, s: targetThing };
-                    console.log('performing action:',[key]);
                     actionList[key].do(t);
                     if(hasOneProp(targetThing,[target.property])) {
-                        console.log('property attained in first iteration');
-                        console.log('total time spent:',beganAt-performance.now());
                         target.properName = THINGS[target.name].name;
                         return target;
                     }
@@ -396,11 +384,8 @@ Application.Services.factory('Things',function(Util) {
                     //}
                     //console.log('primary and secondary actions failed, trying another primary');
                 }
-                console.log('all actions tried, picking new property');
                 fail++;
             }
-            console.log('failed to pick suitable object+property in 500 tries');
-            console.log('total time spent:',beganAt-performance.now());
             target.properName = THINGS[target.name].name;
             return target;
         },

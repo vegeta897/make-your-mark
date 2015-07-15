@@ -1,17 +1,18 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 5; // Stored player data format revision
+    var revision = 6; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
         { sx: Util.randomIntRange(-3,3), sy: Util.randomIntRange(-3,3), x: 16, y: 10,
-            score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), rv: revision };
+            score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), 
+            rv: revision, explored: {} };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
     var player = {
-        sx: +storedPlayer.sx, sy: +storedPlayer.sy, x: +storedPlayer.x, y: +storedPlayer.y, 
-        offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
+        sx: +storedPlayer.sx, sy: +storedPlayer.sy, osx: +storedPlayer.sx, osy: +storedPlayer.sy, 
+        x: +storedPlayer.x, y: +storedPlayer.y, offset: { x: 0, y: 0 }, sectorMove: { x: 0, y: 0 },
         input: {}, score: +storedPlayer.score, cash: +storedPlayer.cash, seeking: storedPlayer.seeking, 
         guid: storedPlayer.guid, color: Util.randomColor('vibrant'), name: storedPlayer.name,
         carried: Things.expandThings(storedPlayer.carried) || [], explored: storedPlayer.explored
@@ -103,8 +104,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     };
     
     var exploreSector = function(sx,sy) {
-        player.explored = player.explored ? player.explored : {};
-        player.explored[sx+','+sy] = 1; // TODO: Store number of things in sector
+        player.explored[sx+','+sy] = World.world.sectorThingCount;
         storePlayer();
     };
     

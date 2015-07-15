@@ -24,7 +24,7 @@ h2 { color: #f2f5eb; }
 .controls .upper button.action:hover { background: #418241; color: #e6fae7;  border-color: #2c592f; }
 .controls .upper button.action:active { background: #5fae5d; color: #d4f8d6;  border-color: #408446; }
 
-.controls .minimap { background: #42555C; }
+.controls .minimap { background: #78949F; }
 
 strong { font-weight: bold; font-size: 1.1em; }
 .muted { color: #858a71; }

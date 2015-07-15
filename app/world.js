@@ -3,7 +3,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
 
     var position = { sx: 0, sy: 0, x: 0, y: 0 };
     var game;
-    var world = { things: [], removed: {}, dropped: {}, players: {} };
+    var world = { things: [], removed: {}, dropped: {}, players: {}, sectorThingCount: 0 };
     var removedReady = false, droppedReady = false, onRemoved;
     
     Renderer.initWorld(world);
@@ -39,16 +39,19 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                 world.things.push(world.dropped[dKey]);
             } else { world.things[thingsIndex] = world.dropped[dKey]; }
         }
+        world.sectorThingCount = 0;
         for(var t = 0; t < world.things.length; t++) {
             var th = world.things[t];
             th.removed = world.removed.hasOwnProperty(th.guid);
+            th.allProps = Things.createFullPropertyList(th);
+            th.allActions = Things.createFullActionList(th);
+            world.sectorThingCount += th.sx == position.sx && th.sy == position.sy && !th.removed ? 1 : 0;
             if(world.dropped.hasOwnProperty(th.guid)) {
                 var d = world.dropped[th.guid];
                 th.dropped = true; th.sx = d.sx; th.sy = d.sy; th.x = d.x; th.y = d.y;
                 th.propsExtra = d.propsExtra; th.propsLost = d.propsLost; 
                 th.actionsExtra = d.actionsExtra; th.actionsLost = d.actionsLost;
-                th.allProps = Things.createFullPropertyList(th);
-                th.allActions = Things.createFullActionList(th);
+                world.sectorThingCount += th.sx == position.sx && th.sy == position.sy ? 1 : 0;
             } else { delete th.dropped; }
         }
     };
