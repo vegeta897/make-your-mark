@@ -66,7 +66,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         p.moving = false; p.offset.x = 0; p.offset.y = 0; p.ox = p.x; p.oy = p.y; p.osx = p.sx; p.osy = p.sy;
         if(p.hasOwnProperty('sectorMove')) { storePlayer(); p.vicinity = World.setPosition(p.sx,p.sy,p.x,p.y); }
     };
-
+    
     var thingIsCarried = function(thing) {
         if(!thing) return false;
         for(var i = 0; i < player.carried.length; i++) {
@@ -84,6 +84,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 console.log('player has seeked object!!!');
                 player.cash += 100;
                 player.seeking = Things.newSeek();
+                checkSeek();
                 return true;
             }
         }
@@ -116,12 +117,13 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                     if(pKey == player.guid) { players[pKey] = player; continue; }
                     var sx = +players[pKey].split(':')[0], sy = +players[pKey].split(':')[1],
                         x = +players[pKey].split(':')[2], y = +players[pKey].split(':')[3];
-                    var moving = world.players[pKey] && (world.players[pKey].sx != sx || world.players[pKey].sy != sy ||
-                        world.players[pKey].x != x || world.players[pKey].y != y);
                     var ox = world.players[pKey] ? world.players[pKey].ox : x,
                         oy = world.players[pKey] ? world.players[pKey].oy : y,
                         osx = world.players[pKey] ? world.players[pKey].osx : sx,
                         osy = world.players[pKey] ? world.players[pKey].osy : sy;
+                    osx = Math.abs(osx - sx) > 1 ? sx : osx;
+                    osy = Math.abs(osy - sy) > 1 ? sy : osy;
+                    var moving = osx != sx || osy != sy || ox != x || oy != y;
                     var name = players[pKey].split(':').length == 5 ? players[pKey].split(':')[4] : pKey;
                     Math.seedrandom(pKey);
                     players[pKey] = {
