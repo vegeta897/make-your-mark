@@ -78,7 +78,7 @@ Application.Services.factory('Things',function(Util) {
             props: [props.CUTTABLE,props.FLAT] },
         mirror: { name: 'Mirror', size: sizes.MEDIUM, common: 80,
             desc: 'A brightly colored circle stares back at you.', actions: [actions.BREAK],
-            props: [props.HARD,props.FLAT] },
+            props: [props.HARD,props.FLAT,props.FRAGILE] },
         saw: { name: 'Saw', size: sizes.MEDIUM, common: 150,
             desc: 'Have you seen this saw?', actions: [actions.CUT],
             props: [props.HARD,props.FLAT,props.LONG] },
@@ -173,19 +173,19 @@ Application.Services.factory('Things',function(Util) {
     };
     
     var actionList = {}; // t.s = Self, t.t = Target
-    actionList[actions.BREAK] = { t: 0, 'do': function(t) { 
+    actionList[actions.BREAK] = { t: 0, 'do': function(t) {
         addProps(t.s,props.BROKEN); removeActions(t.s,[actions.BREAK,actions.CUT]); } };
     actionList[actions.TEAR] = { t: 0, 'do': function(t) {
         if(hasOneProp(t.s,props.CUT)) return;
         addProps(t.s,props.TORN);
         removeProps(t.s,props.FOLDED); removeActions(t.s,[actions.TEAR,actions.FOLD,actions.UNFOLD]); } };
-    actionList[actions.FOLD] = { t: 0, 'do': function(t) { 
+    actionList[actions.FOLD] = { t: 0, 'do': function(t) {
         if(hasOneProp(t.s,props.FOLDED)) return;
         addProps(t.s,props.FOLDED); removeActions(t.s,actions.FOLD); addActions(t.s,actions.UNFOLD); } };
     actionList[actions.UNFOLD] = { t: 0, 'do': function(t) {
         removeProps(t.s,props.FOLDED); removeActions(t.s,actions.UNFOLD); addActions(t.s,actions.FOLD);
     } };
-    actionList[actions.CUT] = { t: 1, 'do': function(t) { 
+    actionList[actions.CUT] = { t: 1, 'do': function(t) {
         if(hasOneProp(t.t,[props.TORN,props.SMASHED])) return;
         if(hasOneProp(t.t,props.BRITTLE)) { addProps(t.t,props.BROKEN); return; }
         if(t.t.id == 'paper' && hasOneProp(t.t,props.FOLDED)) { changeThing(t.s,'paperSnowflake'); return; }

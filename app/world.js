@@ -89,6 +89,8 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                     if(actionsExtra) dropped[dKey].actionsExtra = actionsExtra;
                     if(propsLost) dropped[dKey].propsLost = propsLost;
                     if(actionsLost) dropped[dKey].actionsLost = actionsLost;
+                    dropped[dKey].allProps = Things.createFullPropertyList(dropped[dKey]);
+                    dropped[dKey].allActions = Things.createFullActionList(dropped[dKey]);
                 }
                 world.dropped = dropped || {};
                 applyRemovalsAndDrops();
