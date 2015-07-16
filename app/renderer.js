@@ -142,12 +142,12 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     if(thingCount >= 0) {
                         cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        if(thingCount > 80) thingCount = 7;
-                        else if(thingCount > 60) thingCount = 6;
-                        else if(thingCount > 42) thingCount = 5;
-                        else if(thingCount > 30) thingCount = 4;
-                        else if(thingCount > 20) thingCount = 3;
-                        else if(thingCount > 12) thingCount = 2;
+                        if(thingCount > 60) thingCount = 7;
+                        else if(thingCount > 40) thingCount = 6;
+                        else if(thingCount > 30) thingCount = 5;
+                        else if(thingCount > 20) thingCount = 4;
+                        else if(thingCount > 14) thingCount = 3;
+                        else if(thingCount > 8) thingCount = 2;
                         else if(thingCount > 4) thingCount = 1;
                         else if(thingCount > 0) thingCount = 0;
                         cmm.drawImage(sectorSpriteImg,thingCount*33,0,33,21,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
@@ -156,6 +156,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
             }
             cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
+            cmm.fillStyle = '#445a63';
             cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
