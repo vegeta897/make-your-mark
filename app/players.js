@@ -169,7 +169,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             player.carried.push(thing);
             World.removeThing(thing);
             if(game.selected.guid == thing.guid) delete game.selected;
-            storePlayer();
+            exploreSector(player.sx,player.sy);
             checkSeek();
         },
         dropThing: function(thing) {
@@ -178,7 +178,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             thing.sx = player.sx; thing.sy = player.sy;
             thing.x = player.x; thing.y = player.y;
             World.addThing(thing);
-            storePlayer();
+            exploreSector(player.sx,player.sy);
         },
         thingIsCarried: thingIsCarried,
         thingAction: function(thing,action) {

@@ -4,7 +4,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var spriteImg, spriteLibrary, bgTiles = [], spriteThing, spriteCursor;
+    var spriteImg, spriteLibrary, bgTiles = [], spriteThing, spriteCursor, sectorSpriteImg;
     var lastSO = { };
     
     var findSprite = function(thing) {
@@ -70,7 +70,9 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 spriteLibrary.indexes[spriteLibrary.names[n][0]] = [n,position];
                 position += spriteLibrary.names[n].length
             }
-                        
+            // Load sector sprite sheet
+            sectorSpriteImg = new Image();
+            sectorSpriteImg.src = 'img/sector-sprites.png';
             // Create BG tiles
             var bgTileAlphas = [0.1,0.08,0.04,0.02];
             for(var i = 0; i < 4; i++) {
@@ -131,19 +133,29 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Render minimap
             if(!mmWidth) return;
             cmm.clearRect(0,0,mmWidth,mmHeight);
+            cmm.fillStyle = 'rgba(47,56,60,0.7)';
+            cmm.fillRect(0,0,mmWidth,mmHeight);
             var mmw = mmWidth / 9, mmh = mmHeight / 9;
             for(var mmsx = -5; mmsx <= 5; mmsx++) {
                 for(var mmsy = -5; mmsy <= 5; mmsy++) {
                     var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)] || -1;
                     if(thingCount >= 0) {
-                        cmm.fillStyle = 'rgba(171,220,238,'+(thingCount+1)/100+')';
-                        cmm.fillRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
+                        cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                        if(thingCount > 80) thingCount = 7;
+                        else if(thingCount > 60) thingCount = 6;
+                        else if(thingCount > 42) thingCount = 5;
+                        else if(thingCount > 30) thingCount = 4;
+                        else if(thingCount > 20) thingCount = 3;
+                        else if(thingCount > 12) thingCount = 2;
+                        else if(thingCount > 4) thingCount = 1;
+                        else if(thingCount > 0) thingCount = 0;
+                        cmm.drawImage(sectorSpriteImg,thingCount*33,0,33,21,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
+                        mmh*(4+mmsy)+game.player.sectorMove.y*mmh,33,21);
                     }
                 }
             }
             cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
-            cmm.fillStyle = 'rgba(47,56,60,0.6)';
             cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;

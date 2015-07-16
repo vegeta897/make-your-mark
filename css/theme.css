@@ -24,7 +24,11 @@ h2 { color: #f2f5eb; }
 .controls .upper button.action:hover { background: #418241; color: #e6fae7;  border-color: #2c592f; }
 .controls .upper button.action:active { background: #5fae5d; color: #d4f8d6;  border-color: #408446; }
 
-.controls .minimap { background: #354B52; }
+.controls .minimap { 
+    background: #354B52;
+    /*border: 1px solid;*/
+    /*border-color: rgba(0,0,0,0.2) rgba(255,255,255,0.1) rgba(255,255,255,0.1) rgba(0,0,0,0.2);*/
+}
 
 strong { font-weight: bold; font-size: 1.1em; }
 .muted { color: #858a71; }
