@@ -34,7 +34,7 @@ Application.Directives.directive('controls',function() {
     }
 });
 
-Application.Services.factory('Controls',function(Interface,Canvas) {
+Application.Services.factory('Controls',function(Interface,Canvas,Util) {
     
     var KEY = { BACKSPACE: 8, TAB: 9, RETURN: 13, ESC: 27, SPACE: 32, PAGEUP: 33, PAGEDOWN: 34, END: 35,
         HOME: 36, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, INSERT: 45, DELETE: 46, ZERO: 48, ONE: 49, TWO: 50,
@@ -65,7 +65,12 @@ Application.Services.factory('Controls',function(Interface,Canvas) {
             var io = Interface.updateCursor(cursor,input.mouse.left,input.mouse.right);
             
             if(input.mouse.left) {
-                //if(cursor.quad && io.move) Players.move(cursor.quad);
+                // TODO: Double left click to move to and take thing
+                if(io.hover) {
+                    if(Util.thingInArray(io.hover,Players.player.vicinity) >= 0) Players.takeThing(io.hover);
+                    else game.selected = io.hover;
+                }
+                game.player.needTarget = false;
             }
             if(input.mouse.right) {
                 if(io.move) Players.move(cursor);

@@ -168,7 +168,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             thing.removed = true;
             player.carried.push(thing);
             World.removeThing(thing);
-            if(game.selected.guid == thing.guid) delete game.selected;
+            //if(game.selected.guid == thing.guid) delete game.selected;
             exploreSector(player.sx,player.sy);
             checkSeek();
         },

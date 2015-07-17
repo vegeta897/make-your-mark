@@ -24,7 +24,7 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
         var vicinity = [];
         for(var vt = 0; vt < world.things.length; vt++) {
             if(world.things[vt].sx != position.sx || world.things[vt].sy != position.sy) continue;
-            if(Util.getFastDistance(world.things[vt].x,world.things[vt].y,position.x,position.y) <= 1 && 
+            if(Util.getFastDistance(world.things[vt].x,world.things[vt].y,position.x,position.y) <= 2 && 
                 (!world.things[vt].removed || world.things[vt].dropped)) {
                 vicinity.push(world.things[vt]);
             }

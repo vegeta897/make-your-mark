@@ -138,7 +138,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             var mmw = mmWidth / 9, mmh = mmHeight / 9;
             for(var mmsx = -5; mmsx <= 5; mmsx++) {
                 for(var mmsy = -5; mmsy <= 5; mmsy++) {
-                    var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)] || -1;
+                    var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)];
                     if(thingCount >= 0) {
                         cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
@@ -149,7 +149,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         else if(thingCount > 14) thingCount = 3;
                         else if(thingCount > 8) thingCount = 2;
                         else if(thingCount > 4) thingCount = 1;
-                        else if(thingCount > 0) thingCount = 0;
+                        else if(thingCount >= 0) thingCount = 0;
                         cmm.drawImage(sectorSpriteImg,thingCount*33,0,33,21,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                         mmh*(4+mmsy)+game.player.sectorMove.y*mmh,33,21);
                     }
@@ -192,27 +192,29 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 // Draw on minimap
                 //cmm.fillStyle = '#6699aa';
                 //cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
-                // Draw hover/select box
-                if(!cursor.hover.hasOwnProperty(t.guid) && !(game.selected && game.selected.guid == t.guid)) continue;
-                c.main.lineWidth = 2;c.main.strokeStyle = game.selected && game.selected.guid == t.guid ?
-                    'rgba(200,230,255,0.8)' : 'rgba(150,200,255,0.5)';
+                // Draw select box
+                if(cursor.hover.hasOwnProperty(t.guid)) {
+                    c.high.fillStyle = 'rgba(240,240,240,1)';
+                    c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
+                    c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
+                    var propsExtra = '';
+                    if(t.propsExtra) {
+                        for(var i = 0; i < t.propsExtra.length; i++) {
+                            propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; }
+                    }
+                    var grid = drawX+':'+drawY;
+                    c.high.font = '14px Verdana'; c.high.textAlign = 'center';
+                    c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
+                    c.high.shadowBlur = 0;
+                    hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
+                }
+                // Draw hover info
+                if(!game.selected || game.selected.guid != t.guid) continue;
+                c.main.lineWidth = 2; c.main.strokeStyle = 'rgba(200,230,255,0.5)';
                 c.main.beginPath();
                 c.main.moveTo(drawX,drawY); c.main.lineTo(drawX + pix,drawY);
                 c.main.lineTo(drawX + pix,drawY + pix); c.main.lineTo(drawX,drawY + pix);
                 c.main.closePath(); c.main.stroke();
-                c.high.fillStyle = 'rgba(240,240,240,1)';
-                c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
-                c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
-                var propsExtra = '';
-                if(t.propsExtra) { 
-                    for(var i = 0; i < t.propsExtra.length; i++) { 
-                        propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; } 
-                }
-                var grid = drawX+':'+drawY;
-                c.high.font = '14px Verdana'; c.high.textAlign = 'center';
-                c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
-                c.high.shadowBlur = 0;
-                hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
             }
             // Erase things from buffer
             c.main.clearRect(0,0, mWidth,buffer);

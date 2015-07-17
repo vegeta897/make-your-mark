@@ -26,12 +26,8 @@ Application.Services.factory('Interface',function(World) {
                 hoverSelect = underCursor[i];
             }
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
-            // Select/Deselect things
-            if(lmb && hoverSelect) { game.selected = hoverSelect; game.player.needTarget = false; }
             if(lmb && !hoverSelect) { delete game.selected; game.player.needTarget = false; }
-            if(rmb) { /*delete game.selected;*/ }
-            // TODO: Double left click to take thing
-            return { move: rmb };
+            return { move: rmb, hover: hoverSelect };
         }
     };
 });

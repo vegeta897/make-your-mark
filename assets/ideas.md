@@ -36,3 +36,6 @@ Metagame ideas:
 - Something on a sector by sector basis?
 - **Each player has a shop that they stock with items found in the map**
   - Eventually going to other player's shops will be more viable than exploring
+- Gambler shop
+- Goal of building the ultimate collection?
+  - View collection with silhouettes for things you don't have
