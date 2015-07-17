@@ -1,14 +1,19 @@
 <div class="controls">
     <div class="upper">
+        <section ng-show="game.player.carried.length > 0">
+            <h2>Carrying</h2>
+            <div class="drop-thing-group" ng-repeat="carried in game.player.carried">
+                <button class="drop-thing" ng-click="dropThing(carried)"><img src="img/icon-drop.png"></button>
+                <button class="thing" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="game.player.needTarget ? thingAction({s:game.selected,t:carried},'continue') : selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried), targetable: game.player.needTarget && !thingIsSelected(carried) }"><span ng-repeat="extraProp in carried.propsExtra">
+                    {{ extraProp + ' ' | capitalize }}</span>{{ carried.name }}
+                </button>
+            </div>
+        </section>
         <section ng-show="game.player.vicinity.length > 0" class="clearfix">
             <!-- TODO: Click and drag to pick up/drop things and do actions -->
             <!-- TODO: Change inventory to grid-based with sprites as icons -->
             <h2>Vicinity</h2>
             <button class="thing" ng-repeat="thing in game.player.vicinity" ng-mouseover="onThing(thing)" ng-mouseleave="offThing(thing)" ng-click="game.player.needTarget ? thingAction({s:game.selected,t:thing},'continue') : selectThing(thing)" ng-class="{ hover: isOnThing(thing), selected: thingIsSelected(thing), targetable: game.player.needTarget && !thingIsSelected(thing) }"><span ng-repeat="extraProp in thing.propsExtra">{{ extraProp + ' ' | capitalize }}</span>{{ thing.name }}</button>
-        </section>
-        <section ng-show="game.player.carried.length > 0" class="clearfix">
-            <h2>Carrying</h2>
-            <button class="thing" ng-repeat="carried in game.player.carried" ng-mouseover="onThing(carried)" ng-mouseleave="offThing(carried)" ng-click="game.player.needTarget ? thingAction({s:game.selected,t:carried},'continue') : selectThing(carried)" ng-class="{ hover: isOnThing(carried), selected: thingIsSelected(carried), targetable: game.player.needTarget && !thingIsSelected(carried) }"><span ng-repeat="extraProp in carried.propsExtra">{{ extraProp + ' ' | capitalize }}</span>{{ carried.name }}</button>
         </section>
         <section ng-show="game.selected">
             <h2>Selected</h2>

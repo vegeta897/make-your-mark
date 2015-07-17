@@ -100,7 +100,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 player.carried.splice(i,1); break;
             }
         }
-        if(game.selected.guid == thing.guid) delete game.selected;
+        if(game.selected && game.selected.guid == thing.guid) delete game.selected;
     };
     
     var exploreSector = function(sx,sy) {
@@ -158,12 +158,6 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 return true;
             } else { return false; }
         },
-        //newSector: function() {
-        //    if(last.sx != player.sx || last.sy != player.sy) {
-        //        last.sx = player.sx; last.sy = player.sy;
-        //        return true;
-        //    } else { return false; }
-        //},
         takeThing: function(thing) {
             thing.removed = true;
             player.carried.push(thing);
