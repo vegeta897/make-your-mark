@@ -150,14 +150,12 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         else if(thingCount > 8) thingCount = 2;
                         else if(thingCount > 4) thingCount = 1;
                         else if(thingCount >= 0) thingCount = 0;
-                        cmm.drawImage(sectorSpriteImg,thingCount*33,0,33,21,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
-                        mmh*(4+mmsy)+game.player.sectorMove.y*mmh,33,21);
+                        cmm.drawImage(sectorSpriteImg,(thingCount+1)*mmw,0,mmw,mmh,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
+                        mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
                     }
                 }
             }
-            cmm.clearRect(mmw*4,mmh*4,mmw,mmh);
-            cmm.fillStyle = '#445a63';
-            cmm.fillRect(mmw*4,mmh*4,mmw,mmh);
+            cmm.drawImage(sectorSpriteImg,0,0,mmw,21,mmw*4,mmh*4,mmw,mmh);
             // Render sector buffer
             var buffer = pix*2;
             c.high.fillStyle = 'rgba(47,56,60,0.48)';
