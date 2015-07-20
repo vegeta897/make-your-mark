@@ -215,7 +215,7 @@ Application.Services.factory('Things',function(Util) {
     
     var thingsArray = [];
     
-    var totalCommon = function() {
+    var totalCommon = function() { // Self-executing function
         var total = 0;
         for(var key in THINGS) { if(!THINGS.hasOwnProperty(key)) continue;
             total += THINGS[key].common;
@@ -237,6 +237,7 @@ Application.Services.factory('Things',function(Util) {
             newThing.guid = Util.positionSeed(sx,sy,x,y);
             newThing.allProps = createFullPropertyList(newThing);
             newThing.allActions = createFullActionList(newThing);
+            newThing.quality = Util.randomIntRange(1,1000);
             return newThing;
         }
     };

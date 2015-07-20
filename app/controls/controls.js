@@ -19,6 +19,7 @@ Application.Directives.directive('controls',function() {
             $scope.isInReach = function(thing) {
                 return Players.thingIsCarried(thing) || Util.thingInArray(thing,Players.player.vicinity) >= 0;
             };
+            $scope.quality = Util.thingQuality;
             window.addEventListener('keydown',function(e) { return Controls.onKey(e, e.keyCode, true); },false);
             window.addEventListener('keyup',function(e) { return Controls.onKey(e, e.keyCode, false); },false);
             jQuery(window).mouseup(function(e) { return Controls.onMouse(e, e.which, false); });

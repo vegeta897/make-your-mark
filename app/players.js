@@ -17,7 +17,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         guid: storedPlayer.guid, color: Util.randomColor('vibrant'), name: storedPlayer.name,
         carried: Things.expandThings(storedPlayer.carried) || [], explored: storedPlayer.explored
     };
-    var playerSpeed = 4, last = { offset: {  } };
+    var playerSpeed = 5, last = { offset: {  } };
     var game, world, tick;
     
     var storePlayer = function() {

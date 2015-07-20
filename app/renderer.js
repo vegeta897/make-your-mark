@@ -192,7 +192,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 //cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(t.guid)) {
-                    c.high.fillStyle = 'rgba(240,240,240,1)';
+                    var quality = Util.thingQuality(t.quality);
+                    c.high.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
                     c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
                     c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
                     var propsExtra = '';
@@ -202,7 +203,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     }
                     var grid = drawX+':'+drawY;
                     c.high.font = '14px Verdana'; c.high.textAlign = 'center';
-                    c.high.fillText(propsExtra+t.name,drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
+                    c.high.fillText(propsExtra+quality.name+' '+t.name,
+                        drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                     c.high.shadowBlur = 0;
                     hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
                 }
