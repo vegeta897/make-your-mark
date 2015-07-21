@@ -249,6 +249,16 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         6, 0, 2 * Math.PI, false);
                     c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
                 }
+                // Render player attack
+                if(game.player.attacking) {
+                    var attackProgress = 1 - Math.pow((20-game.player.attacking.frame),5)/Math.pow(20,5);
+                    var xOff = game.player.attacking.dir == 'left' ? -attackProgress*10 :
+                        game.player.attacking.dir == 'right' ? 21 + attackProgress*10 : 9;
+                    var yOff = game.player.attacking.dir == 'up' ? -attackProgress*10 :
+                        game.player.attacking.dir == 'down' ? 21 + attackProgress*10 : 9;
+                    c.main.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
+                    c.main.fillRect(drawPX+xOff,drawPY+yOff,6,6);
+                }
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
                 // Render other player's names

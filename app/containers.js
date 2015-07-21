@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Containers',function(Util) {
+Application.Services.factory('Containers',function(Things,Util) {
     
     var CONTAINERS = {
         chest: { name:'Chest', common:10, 
@@ -44,6 +44,9 @@ Application.Services.factory('Containers',function(Util) {
     };
     
     return {
+        openContainer: function(container) {
+            
+        },
         spawnContainer: spawnContainer
     };
 });

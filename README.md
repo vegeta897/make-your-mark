@@ -46,6 +46,7 @@ New movement/interact system:
 - Right click move, right click on an item to pick it up when you stop moving on it
 - Left click to use/attack in a direction
   - Use/attack straight down if standing on something not picked up
+  - Monsters to attack?
 - All items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
     - Health stored on firebase as time of last hit and health at last hit (current health calculated client-side)

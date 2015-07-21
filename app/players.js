@@ -166,7 +166,16 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             tick = t;
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 doMove(world.players[pKey]);
+                if(world.players[pKey].attacking) {
+                    if(world.players[pKey].attacking.hasOwnProperty('frame')) {
+                        world.players[pKey].attacking.frame++;
+                        if(world.players[pKey].attacking.frame > 20) world.players[pKey].attacking = false;
+                    } else {
+                        world.players[pKey].attacking = { dir: world.players[pKey].attacking, frame: 0 }
+                    }
+                }
             }
+            
         },
         hasMoved: function() {
             if(last.sx != player.sx || last.sy != player.sy || 
