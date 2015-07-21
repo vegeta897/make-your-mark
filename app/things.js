@@ -65,7 +65,7 @@ Application.Services.factory('Things',function(Util) {
             desc: 'Spearmint chewing gum to freshen your breath.', actions: [actions.CHEW],
             props: [props.SOFT,props.CUTTABLE,props.FLAT] },
         eraser: { name: 'Eraser', size: sizes.TINY, common: 300,
-            desc: 'Of classic pink parallelogram variety.', actions: [actions.ERASE],
+            desc: 'Of the classic pink parallelogram variety.', actions: [actions.ERASE],
             props: [props.HARD,props.CUTTABLE,props.SAWABLE,props.PENCIL_WORKS] },
         coin: { name: 'Coin', size: sizes.TINY, common: 30,
             desc: 'A golden coin embossed with the letters "MYM".',
@@ -86,8 +86,6 @@ Application.Services.factory('Things',function(Util) {
             desc: 'You didn\'t axe for this.', actions: [actions.SWING],
             props: [props.HARD,props.THIN,props.LONG,props.SHARP] }
     };
-    
-    for(var tKey in THINGS) { if(!THINGS.hasOwnProperty(tKey)) { continue; } THINGS[tKey].id = tKey; } // Assign IDs
     
     var changeThing = function(thing,changeTo) {
         var newThing = angular.copy(THINGS[changeTo]);
@@ -225,7 +223,7 @@ Application.Services.factory('Things',function(Util) {
         var total = 0;
         for(var key in THINGS) { if(!THINGS.hasOwnProperty(key)) continue;
             total += THINGS[key].common;
-            THINGS[key].key = key;
+            THINGS[key].id = key;
             thingsArray.push(THINGS[key]);
         }
         return total;
@@ -240,7 +238,7 @@ Application.Services.factory('Things',function(Util) {
             if(total < target) continue;
             var newThing = angular.copy(thingsArray[i]);
             newThing.sx = sx; newThing.sy = sy; newThing.x = x; newThing.y = y; 
-            newThing.guid = Util.positionSeed(sx,sy,x,y);
+            newThing.guid = 't'+Util.positionSeed(sx,sy,x,y);
             newThing.allProps = createFullPropertyList(newThing);
             newThing.allActions = createFullActionList(newThing);
             newThing.quality = Util.randomIntRange(1,1000);

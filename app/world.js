@@ -1,21 +1,31 @@
 'use strict';
-Application.Services.factory('World',function(Util,Things,Renderer,FireService) {
+Application.Services.factory('World',function(Util,Things,Containers,Renderer,FireService) {
 
     var position = { sx: 0, sy: 0, x: 0, y: 0 };
     var game;
-    var world = { things: [], removed: {}, dropped: {}, players: {}, sectorThingCount: 0 };
+    var world = { things: [], removed: {}, dropped: {}, containers: [], players: {}, sectorObjectCount: 0 };
     var removedReady = false, droppedReady = false, onRemoved;
     
     Renderer.initWorld(world);
     
     var generateThings = function() {
-        world.things = []; //return;
+        world.things = [];
         for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // 9 sectors
             for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
-                var seed = Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h);
-                Math.seedrandom('thing-gen'+seed);
-                if(Math.random() > 0.02) continue; // 2% chance of thing
+                Math.seedrandom('thing-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h));
+                if(Math.random() > 0.001) continue; // 0.1% of thing
                 world.things.push(Things.spawnThing(+position.sx+sw, +position.sy+sh, w, h));
+            } }
+        } }
+    };
+    
+    var generateContainers = function() {
+        world.containers = [];
+        for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // 9 sectors
+            for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
+                Math.seedrandom('container-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h));
+                if(Math.random() > 0.003) continue; // 0.3% chance of container
+                world.containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
             } }
         } }
     };
@@ -39,20 +49,24 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
                 world.things.push(world.dropped[dKey]);
             } else { world.things[thingsIndex] = world.dropped[dKey]; }
         }
-        world.sectorThingCount = 0;
+        world.sectorObjectCount = 0;
         for(var t = 0; t < world.things.length; t++) {
             var th = world.things[t];
             th.removed = world.removed.hasOwnProperty(th.guid);
             th.allProps = Things.createFullPropertyList(th);
             th.allActions = Things.createFullActionList(th);
-            world.sectorThingCount += th.sx == position.sx && th.sy == position.sy && !th.removed ? 1 : 0;
+            world.sectorObjectCount += th.sx == position.sx && th.sy == position.sy && !th.removed ? 1 : 0;
             if(world.dropped.hasOwnProperty(th.guid)) {
                 var d = world.dropped[th.guid];
                 th.dropped = true; th.sx = d.sx; th.sy = d.sy; th.x = d.x; th.y = d.y;
                 th.propsExtra = d.propsExtra; th.propsLost = d.propsLost; 
                 th.actionsExtra = d.actionsExtra; th.actionsLost = d.actionsLost;
-                world.sectorThingCount += th.sx == position.sx && th.sy == position.sy ? 1 : 0;
+                world.sectorObjectCount += th.sx == position.sx && th.sy == position.sy ? 1 : 0;
             } else { delete th.dropped; }
+        }
+        for(var c = 0; c < world.containers.length; c++) {
+            var ctr = world.containers[c];
+            world.sectorObjectCount += ctr.sx == position.sx && ctr.sy == position.sy ? 1 : 0;
         }
     };
 
@@ -109,21 +123,28 @@ Application.Services.factory('World',function(Util,Things,Renderer,FireService) 
             return getVicinity();
         },
         newSector: function() {
-            generateThings(); applyRemovalsAndDrops();
+            generateThings(); 
+            generateContainers();
+            applyRemovalsAndDrops();
         },
-        getThingsAt: function(sx,sy,x,y,type) {
+        getObjectsAt: function(sx,sy,x,y,type) {
             sx = type == 'cursor' ? position.sx : sx; sy = type == 'cursor' ? position.sy : sy;
-            var things = []; 
-            if(x == '-' || position.sx != sx || position.sy != sy) return things;
+            var objects = []; 
+            if(x == '-' || position.sx != sx || position.sy != sy) return objects;
             var gameX = type == 'cursor' ? Math.floor(x/24)-2 : x, gameY = type == 'cursor' ? Math.floor(y/24)-2 : y;
-            if(type == 'cursor' && (gameX >= game.arena.width - 4 || gameY >= game.arena.height - 4 || gameX < 0 || gameY < 0)) return things;
+            if(type == 'cursor' && (gameX >= game.arena.width - 4 || gameY >= game.arena.height - 4 || gameX < 0 || gameY < 0)) return objects;
             for(var i = 0; i < world.things.length; i++) {
                 var tx = (world.things[i].sx - position.sx) * (game.arena.width - 4) + world.things[i].x,
                     ty = (world.things[i].sy - position.sy) * (game.arena.height - 4) + world.things[i].y;
                 if(tx == gameX && ty == gameY && (!world.things[i].removed || world.things[i].dropped)) {
-                    things.push(world.things[i]); }
+                    objects.push(world.things[i]); }
             }
-            return things;
+            for(var j = 0; j < world.containers.length; j++) {
+                var cx = (world.containers[j].sx - position.sx) * (game.arena.width - 4) + world.containers[j].x,
+                    cy = (world.containers[j].sy - position.sy) * (game.arena.height - 4) + world.containers[j].y;
+                if(cx == gameX && cy == gameY) objects.push(world.containers[j]);
+            }
+            return objects;
         },
         removeThing: function(thing) {
             FireService.set('removed/'+thing.guid,1); FireService.remove('dropped/'+thing.guid);

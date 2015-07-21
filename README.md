@@ -49,3 +49,7 @@ New movement/interact system:
 - All items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
     - Health stored on firebase as time of last hit and health at last hit (current health calculated client-side)
+    - Opened containers store on firebase as time opened, will respawn eventually
+      - Or, all container states reset with a new seed (for position, content) every day?
+  - Dropped items have time dropped stored, will decay eventually
+    - No more need for removed items list!

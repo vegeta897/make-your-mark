@@ -142,14 +142,14 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     if(thingCount >= 0) {
                         cmm.clearRect(mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                             mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        if(thingCount > 60) thingCount = 7;
-                        else if(thingCount > 40) thingCount = 6;
-                        else if(thingCount > 30) thingCount = 5;
-                        else if(thingCount > 20) thingCount = 4;
-                        else if(thingCount > 14) thingCount = 3;
-                        else if(thingCount > 8) thingCount = 2;
-                        else if(thingCount > 4) thingCount = 1;
-                        else if(thingCount >= 0) thingCount = 0;
+                        if(thingCount > 30) thingCount = 7;
+                        else if(thingCount > 20) thingCount = 6;
+                        else if(thingCount > 14) thingCount = 5;
+                        else if(thingCount > 9) thingCount = 4;
+                        else if(thingCount > 5) thingCount = 3;
+                        else if(thingCount > 2) thingCount = 2;
+                        else if(thingCount > 0) thingCount = 1;
+                        else thingCount = 0;
                         cmm.drawImage(sectorSpriteImg,(thingCount+1)*mmw,0,mmw,mmh,mmw*(4+mmsx)+game.player.sectorMove.x*mmw,
                         mmh*(4+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
                     }
@@ -165,18 +165,19 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             c.high.fillRect(buffer,mHeight-buffer, mWidth, buffer);
             // Render cursor highlight
             if(cursor.x != '-') c.high.drawImage(spriteCursor,parseInt(cursor.x/pix)*pix,parseInt(cursor.y/pix)*pix);
-            // Render things
             var hoverCount = {};
-            for(var j = 0; j < world.things.length; j++) {
-                var t = world.things[j];
-                if(t.removed && !t.dropped) continue; // Skip if object removed and not dropped
-                var tdx = (t.sx - game.player.osx)*(game.arena.width-4) + t.x, 
-                    tdy = (t.sy - game.player.osy)*(game.arena.height-4) + t.y;
+            // Render objects
+            var objects = world.things.concat(world.containers);
+            for(var j = 0; j < objects.length; j++) {
+                var o = objects[j];
+                if(o.removed && !o.dropped) continue; // Skip if object removed and not dropped
+                var tdx = (o.sx - game.player.osx)*(game.arena.width-4) + o.x, 
+                    tdy = (o.sy - game.player.osy)*(game.arena.height-4) + o.y;
                 var drawX = (tdx+2) * pix+so.x, drawY = (tdy+2) * pix+so.y;
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
-                if(spriteLibrary.indexes[t.id]) { // If this object has a sprite
-                    var spritePosition = findSprite(t);
+                if(spriteLibrary.indexes[o.id]) { // If this object has a sprite
+                    var spritePosition = findSprite(o);
                     var spriteX = 24 * (spritePosition % 16),
                         spriteY = 24 * Math.floor(spritePosition / 16);
                     c.main.drawImage(spriteImg,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
@@ -184,32 +185,29 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.main.drawImage(spriteThing,drawX+6,drawY+6);
                     c.main.fillStyle = '#112244';
                     c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                    var kerning = jQuery.inArray(t.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
-                    c.main.fillText(t.name[0],drawX+11+kerning,drawY+16);
+                    var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
+                    c.main.fillText(o.name[0],drawX+11+kerning,drawY+16);
                 }
-                // Draw on minimap
-                //cmm.fillStyle = '#6699aa';
-                //cmm.fillRect(Math.round(drawX/pix)-2+mmw*4,Math.round(drawY/pix)-2+mmh*4,1,1);
                 // Draw select box
-                if(cursor.hover.hasOwnProperty(t.guid)) {
-                    var quality = Util.thingQuality(t.quality);
+                if(cursor.hover.hasOwnProperty(o.guid)) {
+                    var quality = Util.objectQuality(o);
                     c.high.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
                     c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 3;
                     c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
                     var propsExtra = '';
-                    if(t.propsExtra) {
-                        for(var i = 0; i < t.propsExtra.length; i++) {
-                            propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; }
+                    if(o.propsExtra) {
+                        for(var i = 0; i < o.propsExtra.length; i++) {
+                            propsExtra += Util.capitalize(o.propsExtra[i]) + ' '; }
                     }
                     var grid = drawX+':'+drawY;
                     c.high.font = 'bold 16px Roboto'; c.high.textAlign = 'center';
-                    c.high.fillText(quality.name+' '+propsExtra+t.name,
+                    c.high.fillText(quality.name+' '+propsExtra+o.name,
                         drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                     c.high.shadowBlur = 0;
                     hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
                 }
                 // Draw hover info
-                if(!game.selected || game.selected.guid != t.guid) continue;
+                if(!game.selected || game.selected.guid != o.guid) continue;
                 c.main.lineWidth = 2; c.main.strokeStyle = 'rgba(200,230,255,0.5)';
                 c.main.beginPath();
                 c.main.moveTo(drawX,drawY); c.main.lineTo(drawX + pix,drawY);

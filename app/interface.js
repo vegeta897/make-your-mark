@@ -19,7 +19,7 @@ Application.Services.factory('Interface',function(World) {
         updateCursor: function(c,lmb,rmb) { // lmb,rmb = left/right mouse pressed
             // Generate hover list
             c.hover = {};
-            var underCursor = World.getThingsAt(0,0,c.x, c.y,'cursor');
+            var underCursor = World.getObjectsAt(0,0,c.x, c.y,'cursor');
             var hoverSelect;
             for(var i = 0; i < underCursor.length; i++) {
                 c.hover[underCursor[i].guid] = underCursor[i];

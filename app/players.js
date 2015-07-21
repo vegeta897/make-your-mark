@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 6; // Stored player data format revision
+    var revision = 7; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
@@ -72,9 +72,9 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     };
     
     var onStopMovement = function() {
-        var underPlayer = World.getThingsAt(player.sx,player.sy,player.x,player.y,'player');
+        var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'player');
         for(var u = 0; u < underPlayer.length; u++) {
-            takeThing(underPlayer[u]);
+            if(!underPlayer[u].tiers) takeThing(underPlayer[u]);
         }
     };
     
@@ -121,7 +121,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     };
     
     var exploreSector = function(sx,sy) {
-        player.explored[sx+','+sy] = World.world.sectorThingCount;
+        player.explored[sx+','+sy] = World.world.sectorObjectCount;
         storePlayer();
     };
     
