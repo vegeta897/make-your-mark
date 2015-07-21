@@ -32,12 +32,13 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         var moveX = Math.floor(c.x/24)- 2, moveY = Math.floor(c.y/24)-2;
         var aw = game.arena.width - 4, ah = game.arena.height - 4;
         var moved = true;
-        if(player.x  == moveX && player.y == moveY) moved = false;
+        if((player.ox == moveX && player.oy == moveY)) moved = false;
+        if(World.getObjectsAt(player.sx,player.sy,moveX,moveY,'containers').length > 0) moved = false;
+        if(!moved) return;
         player.sx = player.osx + (moveX >= aw ? 1 : moveX < 0 ? -1 : 0);
         player.sy = player.osy + (moveY >= ah ? 1 : moveY < 0 ? -1 : 0);
         player.x = moveX >= aw ? moveX - aw : moveX < 0 ? aw + moveX : moveX;
         player.y = moveY >= ah ? moveY - ah : moveY < 0 ? ah + moveY : moveY;
-        if(!moved) return;
         var storedName = player.name && player.name.trim() != '' ? ':' + player.name : '';
         FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
         player.vicinity = [];
@@ -72,7 +73,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     };
     
     var onStopMovement = function() {
-        var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'player');
+        var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'things');
         for(var u = 0; u < underPlayer.length; u++) {
             if(!underPlayer[u].tiers) takeThing(underPlayer[u]);
         }

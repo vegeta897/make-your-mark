@@ -6,7 +6,7 @@ Application.Services.factory('Containers',function(Util) {
             tiers:['plastic','wooden','ceramic','aluminum','steel','silver','gold','jeweled','diamond'] },
         present: { name:'Present', common:50, tiers:['plain','cute','pretty','elegant'] },
         bag: { name:'Bag', common:50, tiers:['paper','plastic','cloth','velvet'] },
-        buried: { name:'Mound', common:30, tiers:[] },
+        buried: { name:'Mound', common:30, tiers:['dirt','gravel','clay'] },
         crate: { name:'Crate', common:50, tiers:['wooden','metal','armored'] }
     };
     

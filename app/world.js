@@ -133,16 +133,20 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             if(x == '-' || position.sx != sx || position.sy != sy) return objects;
             var gameX = type == 'cursor' ? Math.floor(x/24)-2 : x, gameY = type == 'cursor' ? Math.floor(y/24)-2 : y;
             if(type == 'cursor' && (gameX >= game.arena.width - 4 || gameY >= game.arena.height - 4 || gameX < 0 || gameY < 0)) return objects;
-            for(var i = 0; i < world.things.length; i++) {
-                var tx = (world.things[i].sx - position.sx) * (game.arena.width - 4) + world.things[i].x,
-                    ty = (world.things[i].sy - position.sy) * (game.arena.height - 4) + world.things[i].y;
-                if(tx == gameX && ty == gameY && (!world.things[i].removed || world.things[i].dropped)) {
-                    objects.push(world.things[i]); }
+            if(type == 'cursor' || type == 'all' || type == 'things') {
+                for(var i = 0; i < world.things.length; i++) {
+                    var tx = (world.things[i].sx - position.sx) * (game.arena.width - 4) + world.things[i].x,
+                        ty = (world.things[i].sy - position.sy) * (game.arena.height - 4) + world.things[i].y;
+                    if(tx == gameX && ty == gameY && (!world.things[i].removed || world.things[i].dropped)) {
+                        objects.push(world.things[i]); }
+                }
             }
-            for(var j = 0; j < world.containers.length; j++) {
-                var cx = (world.containers[j].sx - position.sx) * (game.arena.width - 4) + world.containers[j].x,
-                    cy = (world.containers[j].sy - position.sy) * (game.arena.height - 4) + world.containers[j].y;
-                if(cx == gameX && cy == gameY) objects.push(world.containers[j]);
+            if(type == 'cursor' || type == 'all' || type == 'containers') {
+                for(var j = 0; j < world.containers.length; j++) {
+                    var cx = (world.containers[j].sx - position.sx) * (game.arena.width - 4) + world.containers[j].x,
+                        cy = (world.containers[j].sy - position.sy) * (game.arena.height - 4) + world.containers[j].y;
+                    if(cx == gameX && cy == gameY) objects.push(world.containers[j]);
+                }
             }
             return objects;
         },

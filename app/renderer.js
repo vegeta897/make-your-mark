@@ -84,12 +84,12 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             }
             // Create sprite for things (with no letter)
             spriteThing = document.createElement('canvas');
-            spriteThing.width = 12; spriteThing.height = 12;
+            spriteThing.width = 24; spriteThing.height = 24;
             var spriteThingContext = spriteThing.getContext('2d');
-            spriteThingContext.fillStyle = 'rgba(0,0,0,0.07)';
-            spriteThingContext.fillRect(0,0,12,12);
+            spriteThingContext.fillStyle = 'rgba(0,0,0,0.3)';
+            spriteThingContext.fillRect(4,4,16,16);
             spriteThingContext.fillStyle = '#6699aa';
-            spriteThingContext.fillRect(1,1,10,10);
+            spriteThingContext.fillRect(5,5,14,14);
             // Create sprite for mouse cursor highlight
             spriteCursor = document.createElement('canvas');
             spriteCursor.width = pix; spriteCursor.height = pix;
@@ -182,11 +182,11 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         spriteY = 24 * Math.floor(spritePosition / 16);
                     c.main.drawImage(spriteImg,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
                 } else { // No sprite, draw letter box
-                    c.main.drawImage(spriteThing,drawX+6,drawY+6);
+                    c.main.drawImage(spriteThing,drawX,drawY);
                     c.main.fillStyle = '#112244';
-                    c.main.font = 'bold 11px Arial';c.main.textAlign = 'center';
-                    var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R']) >= 0 ? 1 : 0;
-                    c.main.fillText(o.name[0],drawX+11+kerning,drawY+16);
+                    c.main.font = 'bold 14px Arial';c.main.textAlign = 'center';
+                    var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
+                    c.main.fillText(o.name[0],drawX+11+kerning,drawY+17);
                 }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {
