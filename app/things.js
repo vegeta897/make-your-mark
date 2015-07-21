@@ -95,12 +95,18 @@ Application.Services.factory('Things',function(Util) {
         thing.id = newThing.id; thing.name = newThing.name; thing.size = newThing.size; thing.common = newThing.common;
         thing.desc = newThing.desc; thing.actions = newThing.actions; thing.props = newThing.props;
         delete thing.propsExtra; delete thing.propsLost; delete thing.actionsExtra; delete thing.actionsLost;
+        thing.allProps = createFullPropertyList(newThing);
+        thing.allActions = createFullActionList(newThing);
     };
     
     var createChild = function(thing,child,id) {
         var newThing = angular.copy(THINGS[child]);
         newThing.guid = thing.guid+'-'+child+'-'+id;
         newThing.sx = thing.sx; newThing.sy = thing.sy; newThing.x = thing.x; newThing.y = thing.y;
+        newThing.allProps = createFullPropertyList(newThing);
+        newThing.allActions = createFullActionList(newThing);
+        Math.seedrandom('child-quality'+Util.positionSeed(newThing.sx,newThing.sy,newThing.x,newThing.y));
+        newThing.quality = Util.randomIntRange(1,1000);
         return newThing;
     };
     

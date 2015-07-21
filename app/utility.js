@@ -2,13 +2,13 @@
 
 Application.Services.service('Util', function() {
 
-    var qualityLevels = [{r:174, g:162, b:119, hex:'aea277', name:'Junk', min:570},
-        {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:314},
-        {r:220, g:220, b:220, hex:'dcdcdc', name:'Average', min:158},
-        {r:150, g:202, b:255, hex:'96caff', name:'Uncommon', min:76},
-        {r:80, g:255, b:183, hex:'50ffb7', name:'Rare', min:42},
-        {r:175, g:135, b:255, hex:'af87ff', name:'Perfect', min:20},
-        {r:255, g:132, b:132, hex:'ff8484', name:'Unique', min:7},
+    var qualityLevels = [
+        {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:500},
+        {r:220, g:220, b:220, hex:'dcdcdc', name:'Average', min:200},
+        {r:88, g:193, b:111, hex:'58c16f', name:'Uncommon', min:90},
+        {r:51, g:115, b:227, hex:'3373e3', name:'Rare', min:42},
+        {r:227, g:74, b:163, hex:'e34aa3', name:'Unique', min:20},
+        {r:181, g:55, b:247, hex:'b537f7', name:'Perfect', min:7},
         {r:255, g:253, b:114, hex:'fffd72', name:'Legendary', min:2},
         {r:255, g:215, b:54, hex:'ffd736', name:'Mythical', min:0}];
     

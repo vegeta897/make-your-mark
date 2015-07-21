@@ -203,7 +203,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     }
                     var grid = drawX+':'+drawY;
                     c.high.font = '14px Verdana'; c.high.textAlign = 'center';
-                    c.high.fillText(propsExtra+quality.name+' '+t.name,
+                    c.high.fillText(quality.name+' '+propsExtra+t.name,
                         drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                     c.high.shadowBlur = 0;
                     hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
