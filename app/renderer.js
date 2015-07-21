@@ -202,7 +202,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                             propsExtra += Util.capitalize(t.propsExtra[i]) + ' '; }
                     }
                     var grid = drawX+':'+drawY;
-                    c.high.font = '14px Verdana'; c.high.textAlign = 'center';
+                    c.high.font = 'bold 16px Roboto'; c.high.textAlign = 'center';
                     c.high.fillText(quality.name+' '+propsExtra+t.name,
                         drawX+12,drawY-4-(16*(hoverCount[grid] || 0)));
                     c.high.shadowBlur = 0;
