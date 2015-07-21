@@ -68,6 +68,23 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         if(p.hasOwnProperty('sectorMove')) player.sectorMove = { x: p.sx - p.osx, y: p.sy - p.osy };
         p.moving = false; p.offset.x = 0; p.offset.y = 0; p.ox = p.x; p.oy = p.y; p.osx = p.sx; p.osy = p.sy;
         if(p.hasOwnProperty('sectorMove')) { storePlayer(); p.vicinity = World.setPosition(p.sx,p.sy,p.x,p.y); }
+        if(p.guid == player.guid) onStopMovement();
+    };
+    
+    var onStopMovement = function() {
+        var underPlayer = World.getThingsAt(player.sx,player.sy,player.x,player.y,'player');
+        for(var u = 0; u < underPlayer.length; u++) {
+            takeThing(underPlayer[u]);
+        }
+    };
+    
+    var takeThing = function(thing) {
+        thing.removed = true;
+        player.carried.push(thing);
+        World.removeThing(thing);
+        //if(game.selected.guid == thing.guid) delete game.selected;
+        exploreSector(player.sx,player.sy);
+        checkSeek();
     };
     
     var thingIsCarried = function(thing) {
@@ -158,14 +175,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
                 return true;
             } else { return false; }
         },
-        takeThing: function(thing) {
-            thing.removed = true;
-            player.carried.push(thing);
-            World.removeThing(thing);
-            //if(game.selected.guid == thing.guid) delete game.selected;
-            exploreSector(player.sx,player.sy);
-            checkSeek();
-        },
+        takeThing: takeThing,
         dropThing: function(thing) {
             thing.removed = false;
             removeFromCarried(thing);

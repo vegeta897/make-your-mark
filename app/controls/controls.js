@@ -66,11 +66,7 @@ Application.Services.factory('Controls',function(Interface,Canvas,Util) {
             var io = Interface.updateCursor(cursor,input.mouse.left,input.mouse.right);
             
             if(input.mouse.left) {
-                // TODO: Double left click to move to and take thing
-                if(io.hover) {
-                    if(Util.thingInArray(io.hover,Players.player.vicinity) >= 0) Players.takeThing(io.hover);
-                    else game.selected = io.hover;
-                }
+                if(io.hover) game.selected = io.hover;
                 game.player.needTarget = false;
             }
             if(input.mouse.right) {

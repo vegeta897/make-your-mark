@@ -39,3 +39,9 @@ Metagame ideas:
 - Gambler shop
 - Goal of building the ultimate collection?
   - View collection with silhouettes for things you don't have
+  
+New movement/interact system:
+
+- Right click move, right click on an item to pick it up when you stop moving on it
+- Left click to use/attack in a direction
+  - Use/attack straight down if standing on something not picked up

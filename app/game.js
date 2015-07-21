@@ -5,12 +5,12 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         arena: {width: 37, height: 25, pixels: 24}, fps: 60, rendered: true,
         objects: {}, player: Players.player
     };
-
+    
     game.localServerOffset = 0; game.tickCount = 0;
     game.frames = 0; game.frameCount = 0; game.framesPerSecond = 0;
     
     var now, dt = 0, last = 0, step = 1000/game.fps; // 60 FPS
-
+    
     var tick = function() {
         if(game.crashed) { return; }
         now = performance.now(); dt += (now - last);

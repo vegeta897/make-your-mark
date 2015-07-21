@@ -9,7 +9,7 @@ Application.Services.service('Util', function() {
         {r:51, g:115, b:227, hex:'3373e3', name:'Rare', min:42},
         {r:227, g:74, b:163, hex:'e34aa3', name:'Unique', min:20},
         {r:181, g:55, b:247, hex:'b537f7', name:'Perfect', min:7},
-        {r:255, g:253, b:114, hex:'fffd72', name:'Legendary', min:2},
+        {r:255, g:251, b:0, hex:'fffb00', name:'Legendary', min:2},
         {r:255, g:215, b:54, hex:'ffd736', name:'Mythical', min:0}];
     
     var pickInArray = function(array) { return array[Math.floor(Math.random()*array.length)]; };
