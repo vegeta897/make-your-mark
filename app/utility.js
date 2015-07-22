@@ -126,9 +126,9 @@ Application.Services.service('Util', function() {
         getFastDistance: function(x1,y1,x2,y2) { // Get distance squared between 2 points
             return Math.pow(x2-x1,2) + Math.pow(y2-y1,2);
         },
-        thingInArray: function(thing,array) {
-            if(!thing || !array) return -1;
-            for(var i = 0; i < array.length; i++) { if(array[i].guid == thing.guid) return i; }
+        objectInArray: function(object,array) { // Return object position in array based on GUID
+            if(!object || !array) return -1;
+            for(var i = 0; i < array.length; i++) { if(array[i].guid == object.guid) return i; }
             return -1;
         },
         subtractArrays: function(source,subtractor) { // Subtract members of first array from subtractor array

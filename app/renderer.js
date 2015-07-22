@@ -188,6 +188,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
                     c.main.fillText(o.name[0],drawX+11+kerning,drawY+17);
                 }
+                // Draw container health
+                if(o.health && o.health[0] < o.health[1]) {
+                    c.high.fillStyle = 'rgba(255,255,255,0.8)';
+                    c.high.fillRect(drawX,drawY-6,pix,5);
+                    var hp = o.health[0]/ o.health[1];
+                    c.high.clearRect(drawX-1+pix,drawY-5,(pix-2)*(1-hp)*-1,3);
+                }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {
                     var quality = Util.objectQuality(o);

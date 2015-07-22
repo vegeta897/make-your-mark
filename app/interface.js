@@ -29,7 +29,7 @@ Application.Services.factory('Interface',function(World) {
             if(lmb && !hoverSelect) { delete game.selected; game.player.needTarget = false; }
 
             // Determine cursor quad
-            var co = { x: c.x - (game.player.x+2)*24, y: c.y - (game.player.y+2)*24 }; // Cursor-Player canvas delta
+            var co = { x: c.x - ((game.player.x+2)*24+12), y: c.y - ((game.player.y+2)*24+12) }; // Cursor-Player canvas delta
             if(c.x != '-'/* && Math.pow(co.x,2) + Math.pow(co.y,2) > 1296*/) {
                 if(co.y < 0 && Math.abs(co.x) <= Math.abs(co.y)) { c.quad = 'up'; }
                 else if(co.y >= 0 && Math.abs(co.x) <= Math.abs(co.y)) { c.quad = 'down'; }

@@ -2,12 +2,12 @@
 Application.Services.factory('Containers',function(Things,Util) {
     
     var CONTAINERS = {
-        chest: { name:'Chest', common:10, 
+        chest: { name:'Chest', common:10, baseHealth: 50,
             tiers:['plastic','wooden','ceramic','aluminum','steel','silver','gold','jeweled','diamond'] },
-        present: { name:'Present', common:50, tiers:['plain','cute','pretty','elegant'] },
-        bag: { name:'Bag', common:50, tiers:['paper','plastic','cloth','velvet'] },
-        buried: { name:'Mound', common:30, tiers:['dirt','gravel','clay'] },
-        crate: { name:'Crate', common:50, tiers:['wooden','metal','armored'] }
+        present: { name:'Present', common:50, baseHealth: 10, tiers:['plain','cute','pretty','elegant'] },
+        bag: { name:'Bag', common:50, baseHealth: 5, tiers:['paper','plastic','cloth','velvet'] },
+        buried: { name:'Mound', common:30, baseHealth: 30, tiers:['dirt','gravel','clay'] },
+        crate: { name:'Crate', common:50, baseHealth: 25, tiers:['wooden','metal','armored'] }
     };
     
     var containersArray = [];
@@ -36,6 +36,9 @@ Application.Services.factory('Containers',function(Things,Util) {
             for(var t = 0; t < newContainer.tiers.length; t++) {
                 if(tier <= Math.pow(t+2,4)) {
                     newContainer.tier = newContainer.tiers[t];
+                    var health = parseInt(Math.pow(newContainer.tiers.length - t+1,2)
+                        * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
+                    newContainer.health = [health,health];
                     break;
                 }
             }

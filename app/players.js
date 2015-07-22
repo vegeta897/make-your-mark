@@ -126,6 +126,18 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         storePlayer();
     };
     
+    var attack = function(dir) {
+        var x = player.x, y = player.y;
+        switch(dir) {
+            case 'left': x--; break;
+            case 'right': x++; break;
+            case 'up': y--; break;
+            case 'down': y++; break;
+        }
+        var target = World.getObjectsAt(player.osx,player.osy,x,y,'containers');
+        if(target.length > 0) World.attack(target[0],1);
+    };
+    
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
     
     return {
@@ -166,12 +178,14 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             tick = t;
             for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
                 doMove(world.players[pKey]);
-                if(world.players[pKey].attacking) {
+                if(world.players[pKey].moving) world.players[pKey].attacking = false;
+                if(world.players[pKey].attacking && !world.players[pKey].moving) {
                     if(world.players[pKey].attacking.hasOwnProperty('frame')) {
                         world.players[pKey].attacking.frame++;
                         if(world.players[pKey].attacking.frame > 20) world.players[pKey].attacking = false;
                     } else {
-                        world.players[pKey].attacking = { dir: world.players[pKey].attacking, frame: 0 }
+                        if(world.players[pKey].guid == player.guid) attack(world.players[pKey].attacking);
+                        world.players[pKey].attacking = { dir: world.players[pKey].attacking, frame: 0 };
                     }
                 }
             }

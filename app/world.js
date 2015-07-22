@@ -44,7 +44,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
     
     var applyRemovalsAndDrops = function() {
         for(var dKey in world.dropped) { if(!world.dropped.hasOwnProperty(dKey)) continue;
-            var thingsIndex = Util.thingInArray(world.dropped[dKey],world.things);
+            var thingsIndex = Util.objectInArray(world.dropped[dKey],world.things);
             if(thingsIndex < 0) {
                 world.things.push(world.dropped[dKey]);
             } else { world.things[thingsIndex] = world.dropped[dKey]; }
@@ -67,6 +67,20 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
         for(var c = 0; c < world.containers.length; c++) {
             var ctr = world.containers[c];
             world.sectorObjectCount += ctr.sx == position.sx && ctr.sy == position.sy ? 1 : 0;
+        }
+    };
+    
+    var applyContainerStatuses = function() {
+        if(!world.containerDeltas) return;
+        for(var cKey in world.containerDeltas) { if(!world.containerDeltas.hasOwnProperty(cKey)) continue;
+            var pos = Util.positionFromSeed(cKey);
+            var health = world.containerDeltas[cKey].split(':')[0];
+            var lastHit = world.containerDeltas[cKey].split(':')[1];
+            var cIndex = Util.objectInArray({guid:cKey},world.containers);
+            if(cIndex >= 0) {
+                world.containers[cIndex].health[0] = health;
+                world.containers[cIndex].lastHit = lastHit;
+            }
         }
     };
 
@@ -114,6 +128,11 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 applyRemovalsAndDrops();
                 droppedReady = true; onRemoved();
             });
+            FireService.onValue('containers',function(containers) {
+                if(!containers) return;
+                world.containerDeltas = containers;
+                applyContainerStatuses();
+            });
         },
         setRemovedCallback: function(cb) { onRemoved = cb; },
         setPosition: function(sx,sy,x,y) {
@@ -126,6 +145,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             generateThings(); 
             generateContainers();
             applyRemovalsAndDrops();
+            applyContainerStatuses();
         },
         getObjectsAt: function(sx,sy,x,y,type) {
             sx = type == 'cursor' ? position.sx : sx; sy = type == 'cursor' ? position.sy : sy;
@@ -193,6 +213,10 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 mods += thing.changedFrom ? ':'+thing.id : ':';
                 FireService.set('dropped/'+thing.guid,thing.sx+':'+thing.sy+':'+thing.x+':'+thing.y+mods);
             }
+        },
+        attack: function(target,damage) {
+            //target.health[0] -= damage;
+            FireService.set('containers/'+target.guid,Math.max(target.health[0]-damage,0)+':'+game.ticks);
         },
         worldReady: function() { return removedReady; },
         world: world
