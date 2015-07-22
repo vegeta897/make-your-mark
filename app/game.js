@@ -39,6 +39,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         if(!World.worldReady()) return;
         Controls.processInput(game,Players);
         Players.update(step,game.ticks);
+        World.update();
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;
             game.tickCount = 0; game.frameCount = 0;

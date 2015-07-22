@@ -83,12 +83,13 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             var lastHit = world.containerDeltas[cKey].split(':')[1];
             var cIndex = Util.objectInArray({guid:cKey},world.containers);
             if(cIndex >= 0) {
-                world.containers[cIndex].health[0] = health;
-                world.containers[cIndex].lastHit = lastHit;
+                world.containers[cIndex].health[0] = +health;
+                world.containers[cIndex].realHealth = +health;
+                world.containers[cIndex].lastHit = +lastHit;
             }
         }
     };
-
+    
     return {
         initGame: function(g) {
             game = g;
@@ -138,6 +139,14 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 world.containerDeltas = containers;
                 applyContainerStatuses();
             });
+        },
+        update: function() {
+            for(var i = 0; i < world.containers.length; i++) { // Regen container healths
+                var ctr = world.containers[i];
+                if(ctr.health[0] == ctr.health[1] || ctr.health[0] == 0 || ctr.realHealth == 0) continue;
+                ctr.realHealth = Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - ctr.lastHit)/200));
+                if(ctr.realHealth == ctr.health[1]) FireService.remove('containers/'+ctr.guid);
+            }
         },
         setRemovedCallback: function(cb) { onRemoved = cb; },
         setPosition: function(sx,sy,x,y) {
@@ -219,8 +228,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             }
         },
         attack: function(target,damage) {
-            //target.health[0] -= damage;
-            FireService.set('containers/'+target.guid,Math.max(target.health[0]-damage,0)+':'+game.ticks);
+            FireService.set('containers/'+target.guid,Math.max(target.realHealth-damage,0)+':'+game.ticks);
+            // TODO: Use transact to lower health
         },
         worldReady: function() { return removedReady; },
         world: world

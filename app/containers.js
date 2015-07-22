@@ -39,6 +39,7 @@ Application.Services.factory('Containers',function(Things,Util) {
                     var health = parseInt(Math.pow(newContainer.tiers.length - t+1,2)
                         * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
                     newContainer.health = [health,health];
+                    newContainer.realHealth = health;
                     break;
                 }
             }
