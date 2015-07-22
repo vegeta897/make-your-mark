@@ -3,31 +3,36 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
 
     var position = { sx: 0, sy: 0, x: 0, y: 0 };
     var game;
-    var world = { things: [], removed: {}, dropped: {}, containers: [], players: {}, sectorObjectCount: 0 };
+    var world = { things: [], removed: {}, dropped: {}, containers: [], players: {}, sectorObjectCount: 0,
+        nearSectors: {} };
     var removedReady = false, droppedReady = false, onRemoved;
     
     Renderer.initWorld(world);
     
-    var generateThings = function() {
+    var generateContainersAndThings = function() {
         world.things = [];
-        for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // 9 sectors
-            for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
-                Math.seedrandom('thing-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h));
-                if(Math.random() > 0.001) continue; // 0.1% of thing
-                world.things.push(Things.spawnThing(+position.sx+sw, +position.sy+sh, w, h));
-            } }
-        } }
-    };
-    
-    var generateContainers = function() {
         world.containers = [];
+        var newSectors = {};
         for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // 9 sectors
+            var sectorKey = (+position.sx+sw)+':'+(+position.sy+sh);
+            if(world.nearSectors[sectorKey]) { // Copy stored sector objects if not new sector
+                newSectors[sectorKey] = world.nearSectors[sectorKey]; continue; 
+            }
+            newSectors[sectorKey] = {things:[],containers:[]}; // Sector not near, spawn objects
+            Math.seedrandom('container-thing-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, 0, 0));
             for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
-                Math.seedrandom('container-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, w, h));
-                if(Math.random() > 0.003) continue; // 0.3% chance of container
-                world.containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
+                if(Math.random() <= 0.003) { // 0.3% chance of container
+                    newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
+                } else if(Math.random() <= 0.001) {
+                    newSectors[sectorKey].things.push(Things.spawnThing(+position.sx+sw, +position.sy+sh, w, h));
+                }
             } }
         } }
+        world.nearSectors = newSectors;
+        for(var sKey in world.nearSectors) { if(!world.nearSectors.hasOwnProperty(sKey)) continue;
+            world.things = world.things.concat(world.nearSectors[sKey].things);
+            world.containers = world.containers.concat(world.nearSectors[sKey].containers);
+        }
     };
     
     var getVicinity = function() {
@@ -142,8 +147,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             return getVicinity();
         },
         newSector: function() {
-            generateThings(); 
-            generateContainers();
+            generateContainersAndThings(); 
             applyRemovalsAndDrops();
             applyContainerStatuses();
         },

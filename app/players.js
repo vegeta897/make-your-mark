@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 7; // Stored player data format revision
+    var revision = 8; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
@@ -134,6 +134,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             case 'up': y--; break;
             case 'down': y++; break;
         }
+        if(x < 0 || y < 0 || x > 32 || y > 20) return;
         var target = World.getObjectsAt(player.osx,player.osy,x,y,'containers');
         if(target.length > 0) World.attack(target[0],1);
     };
