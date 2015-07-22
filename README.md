@@ -31,7 +31,7 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
     - Offers better loot?
     - Need a way to fairly divide loot when 2+ players are exploring
 
-Metagame ideas:
+### Metagame ideas:
 
 - Theft? AI guards with deterministic routines based on global tick?
 - Something on a sector by sector basis?
@@ -41,7 +41,7 @@ Metagame ideas:
 - Goal of building the ultimate collection?
   - View collection with silhouettes for things you don't have
   
-New movement/interact system:
+### New movement/interact system:
 
 - Right click move, right click on an item to pick it up when you stop moving on it
 - Left click to use/attack in a direction
@@ -49,8 +49,9 @@ New movement/interact system:
   - Monsters to attack?
 - All items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
+    - Quality of items within based on health of container
+    - Make it juicy!
     - Health stored on firebase as time of last hit and health at last hit (current health calculated client-side)
     - Opened containers store on firebase as time opened, will respawn eventually
-      - Or, all container states reset with a new seed (for position, content) every day?
+      - Or, all objects reset with a new seed every day?
   - Dropped items have time dropped stored, will decay eventually
-    - No more need for removed items list!
