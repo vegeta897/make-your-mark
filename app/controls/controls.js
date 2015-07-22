@@ -68,7 +68,7 @@ Application.Services.factory('Controls',function(Interface,Canvas,Util) {
             if(input.mouse.left) {
                 if(io.hover) game.selected = io.hover;
                 game.player.needTarget = false;
-                game.player.attacking = !game.player.attacking ? io.quad : game.player.attacking;
+                game.player.attacking = !game.player.attacking && !io.noAttack ? io.quad : game.player.attacking;
             }
             if(input.mouse.right) {
                 if(io.move) Players.move(cursor);

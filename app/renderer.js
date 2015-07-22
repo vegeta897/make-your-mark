@@ -190,10 +190,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
                 // Draw container health
                 if(o.health && o.realHealth < o.health[1]) {
-                    c.high.fillStyle = 'rgba(255,255,255,0.8)';
-                    c.high.fillRect(drawX,drawY-6,pix,5);
+                    c.main.fillStyle = 'rgba(255,255,255,0.8)';
+                    c.main.fillRect(drawX,drawY-6,pix,5);
                     var hp = o.realHealth/ o.health[1];
-                    c.high.clearRect(drawX-1+pix,drawY-5,(pix-2)*(1-hp)*-1,3);
+                    c.main.clearRect(drawX-1+pix,drawY-5,(pix-2)*(1-hp)*-1,3);
                 }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {
@@ -257,7 +257,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.high.fillStyle = 'rgba(121,255,207,0.08)'; c.high.fill();
                 }
                 // Render player attack
-                if(game.player.attacking) {
+                if(p.attacking) {
                     var attackProgress = 1 - Math.pow((20-game.player.attacking.frame),5)/Math.pow(20,5);
                     var xOff = game.player.attacking.dir == 'left' ? -attackProgress*10 :
                         game.player.attacking.dir == 'right' ? 21 + attackProgress*10 : 9;

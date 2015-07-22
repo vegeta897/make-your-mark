@@ -3,6 +3,7 @@ Application.Services.factory('Interface',function(World) {
 
     var game, world;
     var controls = { };
+    var noAttack = false;
 
     return {
         initGame: function(g) { game = g; },
@@ -18,15 +19,20 @@ Application.Services.factory('Interface',function(World) {
         },
         updateCursor: function(c,lmb,rmb) { // lmb,rmb = left/right mouse pressed
             // Generate hover list
+            if(!lmb) noAttack = false; // Reset noAttack when left mouse released
             c.hover = {};
             var underCursor = World.getObjectsAt(0,0,c.x, c.y,'cursor');
             var hoverSelect;
             for(var i = 0; i < underCursor.length; i++) {
                 c.hover[underCursor[i].guid] = underCursor[i];
-                hoverSelect = underCursor[i];
+                hoverSelect = underCursor[i].guid[0] == 't' ? underCursor[i] : hoverSelect;
             }
+            noAttack = hoverSelect ? true : noAttack; // Don't attack when selecting
             if(controls.hover) c.hover[controls.hover.guid] = controls.hover;
-            if(lmb && !hoverSelect) { delete game.selected; game.player.needTarget = false; }
+            if(lmb && !hoverSelect) { 
+                if(game.selected) noAttack = true; // Don't attack when deselecting
+                delete game.selected; game.player.needTarget = false; 
+            }
 
             // Determine cursor quad
             var co = { x: c.x - ((game.player.x+2)*24+12), y: c.y - ((game.player.y+2)*24+12) }; // Cursor-Player canvas delta
@@ -36,7 +42,7 @@ Application.Services.factory('Interface',function(World) {
                 else if(co.x < 0 && Math.abs(co.x) >= Math.abs(co.y)) { c.quad = 'left'; }
                 else { c.quad = 'right'; }
             } else { c.quad = false; }
-            return { move: rmb, hover: hoverSelect, quad: c.quad };
+            return { move: rmb, hover: hoverSelect, quad: c.quad, noAttack: noAttack };
         }
     };
 });

@@ -7,7 +7,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
         { sx: Util.randomIntRange(-3,3), sy: Util.randomIntRange(-3,3), x: 16, y: 10,
             score: 0, cash: 0, seeking: Things.newSeek(), guid: 'P'+Util.randomIntRange(0,1000000), 
-            rv: revision, explored: {} };
+            rv: revision, explored: {}, name: storedPlayer && storedPlayer.name ? storedPlayer.name : null };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
     var player = {

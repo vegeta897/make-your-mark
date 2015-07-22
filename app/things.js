@@ -105,6 +105,7 @@ Application.Services.factory('Things',function(Util) {
         newThing.allActions = createFullActionList(newThing);
         Math.seedrandom('child-quality'+Util.positionSeed(newThing.sx,newThing.sy,newThing.x,newThing.y));
         newThing.quality = Util.randomIntRange(1,1000);
+        newThing.value = thingValue(newThing);
         return newThing;
     };
     
@@ -229,21 +230,35 @@ Application.Services.factory('Things',function(Util) {
         return total;
     }();
     
-    var spawnThing = function(sx,sy,x,y) {
-        Math.seedrandom('thing'+Util.positionSeed(sx,sy,x,y));
-        var target = Util.randomIntRange(1,totalCommon);
-        var total = 0;
-        for(var i = 0; i < thingsArray.length; i++) {
-            total += thingsArray[i].common;
-            if(total < target) continue;
-            var newThing = angular.copy(thingsArray[i]);
-            newThing.sx = sx; newThing.sy = sy; newThing.x = x; newThing.y = y; 
-            newThing.guid = 't'+Util.positionSeed(sx,sy,x,y);
-            newThing.allProps = createFullPropertyList(newThing);
-            newThing.allActions = createFullActionList(newThing);
-            newThing.quality = Util.randomIntRange(1,1000);
-            return newThing;
+    var spawnThing = function(params) {
+        var seed = params.hasOwnProperty('sx') ? Util.positionSeed(params.sx,params.sy,params.x,params.y) : params.seed;
+        Math.seedrandom('thing'+seed);
+        var newThing;
+        if(params.anyItem) { // Don't apply weighting to choice of item
+            newThing = angular.copy(THINGS[Util.pickInObject(THINGS)]);
+        } else { // Choose item with weighting
+            var target = Util.randomIntRange(1,totalCommon);
+            var total = 0;
+            for(var i = 0; i < thingsArray.length; i++) {
+                total += thingsArray[i].common;
+                if(total < target) continue;
+                newThing = angular.copy(thingsArray[i]);
+                break;
+            }
         }
+        newThing.sx = params.sx || 0; newThing.sy = params.sy || 0;
+        newThing.x = params.x || 0; newThing.y = params.y || 0;
+        newThing.guid = 't'+seed;
+        newThing.allProps = createFullPropertyList(newThing);
+        newThing.allActions = createFullActionList(newThing);
+        newThing.quality = Util.randomIntRange(1,1000);
+        if(params.qualityFactor) newThing.quality += parseInt((1000 - newThing.quality) / params.qualityFactor);
+        newThing.value = thingValue(newThing);
+        return newThing;
+    };
+    
+    var thingValue = function(thing) {
+        return (1000 - THINGS[thing.id].common) * thing.quality;
     };
     
     return {
@@ -251,7 +266,10 @@ Application.Services.factory('Things',function(Util) {
         expandThings: function(th) {
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
+            // TODO: Get rid of this string crap and just store things as objects
             for(var i = 0; i < th.length; i++) {
+                var quality = th[i].split('|')[1];
+                th[i] = th[i].split('|')[0];
                 var guid = th[i].split(':')[0].split('-')[0];
                 var propsExtra = th[i].split(':')[1];
                 propsExtra = propsExtra ? propsExtra.split(',') : propsExtra;
@@ -264,19 +282,27 @@ Application.Services.factory('Things',function(Util) {
                 var changedTo = th[i].split(':')[5];
                 var pos = Util.positionFromSeed(guid);
                 var child = th[i].split(':')[0].split('-');
-                th[i] = spawnThing(pos.sx,pos.sy,pos.x,pos.y);
+                var params = {sx:pos.sx,sy:pos.sy,x:pos.x,y:pos.y};
+                if(guid[1] == 'c') { // If container content item
+                    var containerGUID = guid.split('t')[1].split('|')[0];
+                    var contentIndex = guid[guid.length-1];
+                    params = {seed:containerGUID+'|'+contentIndex, anyItem:true};
+                }
+                th[i] = spawnThing(params);
                 if(child.length > 1) th[i] = createChild(th[i],child[1],child[2]);
                 if(changedTo) changeThing(th[i],changedTo);
                 if(propsExtra) th[i].propsExtra = propsExtra;
                 if(actionsExtra) th[i].actionsExtra = actionsExtra;
                 if(propsLost) th[i].propsLost = propsLost;
                 if(actionsLost) th[i].actionsLost = actionsLost;
+                if(quality) th[i].quality = +quality;
                 th[i].allProps = createFullPropertyList(th[i]);
                 th[i].allActions = createFullActionList(th[i]);
             }
             return th;
         },
         shrinkThings: function(th) {
+            // TODO: Get rid of this string crap and just store things as objects
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
@@ -309,6 +335,7 @@ Application.Services.factory('Things',function(Util) {
                     }
                 }
                 guidExtra += th[i].changedFrom ? ':'+th[i].id : ':';
+                guidExtra += '|' + (th[i].guid[1] == 'c' ? th[i].quality : '');
                 th[i] = guidExtra;
             }
             return th;

@@ -2,12 +2,12 @@
 Application.Services.factory('Containers',function(Things,Util) {
     
     var CONTAINERS = {
-        chest: { name:'Chest', common:10, baseHealth: 50,
+        chest: { name:'Chest', common:10, baseHealth: 50, maxContent:3,
             tiers:['plastic','wooden','ceramic','aluminum','steel','silver','gold','jeweled','diamond'] },
-        present: { name:'Present', common:50, baseHealth: 10, tiers:['plain','cute','pretty','elegant'] },
-        bag: { name:'Bag', common:50, baseHealth: 5, tiers:['paper','plastic','cloth','velvet'] },
-        buried: { name:'Mound', common:30, baseHealth: 30, tiers:['dirt','gravel','clay'] },
-        crate: { name:'Crate', common:50, baseHealth: 25, tiers:['wooden','metal','armored'] }
+        present: { name:'Present', common:50, baseHealth: 10, maxContent:1, tiers:['plain','cute','pretty','elegant'] },
+        bag: { name:'Bag', common:50, baseHealth: 5, maxContent:2, tiers:['paper','plastic','cloth','velvet'] },
+        buried: { name:'Mound', common:30, baseHealth: 30, maxContent:1, tiers:['dirt','gravel','clay'] },
+        crate: { name:'Crate', common:50, baseHealth: 25, maxContent:4, tiers:['wooden','metal','armored'] }
     };
     
     var containersArray = [];
@@ -40,6 +40,7 @@ Application.Services.factory('Containers',function(Things,Util) {
                         * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
                     newContainer.health = [health,health];
                     newContainer.realHealth = health;
+                    newContainer.common = newContainer.common / (newContainer.tiers.length - t);
                     break;
                 }
             }
@@ -47,10 +48,24 @@ Application.Services.factory('Containers',function(Things,Util) {
         }
     };
     
+    var spawnContainerThing = function(container,i) {
+        return Things.spawnThing({
+            seed:container.guid+'|'+i, anyItem:true, qualityFactor: container.common
+        });
+    };
+    
     return {
         openContainer: function(container) {
-            
+            var contents = [];
+            var totalValue = 0;
+            for(var i = 0; i < container.maxContent; i++) {
+                var spawned = spawnContainerThing(container,i);
+                contents.push(spawned);
+                totalValue += spawned.value;
+                if(totalValue > container.health[1]) break;
+            }
+            return contents;
         },
-        spawnContainer: spawnContainer
+        spawnContainer: spawnContainer, spawnContainerThing: spawnContainerThing
     };
 });

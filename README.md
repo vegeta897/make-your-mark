@@ -31,7 +31,7 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
     - Offers better loot?
     - Need a way to fairly divide loot when 2+ players are exploring
 
-### Metagame ideas:
+### Metagame ideas
 
 - Theft? AI guards with deterministic routines based on global tick?
 - Something on a sector by sector basis?
@@ -41,7 +41,7 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 - Goal of building the ultimate collection?
   - View collection with silhouettes for things you don't have
   
-### New movement/interact system:
+### New movement/interact system
 
 - Right click move, right click on an item to pick it up when you stop moving on it
 - Left click to use/attack in a direction

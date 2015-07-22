@@ -21,10 +21,11 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             newSectors[sectorKey] = {things:[],containers:[]}; // Sector not near, spawn objects
             Math.seedrandom('container-thing-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, 0, 0));
             for(var w = 0; w < game.arena.width - 4; w++) { for(var h = 0; h < game.arena.height - 4; h++) { // 33x21
-                if(Math.random() <= 0.003) { // 0.3% chance of container
+                if(Math.random() <= 0.003 // 0.3% chance of container
+                    && w > 0 && h > 0 && w < game.arena.width - 5 && h < game.arena.height - 5) { // Don't spawn on edges
                     newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
                 } else if(Math.random() <= 0.001) {
-                    newSectors[sectorKey].things.push(Things.spawnThing(+position.sx+sw, +position.sy+sh, w, h));
+                    newSectors[sectorKey].things.push(Things.spawnThing({sx:+position.sx+sw, sy:+position.sy+sh, x:w, y:h}));
                 }
             } }
         } }
@@ -71,7 +72,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
         }
         for(var c = 0; c < world.containers.length; c++) {
             var ctr = world.containers[c];
-            world.sectorObjectCount += ctr.sx == position.sx && ctr.sy == position.sy ? 1 : 0;
+            world.sectorObjectCount += ctr.sx == position.sx && ctr.sy == position.sy && ctr.realHealth > 0 ? 1 : 0;
         }
     };
     
@@ -96,7 +97,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             FireService.onValue('removed',function(removed) {
                 for(var rKey in removed) { if(!removed.hasOwnProperty(rKey)) continue;
                     var pos = Util.positionFromSeed(rKey);
-                    removed[rKey] = Things.spawnThing(pos.sx,pos.sy,pos.x,pos.y);
+                    removed[rKey] = Things.spawnThing({sx:pos.sx,sy:pos.sy,x:pos.x,y:pos.y});
                     removed[rKey].removed = true;
                 }
                 world.removed = removed || {};
@@ -106,7 +107,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             FireService.onValue('dropped',function(dropped) {
                 for(var dKey in dropped) { if(!dropped.hasOwnProperty(dKey)) continue;
                     var pos = Util.positionFromSeed(dKey);
-                    var split = dropped[dKey].split(':');
+                    var quality = +dropped[dKey].split('|')[1];
+                    var split = dropped[dKey].split('|')[0].split(':');
                     var sx = +split[0], sy = +split[1];
                     var x = +split[2], y = +split[3];
                     var propsExtra = split[4];
@@ -118,7 +120,13 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                     var actionsLost = split[7];
                     actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
                     var changedTo = split[8];
-                    dropped[dKey] = Things.spawnThing(pos.sx,pos.sy,pos.x,pos.y);
+                    var params = {sx:pos.sx,sy:pos.sy,x:pos.x,y:pos.y};
+                    if(dKey[1] == 'c') { // If container content item
+                        var containerGUID = dKey.split('t')[1].split('|')[0];
+                        var contentIndex = dKey[dKey.length-1];
+                        params = {seed:containerGUID+'|'+contentIndex, anyItem:true};
+                    }
+                    dropped[dKey] = Things.spawnThing(params);
                     var child = dKey.split('-');
                     if(child.length > 1) dropped[dKey] = Things.createChild(dropped[dKey],child[1],child[2]);
                     dropped[dKey].sx = sx; dropped[dKey].sy = sy; dropped[dKey].x = x; dropped[dKey].y = y;
@@ -127,6 +135,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                     if(actionsExtra) dropped[dKey].actionsExtra = actionsExtra;
                     if(propsLost) dropped[dKey].propsLost = propsLost;
                     if(actionsLost) dropped[dKey].actionsLost = actionsLost;
+                    if(quality) dropped[dKey].quality = +quality;
                     dropped[dKey].allProps = Things.createFullPropertyList(dropped[dKey]);
                     dropped[dKey].allActions = Things.createFullActionList(dropped[dKey]);
                 }
@@ -144,7 +153,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             for(var i = 0; i < world.containers.length; i++) { // Regen container healths
                 var ctr = world.containers[i];
                 if(ctr.health[0] == ctr.health[1] || ctr.health[0] == 0 || ctr.realHealth == 0) continue;
-                ctr.realHealth = Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - ctr.lastHit)/200));
+                ctr.realHealth = game.ticks - ctr.lastHit > 1000 ? // 1000 ticks since last hit before regen
+                    Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - (ctr.lastHit+1000))/200)) : ctr.health[0];
                 if(ctr.realHealth == ctr.health[1]) FireService.remove('containers/'+ctr.guid);
             }
         },
@@ -195,6 +205,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 !thing.changedFrom && child.length < 2) { 
                 FireService.remove('removed/'+thing.guid); // Dropped in original position with no changes
             } else { // Dropped somewhere else and/or with changes
+                // TODO: Get rid of this string crap and just store things as objects
                 var mods = ':'; // Build mod line
                 if(thing.propsExtra) {
                     for(var m = 0; m < thing.propsExtra.length; m++) {
@@ -224,12 +235,25 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                     }
                 }
                 mods += thing.changedFrom ? ':'+thing.id : ':';
-                FireService.set('dropped/'+thing.guid,thing.sx+':'+thing.sy+':'+thing.x+':'+thing.y+mods);
+                var quality = '|' + (thing.guid[1] == 'c' ? thing.quality : '');
+                FireService.set('dropped/'+thing.guid,thing.sx+':'+thing.sy+':'+thing.x+':'+thing.y+mods+quality);
             }
         },
         attack: function(target,damage) {
-            FireService.set('containers/'+target.guid,Math.max(target.realHealth-damage,0)+':'+game.ticks);
             // TODO: Use transact to lower health
+            var newHealth = target.realHealth-damage
+            FireService.set('containers/'+target.guid,Math.max(newHealth,0)+':'+game.ticks);
+            if(newHealth <= 0) { // Container opened
+                var contents = Containers.openContainer(target);
+                var positions = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]; // 8 spots around container
+                for(var i = 0; i < contents.length; i++) {
+                    var pos = positions.splice(Util.randomIntRange(0,positions.length-1),1)[0];
+                    contents[i].sx = target.sx; contents[i].sy = target.sy;
+                    contents[i].x = target.x + pos[0]; contents[i].y = target.y + pos[1];
+                    FireService.set('dropped/'+contents[i].guid,contents[i].sx+':'+contents[i].sy+':'+
+                        contents[i].x+':'+contents[i].y+':::::|'+contents[i].quality);
+                }
+            }
         },
         worldReady: function() { return removedReady; },
         world: world

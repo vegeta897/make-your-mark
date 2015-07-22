@@ -113,8 +113,9 @@ Application.Services.service('Util', function() {
                 ("00" + (+x)).slice(-2)+("00" + (+y)).slice(-2);
         },
         positionFromSeed: function(seed) {
-            return { sx: +seed.substr(1,4)-5000, sy: +seed.substr(5,4)-5000,
-                x: +seed.substr(9,2), y: +seed.substr(11,2) };
+            seed = seed[1] == 'c' ? seed.substr(2,12) : seed.substr(1,12);
+            return { sx: +seed.substr(0,4)-5000, sy: +seed.substr(4,4)-5000,
+                x: +seed.substr(8,2), y: +seed.substr(10,2) };
         },
         isInArea: function(x1,y1,x2,y2,w,h) { // Is XY1 within a rectangular area WxH centered on XY2
             return Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2;
