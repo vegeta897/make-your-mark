@@ -241,7 +241,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
         },
         attack: function(target,damage) {
             // TODO: Use transact to lower health
-            var newHealth = target.realHealth-damage
+            if(target.realHealth <= 0) return;
+            var newHealth = target.realHealth-damage;
             FireService.set('containers/'+target.guid,Math.max(newHealth,0)+':'+game.ticks);
             if(newHealth <= 0) { // Container opened
                 var contents = Containers.openContainer(target);

@@ -4,8 +4,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var spriteImg, spriteLibrary, bgTiles = [], spriteThing, spriteCursor, sectorSpriteImg;
+    var thingSpriteImg, spriteLibrary, bgTiles = [], genericSprite, cursorSprite, sectorSpriteImg;
     var lastSO = { };
+    
+    var disableShadow = function(canvas) {
+        canvas.shadowColor = 'transparent';
+        canvas.shadowBlur = 0; canvas.shadowOffsetX = 0; canvas.shadowOffsetY = 0;
+    };
     
     var findSprite = function(thing) {
         var list = spriteLibrary.names[spriteLibrary.indexes[thing.id][0]]; // List of sprite mods
@@ -34,8 +39,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             c = Canvas.getCanvases(); game = g; pix = game.arena.pixels;
             mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
             // Load sprite sheet
-            spriteImg = new Image();
-            spriteImg.src = 'img/sprites.png';
+            thingSpriteImg = new Image();
+            thingSpriteImg.src = 'img/thing-sprites.png';
             spriteLibrary = {
                 indexes: {}, names: [
                     ['pencil','chewed|scratched','broken|cut','broken|cut+chewed|scratched'],
@@ -82,28 +87,32 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 ctx.fillStyle = 'rgba(0,0,0,'+bgTileAlphas[i]+')';
                 ctx.fillRect(0,0,pix,pix);
             }
-            // Create sprite for things (with no letter)
-            spriteThing = document.createElement('canvas');
-            spriteThing.width = 24; spriteThing.height = 24;
-            var spriteThingContext = spriteThing.getContext('2d');
+            // Create generic sprite for missing image
+            genericSprite = document.createElement('canvas');
+            genericSprite.width = 24; genericSprite.height = 24;
+            var spriteThingContext = genericSprite.getContext('2d');
+            spriteThingContext.shadowColor = 'rgba(0,0,0,0.3)';
+            spriteThingContext.shadowBlur = 4;
+            spriteThingContext.shadowOffsetX = 2;
+            spriteThingContext.shadowOffsetY = 1;
             spriteThingContext.fillStyle = 'rgba(0,0,0,0.3)';
             spriteThingContext.fillRect(4,4,16,16);
             spriteThingContext.fillStyle = '#6699aa';
             spriteThingContext.fillRect(5,5,14,14);
             // Create sprite for mouse cursor highlight
-            spriteCursor = document.createElement('canvas');
-            spriteCursor.width = pix; spriteCursor.height = pix;
-            var spriteCursorContext = spriteCursor.getContext('2d');
-            spriteCursorContext.fillStyle = 'rgba(121,255,207,0.12)';
-            spriteCursorContext.beginPath();
-            spriteCursorContext.arc(pix/2, pix/2, pix/2, 0, 2 * Math.PI, false);
-            spriteCursorContext.closePath(); spriteCursorContext.fill();
-            spriteCursorContext.fillStyle = 'rgba(121,255,207,1)';
-            spriteCursorContext.globalCompositeOperation = 'destination-out';
-            spriteCursorContext.beginPath();
-            spriteCursorContext.arc(pix/2, pix/2, pix/2-3, 0, 2 * Math.PI, false);
-            spriteCursorContext.closePath(); spriteCursorContext.fill();
-            spriteCursorContext.globalCompositeOperation = 'source-over';
+            cursorSprite = document.createElement('canvas');
+            cursorSprite.width = pix; cursorSprite.height = pix;
+            var cursorSpriteContext = cursorSprite.getContext('2d');
+            cursorSpriteContext.fillStyle = 'rgba(121,255,207,0.12)';
+            cursorSpriteContext.beginPath();
+            cursorSpriteContext.arc(pix/2, pix/2, pix/2, 0, 2 * Math.PI, false);
+            cursorSpriteContext.closePath(); cursorSpriteContext.fill();
+            cursorSpriteContext.fillStyle = 'rgba(121,255,207,1)';
+            cursorSpriteContext.globalCompositeOperation = 'destination-out';
+            cursorSpriteContext.beginPath();
+            cursorSpriteContext.arc(pix/2, pix/2, pix/2-3, 0, 2 * Math.PI, false);
+            cursorSpriteContext.closePath(); cursorSpriteContext.fill();
+            cursorSpriteContext.globalCompositeOperation = 'source-over';
         },
         initMinimap: function(mmcv,mmc) { cmm = mmc; mmWidth = mmcv.width; mmHeight = mmcv.height; },
         initWorld: function(w) { world = w; },
@@ -164,7 +173,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             c.high.fillRect(mWidth - buffer,buffer, buffer, mHeight-buffer*2);
             c.high.fillRect(buffer,mHeight-buffer, mWidth, buffer);
             // Render cursor highlight
-            if(cursor.x != '-') c.high.drawImage(spriteCursor,parseInt(cursor.x/pix)*pix,parseInt(cursor.y/pix)*pix);
+            if(cursor.x != '-') c.high.drawImage(cursorSprite,parseInt(cursor.x/pix)*pix,parseInt(cursor.y/pix)*pix);
             var hoverCount = {};
             // Render objects
             var objects = world.things.concat(world.containers);
@@ -177,12 +186,18 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
                 if(spriteLibrary.indexes[o.id]) { // If this object has a sprite
+                    c.main.shadowColor = 'rgba(0,0,0,0.3)';
+                    c.main.shadowBlur = 4;
+                    c.main.shadowOffsetX = 2;
+                    c.main.shadowOffsetY = 1;
                     var spritePosition = findSprite(o);
                     var spriteX = 24 * (spritePosition % 16),
                         spriteY = 24 * Math.floor(spritePosition / 16);
-                    c.main.drawImage(spriteImg,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
+                    c.main.drawImage(thingSpriteImg,spriteX,spriteY,pix,pix,drawX,drawY,pix,pix);
+                    disableShadow(c.main);
                 } else { // No sprite, draw letter box
-                    c.main.drawImage(spriteThing,drawX,drawY);
+                    c.main.drawImage(genericSprite,drawX,drawY);
+                    c.main.shadowBlur = 0;
                     c.main.fillStyle = '#112244';
                     c.main.font = 'bold 14px Arial';c.main.textAlign = 'center';
                     var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
@@ -190,10 +205,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
                 // Draw container health
                 if(o.health && o.realHealth < o.health[1]) {
-                    c.main.fillStyle = 'rgba(255,255,255,0.8)';
+                    c.main.fillStyle = 'rgba(0,0,0,0.7)';
+                    c.main.fillRect(drawX+1,drawY-5,pix,5);
+                    c.main.fillStyle = 'white';
                     c.main.fillRect(drawX,drawY-6,pix,5);
                     var hp = o.realHealth/ o.health[1];
-                    c.main.clearRect(drawX-1+pix,drawY-5,(pix-2)*(1-hp)*-1,3);
+                    c.main.fillStyle = 'rgba(0,0,0,0.9)';
+                    c.main.fillRect(drawX-1+pix,drawY-5,(pix-2)*(1-hp)*-1,3);
                 }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {
@@ -233,7 +251,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     pdy = (p.osy - game.player.osy)*(game.arena.height-4) + p.oy;
                 var drawPX = (pdx+2) * pix+so.x, drawPY = (pdy+2) * pix+so.y;
                 drawPX += +p.offset.x; drawPY += +p.offset.y;
-                cmm.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
+                cmm.fillStyle = '#'+p.color.hex;
                 cmm.fillRect(Math.round(drawPX/pix)-3+mmw*4,Math.round(drawPY/pix)-3+mmh*4,3,3);
                 if(drawPX < pix*-1 || drawPX > mWidth
                     || drawPY < pix*-1 || drawPY > mHeight) continue;
@@ -266,8 +284,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.main.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
                     c.main.fillRect(drawPX+xOff,drawPY+yOff,6,6);
                 }
+                c.main.shadowColor = 'rgba(0,0,0,0.5)';
+                c.main.shadowBlur = 5;
+                c.main.shadowOffsetX = 2;
+                c.main.shadowOffsetY = 1;
                 c.main.fillStyle = 'rgba('+p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+',0.8)';
                 c.main.beginPath(); c.main.arc(drawPX+pix/2, drawPY+pix/2, 8, 0, 2 * Math.PI, false); c.main.fill();
+                disableShadow(c.main);
                 // Render other player's names
                 if(game.player.guid != pKey) {
                     c.high.fillStyle = 'rgba(240,240,240,1)';
