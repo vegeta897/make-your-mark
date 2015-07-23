@@ -73,7 +73,7 @@ Application.Services.factory('Things',function(Util) {
         cookie: { name: 'Cookie', size: sizes.TINY, common: 10,
             desc: 'Dotted with chocolate chips. Possibly stale.', actions: [actions.EAT,actions.BREAK],
             props: [props.SOFT,props.FLAT,props.BRITTLE] },
-        bubbleWrap: { name: 'Bubble Wrap', size: sizes.MEDIUM, common: 30,
+        bubbleWrap: { name: 'Bubble Wrap', size: sizes.MEDIUM, common: 60,
             desc: 'You know what to do.', actions: [actions.POP,actions.FOLD],
             props: [props.CUTTABLE,props.FLAT] },
         mirror: { name: 'Mirror', size: sizes.MEDIUM, common: 80,
@@ -252,7 +252,9 @@ Application.Services.factory('Things',function(Util) {
         newThing.guid = 't'+seed;
         newThing.allProps = createFullPropertyList(newThing);
         newThing.allActions = createFullActionList(newThing);
-        newThing.quality = Util.randomIntRange(params.containerValue ? Math.min(970,params.containerValue) : 1,1000);
+        newThing.quality = Util.randomIntRange(1, params.containerValue ? 1000 : Util.randomIntRange(500,1000));
+        newThing.quality = params.containerValue ? 
+            parseInt(newThing.quality + (1001 - newThing.quality) * params.containerValue/45000) : newThing.quality;
         newThing.value = thingValue(newThing);
         return newThing;
     };

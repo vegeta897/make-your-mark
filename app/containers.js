@@ -2,12 +2,12 @@
 Application.Services.factory('Containers',function(Things,Util) {
     
     var CONTAINERS = {
-        chest: { name:'Chest', common:10, baseHealth: 50, maxContent:3,
-            tiers:['plastic','wooden','ceramic','aluminum','steel','silver','gold','jeweled','diamond'] },
-        present: { name:'Present', common:30, baseHealth: 20, maxContent:1, tiers:['plain','cute','pretty','elegant'] },
-        bag: { name:'Bag', common:50, baseHealth: 5, maxContent:2, tiers:['paper','plastic','cloth','velvet'] },
-        buried: { name:'Mound', common:30, baseHealth: 30, maxContent:1, tiers:['dirt','gravel','clay'] },
-        crate: { name:'Crate', common:50, baseHealth: 25, maxContent:4, tiers:['wooden','metal','armored'] }
+        chest: { name:'Chest', common:10, maxContent:2,
+            tiers:['plastic:40:100','wooden:80:150','ceramic:120:200','aluminum:300:300','steel:500:500','silver:600:800','gold:700:1200','jeweled:1000:2000','diamond:2000:4000'] },
+        present: { name:'Present', common:30, maxContent:1, tiers:['plain:20:50','cute:25:75','pretty:30:120','elegant:40:200'] },
+        bag: { name:'Bag', common:50, maxContent:2, tiers:['paper:10:10','plastic:15:15','cloth:30:35','velvet:35:100'] },
+        buried: { name:'Mound', common:20, maxContent:1, tiers:['dirt:40:50','gravel:70:60','clay:100:70'] },
+        crate: { name:'Crate', common:50, maxContent:4, tiers:['wooden:60:80','metal:200:200','armored:450:450'] }
     };
     
     var containersArray = [];
@@ -35,14 +35,12 @@ Application.Services.factory('Containers',function(Things,Util) {
             var tier = Util.randomIntRange(1,Math.pow(newContainer.tiers.length+1,4));
             for(var t = 0; t < newContainer.tiers.length; t++) {
                 if(tier <= Math.pow(t+2,4)) {
-                    newContainer.tier = newContainer.tiers[t];
+                    newContainer.tier = newContainer.tiers[t].split(':')[0];
                     newContainer.tierNum = newContainer.tiers.length - 1 - t;
-                    var health = parseInt(Math.pow(newContainer.tiers.length - t + 1,2.5)
-                        * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
+                    var health = parseInt(+newContainer.tiers[t].split(':')[1] * (Util.randomIntRange(8,12)/10));
                     newContainer.health = [health,health];
                     newContainer.realHealth = health;
-                    newContainer.value = Math.ceil(60 / newContainer.common * newContainer.baseHealth*2 * 
-                        (Math.pow(newContainer.tiers.length - t + 1,2)) / newContainer.maxContent);
+                    newContainer.value = Math.ceil(newContainer.tiers[t].split(':')[2]*2 / newContainer.maxContent);
                     break;
                 }
             }

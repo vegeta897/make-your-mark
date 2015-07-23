@@ -24,7 +24,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 if(Math.random() <= 0.003 // 0.3% chance of container
                     && w > 0 && h > 0 && w < game.arena.width - 5 && h < game.arena.height - 5) { // Don't spawn on edges
                     newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
-                } else if(Math.random() <= 0.001) {
+                } else if(Math.random() <= 0.0007) {
                     newSectors[sectorKey].things.push(Things.spawnThing({sx:+position.sx+sw, sy:+position.sy+sh, x:w, y:h}));
                 }
             } }

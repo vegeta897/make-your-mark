@@ -3,14 +3,14 @@
 Application.Services.service('Util', function() {
 
     var qualityLevels = [
-        {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:500},
-        {r:220, g:220, b:220, hex:'dcdcdc', name:'Average', min:200},
-        {r:88, g:193, b:111, hex:'58c16f', name:'Uncommon', min:90},
-        {r:59, g:126, b:249, hex:'3b7ef9', name:'Rare', min:42},
-        {r:193, g:75, b:243, hex:'c14bf3', name:'Unique', min:20},
-        {r:255, g:65, b:168, hex:'ff41a8', name:'Perfect', min:7},
-        {r:255, g:251, b:0, hex:'fffb00', name:'Legendary', min:2},
-        {r:255, g:215, b:54, hex:'ffd736', name:'Mythical', min:0}];
+        {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:0},
+        {r:220, g:220, b:220, hex:'dcdcdc', name:'Average', min:400},
+        {r:88, g:193, b:111, hex:'58c16f', name:'Uncommon', min:860},
+        {r:59, g:126, b:249, hex:'3b7ef9', name:'Rare', min:910},
+        {r:193, g:75, b:243, hex:'c14bf3', name:'Unique', min:950},
+        {r:255, g:65, b:168, hex:'ff41a8', name:'Perfect', min:980},
+        {r:255, g:251, b:0, hex:'fffb00', name:'Legendary', min:993},
+        {r:255, g:215, b:54, hex:'ffd736', name:'Mythical', min:998}];
     
     var pickInArray = function(array) { return array[Math.floor(Math.random()*array.length)]; };
     var hsvToHex = function(hsv) {
@@ -153,9 +153,8 @@ Application.Services.service('Util', function() {
                     r:240, g:240, b:240, hex:'f0f0f0'
                 } : { name:'', r:240, g:240, b:240, hex:'f0f0f0' };
             } else { // If thing
-                var inv = 1001 - object.quality;
-                for(var q = 0; q < qualityLevels.length; q++) {
-                    if(inv > qualityLevels[q].min) return qualityLevels[q];
+                for(var q = qualityLevels.length-1; q >= 0; q--) {
+                    if(object.quality > qualityLevels[q].min) return qualityLevels[q];
                 }
             }
         }
