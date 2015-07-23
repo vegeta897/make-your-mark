@@ -4,7 +4,7 @@ Application.Services.factory('Containers',function(Things,Util) {
     var CONTAINERS = {
         chest: { name:'Chest', common:10, baseHealth: 50, maxContent:3,
             tiers:['plastic','wooden','ceramic','aluminum','steel','silver','gold','jeweled','diamond'] },
-        present: { name:'Present', common:50, baseHealth: 10, maxContent:1, tiers:['plain','cute','pretty','elegant'] },
+        present: { name:'Present', common:50, baseHealth: 20, maxContent:1, tiers:['plain','cute','pretty','elegant'] },
         bag: { name:'Bag', common:50, baseHealth: 5, maxContent:2, tiers:['paper','plastic','cloth','velvet'] },
         buried: { name:'Mound', common:30, baseHealth: 30, maxContent:1, tiers:['dirt','gravel','clay'] },
         crate: { name:'Crate', common:50, baseHealth: 25, maxContent:4, tiers:['wooden','metal','armored'] }
@@ -37,11 +37,12 @@ Application.Services.factory('Containers',function(Things,Util) {
                 if(tier <= Math.pow(t+2,4)) {
                     newContainer.tier = newContainer.tiers[t];
                     newContainer.tierNum = newContainer.tiers.length - 1 - t;
-                    var health = parseInt(Math.pow(newContainer.tiers.length - t+1,2)
+                    var health = parseInt(Math.pow(newContainer.tiers.length - t + 1,2)
                         * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
                     newContainer.health = [health,health];
                     newContainer.realHealth = health;
-                    newContainer.common = newContainer.common / (newContainer.tiers.length - t);
+                    newContainer.value = Math.ceil(20 / newContainer.common * newContainer.baseHealth*2 * 
+                        (newContainer.tiers.length - t + 1));
                     break;
                 }
             }
@@ -51,7 +52,7 @@ Application.Services.factory('Containers',function(Things,Util) {
     
     var spawnContainerThing = function(container,i) {
         return Things.spawnThing({
-            seed:container.guid+'|'+i, anyItem:true, qualityFactor: container.common
+            seed:container.guid+'|'+i, anyItem:true, containerValue: container.value
         });
     };
     
@@ -63,7 +64,7 @@ Application.Services.factory('Containers',function(Things,Util) {
                 var spawned = spawnContainerThing(container,i);
                 contents.push(spawned);
                 totalValue += spawned.value;
-                if(totalValue > container.health[1]) break;
+                if(totalValue > container.value) break;
             }
             return contents;
         },

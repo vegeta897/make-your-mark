@@ -251,14 +251,13 @@ Application.Services.factory('Things',function(Util) {
         newThing.guid = 't'+seed;
         newThing.allProps = createFullPropertyList(newThing);
         newThing.allActions = createFullActionList(newThing);
-        newThing.quality = Util.randomIntRange(1,1000);
-        if(params.qualityFactor) newThing.quality += parseInt((1000 - newThing.quality) / params.qualityFactor);
+        newThing.quality = Util.randomIntRange(params.containerValue ? Math.min(970,params.containerValue) : 1,1000);
         newThing.value = thingValue(newThing);
         return newThing;
     };
     
     var thingValue = function(thing) {
-        return (1000 - THINGS[thing.id].common) * thing.quality;
+        return (1000 - THINGS[thing.id].common) * thing.quality / 1000;
     };
     
     return {
