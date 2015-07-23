@@ -242,7 +242,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
             checkSeek();
         },
         clearPlayerData: function() {
-            localStorageService.remove('player');
+            localStorageService.set('player',{name:player.name});
             FireService.remove('players/'+player.guid);
         },
         gotoPlayer: function(targetPlayer) {
