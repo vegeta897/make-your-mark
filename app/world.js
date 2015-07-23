@@ -124,8 +124,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
                 if(ctr.knockback && ctr.knockback[1] > 0) ctr.knockback[1]--;
                 ctr.open = ctr.health[0] == 0 || ctr.realHealth == 0;
                 if(ctr.health[0] == ctr.health[1] || ctr.health[0] == 0 || ctr.realHealth == 0) continue;
-                ctr.realHealth = game.ticks - ctr.lastHit > 1000 ? // 1000 ticks since last hit before regen
-                    Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - (ctr.lastHit+1000))/200)) : ctr.health[0];
+                ctr.realHealth = game.ticks - ctr.lastHit > 2000 ? // ~33 seconds since last hit before regen
+                    Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - (ctr.lastHit+1000))/300)) : ctr.health[0];
                 if(ctr.realHealth == ctr.health[1]) FireService.remove('containers/'+ctr.guid);
             }
         },

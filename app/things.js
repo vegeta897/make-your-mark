@@ -46,7 +46,7 @@ Application.Services.factory('Things',function(Util) {
         banana: { name: 'Banana', size: sizes.SMALL, common: 250,
             desc: 'Just like the monkeys eat!', actions: [actions.PEEL],
             props: [props.CUTTABLE,props.SOFT,props.SAWABLE] },
-        bananaPeel: { name: 'Banana Peel', size: sizes.SMALL, common: 10,
+        bananaPeel: { name: 'Banana Peel', size: sizes.SMALL, common: 250, noSpawn: true,
             desc: 'Watch your step.',
             props: [props.CUTTABLE,props.SOFT] },
         guitar: { name: 'Guitar', size: sizes.LARGE, common: 30,
@@ -223,9 +223,10 @@ Application.Services.factory('Things',function(Util) {
     var totalCommon = function() { // Self-executing function
         var total = 0;
         for(var key in THINGS) { if(!THINGS.hasOwnProperty(key)) continue;
-            total += THINGS[key].common;
             THINGS[key].id = key;
+            if(THINGS[key].noSpawn) continue;
             thingsArray.push(THINGS[key]);
+            total += THINGS[key].common;
         }
         return total;
     }();
