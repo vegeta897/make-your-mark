@@ -4,8 +4,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var thingSpriteImg, thingSpriteLibrary, containerSpriteImg, containerSpriteLibrary, bgTiles = [],
-        genericSprite, cursorSprite, sectorSpriteImg;
+    var thingSpriteImg, thingSpriteLib, containerSpriteImg, impactSpriteImg, containerSpriteLib,
+        bgTiles = [], genericSprite, cursorSprite, sectorSpriteImg;
     var lastSO = { };
     
     var disableShadow = function(canvas) {
@@ -14,8 +14,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     };
     
     var findSprite = function(thing) {
-        var list = thingSpriteLibrary.names[thingSpriteLibrary.indexes[thing.id][0]]; // List of sprite mods
-        var basePosition = thingSpriteLibrary.indexes[thing.id][1]; // Position of base sprite in sheet
+        var list = thingSpriteLib.names[thingSpriteLib.indexes[thing.id][0]]; // List of sprite mods
+        var basePosition = thingSpriteLib.indexes[thing.id][1]; // Position of base sprite in sheet
         var position = basePosition;
         for(var m = 1; m < list.length; m++) { // Loop through mods (not counting base)
             var modProps = list[m].split('+'); // Required props for this mod
@@ -42,9 +42,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Load sprite sheet
             thingSpriteImg = new Image();
             thingSpriteImg.src = 'img/thing-sprites.png';
-            containerSpriteImg = new Image();
-            containerSpriteImg.src = 'img/container-sprites.png';
-            thingSpriteLibrary = {
+            thingSpriteLib = {
                 indexes: {}, names: [
                     ['pencil','chewed|scratched','broken|cut','broken|cut+chewed|scratched'],
                     ['pen','scratched'],
@@ -72,11 +70,17 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 ]
             };
             var position = 0; // Build thing sprite name and position index list
-            for(var n = 0; n < thingSpriteLibrary.names.length; n++) {
-                thingSpriteLibrary.indexes[thingSpriteLibrary.names[n][0]] = [n,position];
-                position += thingSpriteLibrary.names[n].length
+            for(var n = 0; n < thingSpriteLib.names.length; n++) {
+                thingSpriteLib.indexes[thingSpriteLib.names[n][0]] = [n,position];
+                position += thingSpriteLib.names[n].length
             }
-            containerSpriteLibrary = {
+            // Load impact animation sprite sheet
+            impactSpriteImg = new Image();
+            impactSpriteImg.src = 'img/impact-anims.png';
+            // Load container sprite sheet
+            containerSpriteImg = new Image();
+            containerSpriteImg.src = 'img/container-sprites.png';
+            containerSpriteLib = {
                 bag: 0 // Row index of first of container type (add tierNum to get other tiers)
             };
             // Load sector sprite sheet
@@ -191,16 +195,16 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     || drawY <= pix || drawY >= mHeight - pix) continue;
                 var knockX = 0, knockY = 0;
                 if(o.knockback && o.knockback[1] > 0) switch(o.knockback[0]) {
-                    case 'left': knockX = parseInt(-Math.pow(o.knockback[1],2)/70);
-                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20); break;
-                    case 'right': knockX = parseInt(Math.pow(o.knockback[1],2)/70);
-                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20); break;
-                    case 'up': knockY = parseInt(-Math.pow(o.knockback[1],2)/70);
-                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20); break;
-                    case 'down': knockY = parseInt(Math.pow(o.knockback[1],2)/70);
-                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20); break;
+                    case 'left': knockX = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
+                    case 'right': knockX = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
+                    case 'up': knockY = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
+                    case 'down': knockY = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
                 }
-                if(thingSpriteLibrary.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
+                if(thingSpriteLib.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
                     c.main.shadowColor = 'rgba(0,0,0,0.3)';
                     c.main.shadowBlur = 4;
                     c.main.shadowOffsetX = 2;
@@ -211,15 +215,25 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.main.drawImage(thingSpriteImg, thingSpriteX, thingSpriteY, pix, pix, 
                         drawX, drawY, pix, pix);
                     disableShadow(c.main);
-                } else if(containerSpriteLibrary.hasOwnProperty(o.id)) { // If this container has a sprite
+                } else if(containerSpriteLib.hasOwnProperty(o.id)) { // If this container has a sprite
                     c.main.shadowColor = 'rgba(0,0,0,0.3)';
                     c.main.shadowBlur = 4;
                     c.main.shadowOffsetX = 2;
                     c.main.shadowOffsetY = 1;
                     var containerSpriteX = o.open ? o.broke ? 48 : 24 : 0,
-                        containerSpriteY = containerSpriteLibrary[o.id] + o.tierNum * 24;
+                        containerSpriteY = containerSpriteLib[o.id] + o.tierNum * 24;
                     c.main.drawImage(containerSpriteImg, containerSpriteX, containerSpriteY, pix, pix,
                         drawX+knockX, drawY+knockY, pix, pix);
+                    if(o.knockback && o.knockback[1] > 8) {
+                        c.main.shadowColor = 'rgba(0,0,0,0.7)';
+                        c.main.shadowBlur = 0;
+                        c.main.shadowOffsetX = 1;
+                        c.main.shadowOffsetY = 1;
+                        var impactSpriteX = (20 - o.knockback[1]) * 48,
+                            impactSpriteY = containerSpriteY*2;
+                        c.main.drawImage(impactSpriteImg, impactSpriteX, impactSpriteY, 48, 48,
+                            drawX-12, drawY-12, 48, 48);
+                    }
                     disableShadow(c.main);
                 } else { // No sprite, draw letter box
                     c.main.drawImage(genericSprite,drawX+knockX, drawY+knockY);
@@ -233,12 +247,12 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 // Draw container health
                 if(showHealth) {
                     c.main.fillStyle = 'rgba(0,0,0,0.7)';
-                    c.main.fillRect(drawX+1,drawY-5,pix,5);
+                    c.main.fillRect(drawX+1+knockX,drawY-5+knockY,pix,5);
                     c.main.fillStyle = 'white';
-                    c.main.fillRect(drawX,drawY-6,pix,5);
+                    c.main.fillRect(drawX+knockX,drawY-6+knockY,pix,5);
                     var hp = o.realHealth/ o.health[1];
                     c.main.fillStyle = 'rgba(0,0,0,0.9)';
-                    c.main.fillRect(drawX-1+pix,drawY-5,parseInt((pix-2)*(1-hp))*-1,3);
+                    c.main.fillRect(drawX-1+pix+knockX,drawY-5+knockY,parseInt((pix-2)*(1-hp))*-1,3);
                 }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {

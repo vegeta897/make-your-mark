@@ -119,9 +119,9 @@ Application.Services.factory('Things',function(Util) {
     };
 
     var hasAllProps = function(t,props) { // Thing has all of these properties/propsExtra
-        var has = 0, allProps = Util.subtractArrays(t.props.concat(t.propsExtra || []), t.propsLost);
-        for(var i = 0; i < props.length; i++) { if(jQuery.inArray(props[i], allProps) >= 0) has++; }
-        return has == props.length;
+        var allProps = Util.subtractArrays(t.props.concat(t.propsExtra || []), t.propsLost);
+        for(var i = 0; i < props.length; i++) { if(jQuery.inArray(props[i], allProps) < 0) return false; }
+        return true;
     };
     
     var addX = function(thing,x,stock,extra,lost) {

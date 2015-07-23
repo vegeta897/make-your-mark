@@ -46,9 +46,12 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 - Right click move, right click on an item to pick it up when you stop moving on it
 - Left click to use/attack in a direction
   - Use/attack straight down if standing on something not picked up
+  - Attacks are based on what is equipped
+    - Different equip slots, like cutting tool, stabbing tool, bashing tool, writing tool, etc
   - Monsters to attack?
 - All items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
+    - Damage to container is based on item used to attack and container type/material
     - Quality of items within based on health of container
     - Make it juicy!
     - Health stored on firebase as time of last hit and health at last hit (current health calculated client-side)
