@@ -36,6 +36,7 @@ Application.Services.factory('Containers',function(Things,Util) {
             for(var t = 0; t < newContainer.tiers.length; t++) {
                 if(tier <= Math.pow(t+2,4)) {
                     newContainer.tier = newContainer.tiers[t];
+                    newContainer.tierNum = newContainer.tiers.length - 1 - t;
                     var health = parseInt(Math.pow(newContainer.tiers.length - t+1,2)
                         * newContainer.baseHealth * (Util.randomIntRange(8,12)/10));
                     newContainer.health = [health,health];

@@ -266,77 +266,49 @@ Application.Services.factory('Things',function(Util) {
         expandThings: function(th) {
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
-            // TODO: Get rid of this string crap and just store things as objects
             for(var i = 0; i < th.length; i++) {
-                var quality = th[i].split('|')[1];
-                th[i] = th[i].split('|')[0];
-                var guid = th[i].split(':')[0].split('-')[0];
-                var propsExtra = th[i].split(':')[1];
-                propsExtra = propsExtra ? propsExtra.split(',') : propsExtra;
-                var actionsExtra = th[i].split(':')[2];
-                actionsExtra = actionsExtra ? actionsExtra.split(',') : actionsExtra;
-                var propsLost = th[i].split(':')[3];
-                propsLost = propsLost ? propsLost.split(',') : propsLost;
-                var actionsLost = th[i].split(':')[4];
-                actionsLost = actionsLost ? actionsLost.split(',') : actionsLost;
-                var changedTo = th[i].split(':')[5];
+                var t = th[i];
+                var guid = t.g;
+                var quality = +t.q;
+                var sx = +t.sx, sy = +t.sy, x = +t.x, y = +t.y;
+                var propsExtra = t.pe, actionsExtra = t.ae, propsLost = t.pl, actionsLost = t.al;
+                var changedTo = t.ct;
                 var pos = Util.positionFromSeed(guid);
-                var child = th[i].split(':')[0].split('-');
                 var params = {sx:pos.sx,sy:pos.sy,x:pos.x,y:pos.y};
-                if(guid[1] == 'c') { // If container content item
+                if(guid[1] == 'c') { // If thing from container
                     var containerGUID = guid.split('t')[1].split('|')[0];
                     var contentIndex = guid[guid.length-1];
                     params = {seed:containerGUID+'|'+contentIndex, anyItem:true};
                 }
-                th[i] = spawnThing(params);
-                if(child.length > 1) th[i] = createChild(th[i],child[1],child[2]);
-                if(changedTo) changeThing(th[i],changedTo);
-                if(propsExtra) th[i].propsExtra = propsExtra;
-                if(actionsExtra) th[i].actionsExtra = actionsExtra;
-                if(propsLost) th[i].propsLost = propsLost;
-                if(actionsLost) th[i].actionsLost = actionsLost;
-                if(quality) th[i].quality = +quality;
-                th[i].allProps = createFullPropertyList(th[i]);
-                th[i].allActions = createFullActionList(th[i]);
+                t = spawnThing(params);
+                var child = guid.split('-');
+                if(child.length > 1) t = createChild(t,child[1],child[2]);
+                t.sx = sx; t.sy = sy; t.x = x; t.y = y;
+                if(changedTo) changeThing(t,changedTo);
+                if(propsExtra) t.propsExtra = propsExtra;
+                if(actionsExtra) t.actionsExtra = actionsExtra;
+                if(propsLost) t.propsLost = propsLost;
+                if(actionsLost) t.actionsLost = actionsLost;
+                if(quality) t.quality = +quality;
+                t.allProps = createFullPropertyList(t);
+                t.allActions = createFullActionList(t);
+                th[i] = t;
             }
             return th;
         },
         shrinkThings: function(th) {
-            // TODO: Get rid of this string crap and just store things as objects
             if(!th || th.length == 0) return [];
             th = angular.copy(th);
             for(var i = 0; i < th.length; i++) {
-                var guidExtra = th[i].guid + ':';
-                if(th[i].propsExtra) {
-                    for(var m = 0; m < th[i].propsExtra.length; m++) {
-                        guidExtra += m == th[i].propsExtra.length - 1 ? 
-                            th[i].propsExtra[m] : th[i].propsExtra[m] + ',';
-                    }
+                var storedThing = {
+                    sx: th[i].sx, sy: th[i].sy, x: th[i].x, y: th[i].y, g: th[i].guid,
+                    pe: th[i].propsExtra, ae: th[i].actionsExtra, pl: th[i].propsLost, al: th[i].actionsLost,
+                    ct: th[i].changedFrom ? th[i].id : null, q: th[i].guid[1] == 'c' ? th[i].quality : null
+                };
+                for(var sk in storedThing) { if(!storedThing.hasOwnProperty(sk)) continue;
+                    if(storedThing[sk] === null || storedThing[sk] === undefined) delete storedThing[sk];
                 }
-                guidExtra += ':';
-                if(th[i].actionsExtra) {
-                    for(var n = 0; n < th[i].actionsExtra.length; n++) {
-                        guidExtra += n == th[i].actionsExtra.length - 1 ?
-                            th[i].actionsExtra[n] : th[i].actionsExtra[n] + ',';
-                    }
-                }
-                guidExtra += ':';
-                if(th[i].propsLost) {
-                    for(var o = 0; o < th[i].propsLost.length; o++) {
-                        guidExtra += o == th[i].propsLost.length - 1 ?
-                            th[i].propsLost[o] : th[i].propsLost[o] + ',';
-                    }
-                }
-                guidExtra += ':';
-                if(th[i].actionsLost) {
-                    for(var p = 0; p < th[i].actionsLost.length; p++) {
-                        guidExtra += p == th[i].actionsLost.length - 1 ?
-                            th[i].actionsLost[p] : th[i].actionsLost[p] + ',';
-                    }
-                }
-                guidExtra += th[i].changedFrom ? ':'+th[i].id : ':';
-                guidExtra += '|' + (th[i].guid[1] == 'c' ? th[i].quality : '');
-                th[i] = guidExtra;
+                th[i] = storedThing;
             }
             return th;
         },

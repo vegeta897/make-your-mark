@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('Players',function(Renderer,Controls,World,Util,Things,FireService,localStorageService) {
 
-    var revision = 8; // Stored player data format revision
+    var revision = 9; // Stored player data format revision
     Math.seedrandom();
     var storedPlayer = localStorageService.get('player');
     storedPlayer = storedPlayer && storedPlayer.hasOwnProperty('rv') && storedPlayer.rv == revision ? storedPlayer :
@@ -33,6 +33,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         var aw = game.arena.width - 4, ah = game.arena.height - 4;
         var moved = true;
         if((player.ox == moveX && player.oy == moveY)) moved = false;
+        if(!moved) takeThing(World.getObjectsAt(player.sx,player.sy,moveX,moveY,'things')[0]); 
         if(World.getObjectsAt(player.sx,player.sy,moveX,moveY,'containers').length > 0) moved = false;
         if(!moved) return;
         player.sx = player.osx + (moveX >= aw ? 1 : moveX < 0 ? -1 : 0);
@@ -80,6 +81,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
     };
     
     var takeThing = function(thing) {
+        if(!thing) return;
         thing.removed = true;
         player.carried.push(thing);
         World.removeThing(thing);
@@ -136,7 +138,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         }
         if(x < 0 || y < 0 || x > 32 || y > 20) return;
         var target = World.getObjectsAt(player.osx,player.osy,x,y,'containers');
-        if(target.length > 0) World.attack(target[0],1);
+        if(target.length > 0) setTimeout(function(){ World.attack(target[0],1,dir); }, 120);
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
