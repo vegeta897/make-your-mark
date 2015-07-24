@@ -247,12 +247,13 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     game.effects.push({type:'damage', amt: o.knockback[3], dirXY: dirXY,
                         ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 30,
                         vx: dirXY[0] * 12 + Util.randomIntRange(-8,8), vy: -Util.randomIntRange(25,40)});
-                    for(var pe = 0; pe < 12; pe++) {
+                    for(var pe = 0; pe < Math.ceil((1 - o.realHealth/o.health[1]) * Util.randomIntRange(12,16))+2; pe++) {
+                        var size = Util.randomIntRange(1,2);
                         game.effects.push({ type:'spark', color: o.colors ? Util.pickInArray(o.colors) : 'ffffff',
                             ox: drawX + pix/2 - dirXY[0]*pix/4, oy: drawY + pix/2 - dirXY[1]*pix/4,
                             vx: dirXY[0] * 16 + Util.randomIntRange(-pix,pix), vy: -Util.randomIntRange(20,50),
                             ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60),
-                            width: Util.randomIntRange(1,2), height: Util.randomIntRange(1,2) });
+                            width: size, height: size > 1 ? Util.randomIntRange(1,2) : 1 });
                     }
                     o.newHit = false;
                 }
