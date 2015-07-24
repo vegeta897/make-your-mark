@@ -246,11 +246,11 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 if(o.newHit) { // If hit and haven't created fx yet
                     game.effects.push({type:'damage', amt: o.knockback[3], dirXY: dirXY,
                         ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 30,
-                        vx: dirXY[0] * 8 + Util.randomIntRange(-6,6), vy: -Util.randomIntRange(15,20)});
+                        vx: dirXY[0] * 12 + Util.randomIntRange(-8,8), vy: -Util.randomIntRange(25,40)});
                     for(var pe = 0; pe < 12; pe++) {
                         game.effects.push({ type:'spark', color: o.colors ? Util.pickInArray(o.colors) : 'ffffff',
                             ox: drawX + pix/2 - dirXY[0]*pix/4, oy: drawY + pix/2 - dirXY[1]*pix/4,
-                            vx: dirXY[0] * 16 + Util.randomIntRange(-pix/2,pix/2), vy: -Util.randomIntRange(10,25),
+                            vx: dirXY[0] * 16 + Util.randomIntRange(-pix,pix), vy: -Util.randomIntRange(20,50),
                             ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60) });
                     }
                     o.newHit = false;

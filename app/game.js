@@ -43,17 +43,17 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
                 efx.frame = 1; efx.x = efx.ox; efx.y = efx.oy; efx.init = true;
             } else {
                 efx.frame++;
-                efx.x = efx.x+efx.vx/12; // Apply velocities
-                efx.y = efx.y+efx.vy/12;
+                efx.x = efx.x+efx.vx/24; // Apply velocities
+                efx.y = efx.y+efx.vy/24;
             }
             // Bounce if hit ground
             if(efx.hasOwnProperty('ground') && efx.y >= efx.ground) {
                 efx.vy *= -0.4; efx.vx *= 0.8; efx.y = Math.min(efx.y,efx.ground);
             }
             if(efx.type == 'damage') {
-                efx.vy += 1;
+                efx.vy += 2;
             } else if(efx.type == 'spark') {
-                efx.vy += 1.8;
+                efx.vy += 3.5;
             }
         }
     };
