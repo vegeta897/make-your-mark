@@ -48,7 +48,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
             }
             // Bounce if hit ground
             if(efx.hasOwnProperty('ground') && efx.y >= efx.ground) {
-                efx.vy *= -0.4; efx.vx *= 0.8; efx.y = Math.min(efx.y,efx.ground);
+                efx.vy *= -0.4; efx.vx *= 0.6; efx.y = Math.min(efx.y,efx.ground);
             }
             if(efx.type == 'damage') {
                 efx.vy += 2;

@@ -214,30 +214,27 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1]));
                         dirXY = [0,1]; break;
                 }
+                var spriteX, spriteY;
                 if(thingSpriteLib.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
-                    c.main.shadowColor = 'rgba(0,0,0,0.3)';
-                    c.main.shadowBlur = 4;
-                    c.main.shadowOffsetX = 2;
-                    c.main.shadowOffsetY = 1;
+                    c.main.shadowColor = 'rgba(0,0,0,0.3)'; c.main.shadowBlur = 4;
+                    c.main.shadowOffsetX = 2; c.main.shadowOffsetY = 1;
                     var thingSpritePos = findSprite(o);
-                    var thingSpriteX = 24 * (thingSpritePos % 16),
-                        thingSpriteY = 24 * Math.floor(thingSpritePos / 16);
-                    c.main.drawImage(thingSpriteImg, thingSpriteX, thingSpriteY, pix, pix, 
+                    spriteX = 24 * (thingSpritePos % 16);
+                    spriteY = 24 * Math.floor(thingSpritePos / 16);
+                    c.main.drawImage(thingSpriteImg, spriteX, spriteY, pix, pix, 
                         drawX, drawY, pix, pix);
                     disableShadow(c.main);
                 } else if(containerSpriteLib.hasOwnProperty(o.id)) { // If this container has a sprite
-                    c.main.shadowColor = 'rgba(0,0,0,0.3)';
-                    c.main.shadowBlur = 4;
-                    c.main.shadowOffsetX = 2;
-                    c.main.shadowOffsetY = 1;
-                    var containerSpriteX = o.open ? o.broke ? 48 : 24 : 0,
-                        containerSpriteY = (containerSpriteLib[o.id] + o.tierNum) * 24;
-                    c.main.drawImage(containerSpriteImg, containerSpriteX, containerSpriteY, pix, pix,
+                    c.main.shadowColor = 'rgba(0,0,0,0.3)'; c.main.shadowBlur = 4;
+                    c.main.shadowOffsetX = 2; c.main.shadowOffsetY = 1;
+                    spriteX = o.open ? o.broke ? 48 : 24 : 0;
+                    spriteY = (containerSpriteLib[o.id] + o.tierNum) * 24;
+                    c.main.drawImage(containerSpriteImg, spriteX, spriteY, pix, pix,
                         drawX+knockX, drawY+knockY, pix, pix);
                     disableShadow(c.main);
                 } else { // No sprite, draw letter box
                     c.main.drawImage(genericSprite,drawX+knockX, drawY+knockY);
-                    c.main.shadowBlur = 0;
+                    disableShadow(c.main);
                     c.main.fillStyle = '#112244';
                     c.main.font = 'bold 14px Arial';c.main.textAlign = 'center';
                     var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
@@ -245,11 +242,16 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 }
                 if(o.newHit) { // If hit and haven't created fx yet
                     game.effects.push({type:'damage', amt: o.knockback[3], dirXY: dirXY,
-                        ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 30,
+                        ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 40,
                         vx: dirXY[0] * 12 + Util.randomIntRange(-8,8), vy: -Util.randomIntRange(25,40)});
                     for(var pe = 0; pe < Math.ceil((1 - o.realHealth/o.health[1]) * Util.randomIntRange(12,16))+2; pe++) {
                         var size = Util.randomIntRange(1,2);
-                        game.effects.push({ type:'spark', color: o.colors ? Util.pickInArray(o.colors) : 'ffffff',
+                        var pixel = [0,0,0];
+                        while(pixel[0]+pixel[1]+pixel[2] == 0) {
+                            pixel = c.main.getImageData(drawX+knockX+Util.randomIntRange(1,pix-2),
+                                drawY+knockY+Util.randomIntRange(1,pix-2),1,1).data;
+                        }
+                        game.effects.push({ type:'spark', color: 'rgba('+pixel[0]+','+pixel[1]+','+pixel[2]+',1)',
                             ox: drawX + pix/2 - dirXY[0]*pix/4, oy: drawY + pix/2 - dirXY[1]*pix/4,
                             vx: dirXY[0] * 16 + Util.randomIntRange(-pix,pix), vy: -Util.randomIntRange(20,50),
                             ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60),
@@ -306,7 +308,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 } else if(efx.type == 'spark') {
                     c.high.fillStyle = 'rgba(0,0,0,0.8)';
                     c.high.fillRect(parseInt(efx.x)+1,parseInt(efx.y)+1,efx.width,efx.height);
-                    c.high.fillStyle = '#'+efx.color;
+                    c.high.fillStyle = efx.color;
                     c.high.fillRect(parseInt(efx.x),parseInt(efx.y),efx.width,efx.height);
                 }
                 c.high.restore();
