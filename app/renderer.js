@@ -251,7 +251,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                         game.effects.push({ type:'spark', color: o.colors ? Util.pickInArray(o.colors) : 'ffffff',
                             ox: drawX + pix/2 - dirXY[0]*pix/4, oy: drawY + pix/2 - dirXY[1]*pix/4,
                             vx: dirXY[0] * 16 + Util.randomIntRange(-pix,pix), vy: -Util.randomIntRange(20,50),
-                            ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60) });
+                            ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60),
+                            width: Util.randomIntRange(1,2), height: Util.randomIntRange(1,2) });
                     }
                     o.newHit = false;
                 }
@@ -302,11 +303,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 if(efx.type == 'damage') {
                     c.high.drawImage(tinyNumbersImg,efx.amt*4,0,4,6,parseInt(efx.x),parseInt(efx.y),4,6);
                 } else if(efx.type == 'spark') {
+                    c.high.fillStyle = 'rgba(0,0,0,0.8)';
+                    c.high.fillRect(parseInt(efx.x)+1,parseInt(efx.y)+1,efx.width,efx.height);
                     c.high.fillStyle = '#'+efx.color;
-                    c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 1;
-                    c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
-                    c.high.fillRect(parseInt(efx.x),parseInt(efx.y),1,1);
-                    disableShadow(c.high);
+                    c.high.fillRect(parseInt(efx.x),parseInt(efx.y),efx.width,efx.height);
                 }
                 c.high.restore();
             }
