@@ -3,7 +3,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
 
     var game = {
         arena: {width: 37, height: 25, pixels: 24}, fps: 60, rendered: true,
-        objects: {}, player: Players.player
+        objects: {}, player: Players.player, effects: []
     };
     
     game.localServerOffset = 0; game.tickCount = 0;
@@ -35,11 +35,35 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         requestAnimationFrame(frame);
     };
     
+    var effectUpdate = function() { // Update effects
+        for(var f = 0; f < game.effects.length; f++) {
+            var efx = game.effects[f];
+            if(efx.frame >= efx.time) { game.effects.splice(f,1); f--; } // Delete effect if time expired
+            if(!efx.init) {
+                efx.frame = 1; efx.x = efx.ox; efx.y = efx.oy; efx.init = true;
+            } else {
+                efx.frame++;
+                efx.x = efx.x+efx.vx/12; // Apply velocities
+                efx.y = efx.y+efx.vy/12;
+            }
+            // Bounce if hit ground
+            if(efx.hasOwnProperty('ground') && efx.y >= efx.ground) {
+                efx.vy *= -0.4; efx.vx *= 0.8; efx.y = Math.min(efx.y,efx.ground);
+            }
+            if(efx.type == 'damage') {
+                efx.vy += 1;
+            } else if(efx.type == 'spark') {
+                efx.vy += 1.8;
+            }
+        }
+    };
+    
     var update = function(step,dt,now) {
         if(!World.worldReady()) return;
         Controls.processInput(game,Players);
         Players.update(step,game.ticks);
         World.update();
+        effectUpdate();
         if(game.ticks % game.fps == 0) { // Every game second
             game.framesPerSecond = game.frameCount;
             game.tickCount = 0; game.frameCount = 0;

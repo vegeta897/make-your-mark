@@ -4,9 +4,10 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var c, cmm; // Canvas and minimap objects
     var cursor = Canvas.cursor;
     var game, world, pix, mmWidth, mmHeight, mWidth, mHeight;
-    var thingSpriteImg, thingSpriteLib, containerSpriteImg, impactSpriteImg, containerSpriteLib,
-        bgTiles = [], genericSprite, cursorSprite, sectorSpriteImg;
-    var lastSO = { };
+    var thingSpriteImg, thingSpriteLib, containerSpriteImg, containerSpriteLib,
+        tinyNumbersImg, bgTiles = [], genericSprite, cursorSprite, sectorSpriteImg;
+    var lastSO = {};
+    var graphicsRevision = 0;
     
     var disableShadow = function(canvas) {
         canvas.shadowColor = 'transparent';
@@ -74,18 +75,18 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 thingSpriteLib.indexes[thingSpriteLib.names[n][0]] = [n,position];
                 position += thingSpriteLib.names[n].length
             }
-            // Load impact animation sprite sheet
-            impactSpriteImg = new Image();
-            impactSpriteImg.src = 'img/impact-anims.png';
             // Load container sprite sheet
             containerSpriteImg = new Image();
-            containerSpriteImg.src = 'img/container-sprites.png';
+            containerSpriteImg.src = 'img/container-sprites.png?'+graphicsRevision;
             containerSpriteLib = {
-                bag: 0 // Row index of first of container type (add tierNum to get other tiers)
+                bag: 0, // Row index of first of container type (add tierNum to get other tiers)
+                present: 4
             };
             // Load sector sprite sheet
             sectorSpriteImg = new Image();
-            sectorSpriteImg.src = 'img/sector-sprites.png';
+            sectorSpriteImg.src = 'img/sector-sprites.png?'+graphicsRevision;
+            tinyNumbersImg = new Image();
+            tinyNumbersImg.src = 'img/tiny-numbers.png?'+graphicsRevision; // Tiny numbers font
             // Create BG tiles
             var bgTileAlphas = [0.1,0.08,0.04,0.02];
             for(var i = 0; i < 4; i++) {
@@ -185,7 +186,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             var hoverCount = {};
             // Render objects
             var objects = world.things.concat(world.containers);
-            for(var j = 0; j < objects.length; j++) {
+            for(var j = objects.length-1; j >= 0; j--) {
                 var o = objects[j];
                 if(o.removed && !o.dropped) continue; // Skip if object removed and not dropped
                 var tdx = (o.sx - game.player.osx)*(game.arena.width-4) + o.x, 
@@ -194,15 +195,24 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 if(drawX <= pix || drawX >= mWidth - pix
                     || drawY <= pix || drawY >= mHeight - pix) continue;
                 var knockX = 0, knockY = 0;
+                var dirXY = [];
                 if(o.knockback && o.knockback[1] > 0) switch(o.knockback[0]) {
-                    case 'left': knockX = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
-                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
-                    case 'right': knockX = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
-                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
-                    case 'up': knockY = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
-                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
-                    case 'down': knockY = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
-                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); break;
+                    case 'left': 
+                        knockX = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1])); 
+                        dirXY = [-1,0]; break;
+                    case 'right': 
+                        knockX = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockY = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1]));
+                        dirXY = [1,0]; break;
+                    case 'up': 
+                        knockY = parseInt(-Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1]));
+                        dirXY = [0,-1]; break;
+                    case 'down': 
+                        knockY = parseInt(Math.pow(o.knockback[1],2)/70*(1.2-o.realHealth/o.health[1]));
+                        knockX = parseInt(o.knockback[2] * o.knockback[1]/20*(1.2-o.realHealth/o.health[1]));
+                        dirXY = [0,1]; break;
                 }
                 if(thingSpriteLib.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
                     c.main.shadowColor = 'rgba(0,0,0,0.3)';
@@ -221,19 +231,9 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     c.main.shadowOffsetX = 2;
                     c.main.shadowOffsetY = 1;
                     var containerSpriteX = o.open ? o.broke ? 48 : 24 : 0,
-                        containerSpriteY = containerSpriteLib[o.id] + o.tierNum * 24;
+                        containerSpriteY = (containerSpriteLib[o.id] + o.tierNum) * 24;
                     c.main.drawImage(containerSpriteImg, containerSpriteX, containerSpriteY, pix, pix,
                         drawX+knockX, drawY+knockY, pix, pix);
-                    if(o.knockback && o.knockback[1] > 8) {
-                        c.main.shadowColor = 'rgba(0,0,0,0.7)';
-                        c.main.shadowBlur = 0;
-                        c.main.shadowOffsetX = 1;
-                        c.main.shadowOffsetY = 1;
-                        var impactSpriteX = (20 - o.knockback[1]) * 48,
-                            impactSpriteY = containerSpriteY*2;
-                        c.main.drawImage(impactSpriteImg, impactSpriteX, impactSpriteY, 48, 48,
-                            drawX-12, drawY-12, 48, 48);
-                    }
                     disableShadow(c.main);
                 } else { // No sprite, draw letter box
                     c.main.drawImage(genericSprite,drawX+knockX, drawY+knockY);
@@ -243,16 +243,28 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
                     c.main.fillText(o.name[0],drawX+11+kerning+knockX,drawY+17+knockY);
                 }
+                if(o.knockback && o.knockback[1] == 20) { // Draw damage number
+                    game.effects.push({type:'damage', amt: o.knockback[3], dirXY: dirXY,
+                        ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 30,
+                        vx: dirXY[0] * 8 + Util.randomIntRange(-6,6), vy: -Util.randomIntRange(15,20)});
+                    for(var pe = 0; pe < 12; pe++) {
+                        game.effects.push({ type:'spark', color: o.colors ? Util.pickInArray(o.colors) : 'ffffff',
+                            ox: drawX + pix/2 - dirXY[0]*pix/4, oy: drawY + pix/2 - dirXY[1]*pix/4,
+                            vx: dirXY[0] * 16 + Util.randomIntRange(-pix/2,pix/2), vy: -Util.randomIntRange(10,25),
+                            ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60) });
+                    }
+                }
                 var showHealth = o.health && o.realHealth < o.health[1];
                 // Draw container health
                 if(showHealth) {
+                    var under = o.x == game.player.ox && o.y == game.player.oy + 1 ? pix+6 : 0;
                     c.main.fillStyle = 'rgba(0,0,0,0.7)';
-                    c.main.fillRect(drawX+1+knockX,drawY-5+knockY,pix,5);
+                    c.main.fillRect(drawX+1+knockX,drawY-5+knockY+under,pix,5);
                     c.main.fillStyle = 'white';
-                    c.main.fillRect(drawX+knockX,drawY-6+knockY,pix,5);
+                    c.main.fillRect(drawX+knockX,drawY-6+knockY+under,pix,5);
                     var hp = o.realHealth/ o.health[1];
                     c.main.fillStyle = 'rgba(0,0,0,0.9)';
-                    c.main.fillRect(drawX-1+pix+knockX,drawY-5+knockY,parseInt((pix-2)*(1-hp))*-1,3);
+                    c.main.fillRect(drawX-1+pix+knockX,drawY-5+knockY+under,parseInt((pix-2)*(1-hp))*-1,3);
                 }
                 // Draw select box
                 if(cursor.hover.hasOwnProperty(o.guid)) {
@@ -280,6 +292,22 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                 c.main.moveTo(drawX,drawY); c.main.lineTo(drawX + pix,drawY);
                 c.main.lineTo(drawX + pix,drawY + pix); c.main.lineTo(drawX,drawY + pix);
                 c.main.closePath(); c.main.stroke();
+            }
+            // Draw effects
+            for(var f = 0; f < game.effects.length; f++) {
+                var efx = game.effects[f];
+                c.high.save();
+                c.high.globalAlpha = efx.frame >= (efx.time - 10) ? (efx.time - efx.frame) / 10 : 1; // Fade out
+                if(efx.type == 'damage') {
+                    c.high.drawImage(tinyNumbersImg,efx.amt*4,0,4,6,parseInt(efx.x),parseInt(efx.y),4,6);
+                } else if(efx.type == 'spark') {
+                    c.high.fillStyle = '#'+efx.color;
+                    c.high.shadowColor = 'rgba(0,0,0,1)'; c.high.shadowBlur = 1;
+                    c.high.shadowOffsetX = 0; c.high.shadowOffsetY = 0;
+                    c.high.fillRect(parseInt(efx.x),parseInt(efx.y),1,1);
+                    disableShadow(c.high);
+                }
+                c.high.restore();
             }
             // Erase things from buffer
             c.main.clearRect(0,0, mWidth,buffer);

@@ -52,7 +52,13 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 - All items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
     - Damage to container is based on item used to attack and container type/material
-    - Quality of items within based on health of container
+    - Attacked containers are busted open and have the broken sprite
+    - Player can gain specific container opening skills to open them cleanly
+      - Chance of success is based on amount of power saved up in that skill
+        - Power is drained to 0 when skill is used, regenerates slowly over time
+      - Player can do something with a cleanly opened container? Collect them?
+      - Opening containers forcefully gives XP toward earning skill or next level of skill for that container type
+    - Quality of items within based on container tier
     - Make it juicy!
     - Health stored on firebase as time of last hit and health at last hit (current health calculated client-side)
     - Opened containers store on firebase as time opened, will respawn eventually

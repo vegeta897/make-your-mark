@@ -122,7 +122,8 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
             for(var i = 0; i < world.containers.length; i++) { // Regen container healths
                 var ctr = world.containers[i];
                 if(ctr.knockback && ctr.knockback[1] > 0) ctr.knockback[1]--;
-                ctr.open = ctr.health[0] == 0 || ctr.realHealth == 0;
+                ctr.broke = ctr.health[0] == 0 || ctr.realHealth == 0;
+                ctr.open = ctr.broke ? true : ctr.open;
                 if(ctr.health[0] == ctr.health[1] || ctr.health[0] == 0 || ctr.realHealth == 0) continue;
                 ctr.realHealth = game.ticks - ctr.lastHit > 2000 ? // ~33 seconds since last hit before regen
                     Math.min(ctr.health[1],ctr.health[0]+parseInt((game.ticks - (ctr.lastHit+1000))/300)) : ctr.health[0];
@@ -180,7 +181,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
         },
         attack: function(target,damage,dir) {
             if(target.realHealth <= 0) return;
-            target.knockback = [dir,20,Util.randomIntRange(-2,2)];
+            target.knockback = [dir,20,Util.randomIntRange(-2,2),damage];
             var newHealth = target.realHealth-damage;
             // TODO: Use transact to lower health
             FireService.set('containers/'+target.guid,Math.max(newHealth,0)+':'+game.ticks);
