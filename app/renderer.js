@@ -243,7 +243,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                     var kerning = jQuery.inArray(o.name[0],['A','B','C','G','H','R','M']) >= 0 ? 1 : 0;
                     c.main.fillText(o.name[0],drawX+11+kerning+knockX,drawY+17+knockY);
                 }
-                if(o.knockback && o.knockback[1] == 20) { // Draw damage number
+                if(o.newHit) { // If hit and haven't created fx yet
                     game.effects.push({type:'damage', amt: o.knockback[3], dirXY: dirXY,
                         ox: drawX + pix/2 + 16*dirXY[0], oy: drawY, time: 30,
                         vx: dirXY[0] * 8 + Util.randomIntRange(-6,6), vy: -Util.randomIntRange(15,20)});
@@ -253,6 +253,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
                             vx: dirXY[0] * 16 + Util.randomIntRange(-pix/2,pix/2), vy: -Util.randomIntRange(10,25),
                             ground: drawY + Util.randomIntRange(16,28), time: Util.randomIntRange(20,60) });
                     }
+                    o.newHit = false;
                 }
                 var showHealth = o.health && o.realHealth < o.health[1];
                 // Draw container health

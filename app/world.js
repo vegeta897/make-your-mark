@@ -181,6 +181,7 @@ Application.Services.factory('World',function(Util,Things,Containers,Renderer,Fi
         },
         attack: function(target,damage,dir) {
             if(target.realHealth <= 0) return;
+            target.newHit = true;
             target.knockback = [dir,20,Util.randomIntRange(-2,2),damage];
             var newHealth = target.realHealth-damage;
             // TODO: Use transact to lower health

@@ -138,7 +138,7 @@ Application.Services.factory('Players',function(Renderer,Controls,World,Util,Thi
         }
         if(x < 0 || y < 0 || x > 32 || y > 20) return;
         var target = World.getObjectsAt(player.osx,player.osy,x,y,'containers');
-        if(target.length > 0) setTimeout(function(){ World.attack(target[0],1,dir); }, 120);
+        if(target.length > 0) setTimeout(function(){ World.attack(target[0],1,dir); }, 80);
     };
     
     World.setRemovedCallback(function(){ player.vicinity = World.setPosition(player.sx,player.sy,player.x,player.y); });
