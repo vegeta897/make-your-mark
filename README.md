@@ -30,6 +30,7 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
   - Players can explore an instance together (created specifically for their combination of player IDs)
     - Offers better loot?
     - Need a way to fairly divide loot when 2+ players are exploring
+- **Make game isometric?**
 
 ### Metagame ideas
 

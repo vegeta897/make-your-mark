@@ -7,7 +7,7 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
     var thingSpriteImg, thingSpriteLib, containerSpriteImg, containerSpriteLib,
         tinyNumbersImg, bgTiles = [], genericSprite, cursorSprite, sectorSpriteImg;
     var lastSO = {};
-    var graphicsRevision = 0;
+    var graphicsRevision = 2;
     
     var disableShadow = function(canvas) {
         canvas.shadowColor = 'transparent';
@@ -42,7 +42,9 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             mWidth = c.mainCanvas.width; mHeight = c.mainCanvas.height;
             // Load sprite sheet
             thingSpriteImg = new Image();
-            thingSpriteImg.src = 'img/thing-sprites.png';
+            thingSpriteImg.src = 'img/thing-sprites.png?'+graphicsRevision;
+            // TODO: Create 2 new sprite sheets for poor and average with lower saturation
+            // TODO: Create some kind of effect for higher quality items
             thingSpriteLib = {
                 indexes: {}, names: [
                     ['pencil','chewed|scratched','broken|cut','broken|cut+chewed|scratched'],
@@ -78,9 +80,8 @@ Application.Services.factory('Renderer',function(Canvas,Util) {
             // Load container sprite sheet
             containerSpriteImg = new Image();
             containerSpriteImg.src = 'img/container-sprites.png?'+graphicsRevision;
-            containerSpriteLib = {
-                bag: 0, // Row index of first of container type (add tierNum to get other tiers)
-                present: 4
+            containerSpriteLib = { // Row index of first of container type (add tierNum to get other tiers)
+                bag: 0, present: 4, buried: 8
             };
             // Load sector sprite sheet
             sectorSpriteImg = new Image();

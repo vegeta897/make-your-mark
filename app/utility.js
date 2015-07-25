@@ -4,7 +4,7 @@ Application.Services.service('Util', function() {
 
     var qualityLevels = [
         {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:0},
-        {r:220, g:220, b:220, hex:'dcdcdc', name:'Average', min:400},
+        {r:220, g:220, b:220, hex:'fbfbfb', name:'Average', min:400},
         {r:88, g:193, b:111, hex:'58c16f', name:'Uncommon', min:860},
         {r:59, g:126, b:249, hex:'3b7ef9', name:'Rare', min:910},
         {r:193, g:75, b:243, hex:'c14bf3', name:'Unique', min:950},
