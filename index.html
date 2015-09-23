@@ -8,47 +8,64 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body ng-cloak ng-controller="Main">
-    <header>
-        <h1>Make Your Mark</h1>
-        <p><strong>v{{ version }}</strong> - <span class="muted">{{ versionName }}</span></p>
-    </header>
-    <section id="arena" ng-hide="needUpdate">
-        <div class="canvas"></div>
-        <controls></controls>
-        <!--<p class="coords">-->
-            <!--<strong>{{ cursor.x }}</strong> , <strong>{{ cursor.y }}</strong>-->
-        <!--</p>-->
-    </section>
-    <section id="info" ng-hide="needUpdate">
-        <h2>Welcome to <strong>Make Your Mark</strong>!</h2>
-        <p>
-            <strong>Move</strong> around with <strong>right</strong> click. Move to things to pick them up.<br />
-            <strong>Attack</strong> with <strong>left</strong> click. Attacks are directional.<br />
-        </p>
-        <p>You are seeking {{ player.seeking.property | properVowelConsonant }} <strong>{{ player.seeking.property | capitalize }} {{ player.seeking.properName }}</strong>.</p>
-        <p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>
-        <p>
-            <label>Name
-                <input type="text" name="playerName" ng-model="player.name" size="12" maxlength="20">
-            </label>
-        </p>
-        <p>
-            Teleport: 
-            <button ng-repeat="otherPlayer in world.players" ng-click="gotoPlayer(otherPlayer)" ng-hide="otherPlayer.guid == player.guid">{{ otherPlayer.name }}</button>
-        </p>
-        <p>
-            <button ng-click="game.paused = !game.paused">{{ game.paused ? 'Unpause' : 'Pause' }}</button>
-            <button ng-click="clearPlayerData()">Clear Player Data</button>
-        </p>
-        <dl>
-            <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
-            <dt>Global Tick: <strong>{{ game.ticks }}</strong></dt>
-            <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
-        </dl>
-    </section>
-    <section ng-show="needUpdate">
-        <h2 class="error">Your game is out of date! Shift+F5 to hard-refresh the page</h2>
-    </section>
+    <div id="wrapper">
+        <header>
+            <h1>Make Your Mark</h1>
+            <p><strong>v{{ version }}</strong> - <span class="muted">{{ versionName }}</span></p>
+        </header>
+        <div class="canvas">
+            <canvas id="mainCanvas" width="722" height="416" ng-hide="needUpdate">
+                Your browser is too old for this game. <a href="http://www.google.com/chrome">Time to upgrade.</a>
+            </canvas>
+        </div>
+        <canvas id="zoomCanvas" width="180" height="110"></canvas>
+        <controls ng-hide="needUpdate"></controls>
+        <div class="minimap" ng-hide="needUpdate">
+            <canvas id="minimap" width="225" height="225"></canvas>
+            <button ng-click="minimapZoom(-1)" ng-disabled="game.options.minimapZoom < 2">-</button>
+            <button ng-click="minimapZoom(1)" ng-disabled="game.options.minimapZoom > 3">+</button>
+        </div>
+        <section id="stats" ng-hide="needUpdate">
+            <dl class="stats">
+                <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
+                <dt>Global Time: <strong>{{ game.globalSecond }}</strong></dt>
+                <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
+                <dt>Temperature: <strong>{{ game.weather.now.temp | number:0 }}</strong>&deg;F &nbsp;&nbsp;&nbsp;
+                    Precipitation: <strong>{{ game.weather.now.rain | number:0 }}</strong>%</dt>
+            </dl>
+        </section>
+        <section id="info" ng-hide="needUpdate">
+            <p>
+                <strong>Move</strong> around with <strong>right</strong> click.<br />
+                Move to things to pick them up.<br />
+                <strong>Attack</strong> with <strong>left</strong> click.
+            </p>
+            <p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>
+            <p>
+                <label>Name
+                    <input type="text" name="playerName" ng-model="player.name" size="10" maxlength="20">
+                </label>
+            </p>
+            <p>
+                Teleport: 
+                <button ng-repeat="otherPlayer in world.players" ng-click="gotoPlayer(otherPlayer)" ng-hide="otherPlayer.guid == player.guid">{{ otherPlayer.name }}</button>
+            </p>
+            <p>
+                <button ng-click="game.paused = !game.paused">{{ game.paused ? 'Unpause' : 'Pause' }}</button>
+                <button ng-click="clearPlayerData()">Reset Player</button>
+                <button ng-click="clearMapData()" ng-show="player.name == 'Vegeta'">Reset Map</button>
+            </p>
+        </section>
+        <section id="eventLog" ng-hide="needUpdate">
+            <ol>
+                <li ng-repeat="event in game.eventLog | reverse" ng-bind-html="event.text"></li>
+            </ol>
+        </section>
+        <section ng-show="needUpdate" class="error">
+            <h2>Your game is out of date! Shift+F5 to hard-refresh the page</h2>
+            <p>If that doesn't work, Vegeta probably locked the app. An update must be coming!</p>
+        </section>
+    </div> <!-- /wrapper -->
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular.min.js"></script>
     <script src="js/angular-sanitize.min.js"></script>
@@ -58,13 +75,16 @@
     <script src="app/main.js"></script>
     <script src="app/game.js"></script>
     <script src="app/players.js"></script>
+    <script src="app/pathfinder.js"></script>
     <script src="app/world.js"></script>
     <script src="app/things.js"></script>
     <script src="app/containers.js"></script>
     <script src="app/renderer.js"></script>
+    <script src="app/spritemanager.js"></script>
+    <script src="app/textdraw.js"></script>
+    <script src="app/effects.js"></script>
     <script src="app/interface.js"></script>
     <script src="app/controls/controls.js"></script>
-    <script src="app/canvas/canvas.js"></script>
     <script src="app/fireservice.js"></script>
     <script src="app/utility.js"></script>
     <script src="js/seedrandom.js"></script>

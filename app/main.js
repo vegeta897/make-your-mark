@@ -1,10 +1,11 @@
 'use strict';
-Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Canvas,FireService,Util) {
+Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Controls,FireService,Util) {
 
-    $scope.version = 0.017; $scope.versionName = 'Mark-us Persson';
+    $scope.version = 0.02; $scope.versionName = 'Mark of the Unicorn';
     FireService.onceGlobal('version',function(ver) {
         if($scope.version < ver) {
             $scope.needUpdate = true;
+            $timeout(function(){});
         } else {
             Game.init();
             FireService.onGlobal('version',function(newVer){
@@ -15,9 +16,11 @@ Application.Controllers.controller('Main', function($scope,$timeout,Game,World,P
     
     $scope.game = Game.game;
     $scope.world = World.world;
-    $scope.cursor = Canvas.cursor;
+    $scope.cursor = Controls.cursor;
     $scope.player = Players.player;
+    $scope.minimapZoom = Game.minimapZoom;
     
     $scope.clearPlayerData = Players.clearPlayerData;
+    $scope.clearMapData = World.clearMapData;
     $scope.gotoPlayer = Players.gotoPlayer;
 });

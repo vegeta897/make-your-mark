@@ -1,54 +1,125 @@
 /* Eric Meyer's Reset CSS v2.0 - http://cssreset.com */
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
 
-body { width: 1202px; margin: 0 auto; }
+*:not(input) {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+body { width: 100%; }
+#wrapper { margin: 0 auto; width: 1444px; position: relative; }
 header { width: 100%; height: 56px; }
 h1 { font-size: 3em; padding: 10px 0 0 0; float: left; }
 header h1 + p { float: left; margin: 30px 0 0 12px; }
+section { position: relative; }
+body > section { top: -55px; }
 #globalTime { position: absolute; left: 300px; top: 0; width: 600px; text-align: center; }
 #globalTime .unit { float: left; width: 75px; }
 #globalTime .unit .number { font-size: 3.1em; }
 #globalTime .unit .label { font-size: 1.1em; font-weight: bold; text-transform: uppercase; }
-.canvas { position: relative; float: left; border: 1px solid; width: 888px; height: 600px; background: #555; }
-.canvases canvas { position: absolute; }
-/*canvas#highCanvas { position: absolute; top: 0; left: 0; }*/
+.canvas { position: absolute; top: 0; width: 1444px; height: 832px; }
+canvas#mainCanvas {
+    position: absolute;
+    transform-origin: 0% 0%;
+    -ms-transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+    -o-transform-origin: 0% 0%;
+    -moz-transform-origin: 0% 0%;
+    transform: scale(2, 2);
+    -ms-transform: scale(2, 2);
+    -webkit-transform: scale(2, 2);
+    -o-transform: scale(2, 2);
+    -moz-transform: scale(2, 2);
+    image-rendering: optimizeSpeed;             /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+    image-rendering: -webkit-optimize-contrast; /* Safari                        */
+    image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated;                 /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+canvas#highCanvas { z-index: 4500; }
 
-.controls { float: left; box-sizing: border-box; padding: 7px; width: 312px; height: 602px; border: 1px solid; border-left-width: 0; }
-.controls .upper { height: 397px; }
-.controls .upper section { margin-bottom: 8px; }
-.controls .upper h2 { text-align: center; margin-bottom: 0; }
-.controls .upper h3 { font-size: 1.2em; margin-bottom: 4px; }
-.controls .upper button {
-    font-size: 18px; padding: 3px 6px; border: 1px solid; cursor: pointer; margin: 0 8px 8px; height: 34px;
+#zoomCanvas {
+    pointer-events: none;
+    opacity: 0;
+    position: relative; left: 272px; top: 67px;
+    z-index: 4600;
+    transform-origin: 0% 0%;
+    -ms-transform-origin: 0% 0%;
+    -webkit-transform-origin: 0% 0%;
+    -o-transform-origin: 0% 0%;
+    -moz-transform-origin: 0% 0%;
+    transform: scale(5, 5);
+    -ms-transform: scale(5, 5);
+    -webkit-transform: scale(5, 5);
+    -o-transform: scale(5, 5);
+    -moz-transform: scale(5, 5);
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -o-crisp-edges;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
 }
-.controls .upper button.thing { 
-    font-size: 18px; float: left; padding: 6px; margin: 6px; border: 1px solid; cursor: pointer; 
+
+.controls { display: none; position: absolute; top: 10px; right: 0; width: 400px; z-index: 5000; padding: 12px; }
+.controls section { margin-bottom: 8px; }
+.controls h2 { margin-bottom: 6px; }
+.controls h3 { font-size: 1.6em; margin-bottom: 8px; }
+.controls h4 { font-size: 1.2em; margin-bottom: 6px; }
+.controls .item-description { height: 2em; }
+.controls dl dt { line-height: 1.4em; }
+.controls button {
+    font-size: 18px; padding: 3px 6px; border: 1px solid; margin: 0 8px 8px; height: 34px;
 }
-.controls .upper .drop-thing-group {
+.controls button.thing { 
+    font-size: 18px; float: left; padding: 6px; margin: 6px; border: 1px solid;
+}
+.controls .drop-thing-group {
     display: inline-block;     position: relative;
 }
-.controls .upper .drop-thing-group button.thing {
+.controls .drop-thing-group button.thing {
     margin-left: 0; float: left;
 }
-.controls .upper button.drop-thing {
+.controls button.drop-thing {
     float: left; padding: 0; margin: 6px 0 6px; width: 29px; height: 34px;
 }
+.controls strong+strong { font-size: 0.97em; line-height: 1em; }
 
-.controls .minimap { height: 189px; padding: 1px; position: relative; box-sizing: border-box; }
+.minimap { width: 227px; height: 227px; padding: 1px; position: absolute; 
+    box-sizing: border-box; top: 56px; z-index: 5500; }
+.minimap button { font-weight: bold; font-size: 1.2em; width: 24px; height: 24px; padding: 0; }
 
-section#arena p.coords { margin-right: 2px; float: right; text-align: right; margin-bottom: 0; }
-section#info { padding: 6px 0; clear: both; }
+p.coords { margin-right: 2px; float: right; text-align: right; margin-bottom: 0; }
+section#stats { z-index: -99; width: 220px; position: absolute; top: 60px; left: 250px; }
+section#info { z-index: 5000; width: 228px; padding: 6px 0; position: absolute; top: 500px; }
 section#info>section { float: left; }
 section#info>section:first-child { width: 300px; }
 section#info>section:nth-child(2) { width: 900px; }
+section#info button { font-size: 0.8em; padding: 1px 2px; }
+section#eventLog { z-index: -99; width: 605px; position: absolute; top: 695px; line-height: 1.2em; }
+section#eventLog strong { font-weight: normal; font-size: 1em; }
 
+section.half { width: 49.5%; display: inline-block; vertical-align: top; }
+
+strong { font-size: 1.1em; }
 h2 { font-size: 1.5em; margin-bottom: 8px; }
 .button-group { padding: 4px; margin-bottom: 8px; border: 1px solid; }
 dl dt { line-height: 1.2em; }
 p { margin-bottom: 1em; line-height: 1.2em; }
+*:not(input) { cursor: default; }
+button, a, a>* { cursor: pointer; }
+button:disabled { cursor: default; }
 p button { margin-right: 4px; }
 button:focus { outline: 0; }
 label input { margin-left: 4px; }
+.stats { font-size: 0.8em; }
+small { font-size: 0.8em; }
+.error { font-size: 1.8em; }
 
 .ng-hide { transition: all 0s !important; }
 .clearfix { overflow: auto; }

@@ -6,16 +6,24 @@ Application.Services.factory('FireService',function() {
     var getServerTime = function() {
         return localTimeOffset ? new Date().getTime() + localTimeOffset : new Date().getTime();
     };
+    var writesPer5Sec = 0;
+    setInterval(function(){
+        if(writesPer5Sec > 200) { alert("Too many firebase writes! ("+writesPer5Sec+")"); fireRef = null; }
+        writesPer5Sec = 0;
+    },5000);
     
     return {
-        set: function(path, value) { fireRef.child(path).set(value); },
+        set: function(path, value) { fireRef.child(path).set(value); writesPer5Sec++; },
         remove: function(path) {
             if(path.constructor !== Array) path = [path];
-            for(var i = 0; i < path.length; i++) fireRef.child(path[i]).remove();
+            for(var i = 0; i < path.length; i++) {
+                fireRef.child(path[i]).remove(); writesPer5Sec++;
+            }
         },
-        update: function(path, properties) { fireRef.child(path).update(properties); },
-        push: function(path, value) { fireRef.child(path).push(value); },
-        transact: function(path, amount) {
+        update: function(path, properties) { fireRef.child(path).update(properties); writesPer5Sec++; },
+        push: function(path, value) { fireRef.child(path).push(value); writesPer5Sec++; },
+        transact: function(path, amount) { 
+            writesPer5Sec++;
             fireRef.child(path).transaction(function(orig) {
                 return !orig ? +amount : +orig + +amount == 0 ? null : +orig + +amount
             });
@@ -27,7 +35,10 @@ Application.Services.factory('FireService',function() {
             fireRef.child(path).on('value',function(snap) { handler(snap.val()); });
         },
         onAddChild: function(path, handler) {
-            fireRef.child(path).on('child_added',function(snap) { handler(snap.val(),snap.name()); });
+            fireRef.child(path).on('child_added',function(snap) { handler(snap.val(),snap.key()); });
+        },
+        onRemoveChild: function(path, handler) {
+            fireRef.child(path).on('child_removed',function(snap) { handler(snap.val(),snap.key()); });
         },
         off: function(path) {
             if(path.constructor !== Array) path = [path];
@@ -49,11 +60,10 @@ Application.Services.factory('FireService',function() {
         },
         initServerTime: function(callback) {
             var localTimeRef = new Date().getTime();
-            var timeStampID = 'stamp'+parseInt(Math.random()*10000);
+            var timeStampID = 'stamp'+Math.floor(Math.random()*10000);
             fireRef.child('timeStampTests/'+timeStampID).set(Firebase.ServerValue.TIMESTAMP,function(){
                 fireRef.child('timeStampTests/'+timeStampID).once('value',function(snap){
                     localTimeOffset = snap.val() - localTimeRef;
-                    console.log('local time offset:',localTimeOffset);
                     callback(localTimeOffset);
                     fireRef.child('timeStampTests/'+timeStampID).remove();
                     //setInterval(interval,500);
