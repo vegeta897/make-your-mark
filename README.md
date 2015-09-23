@@ -7,8 +7,8 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 - Move around and interact/gather objects
 - Deltas stored on firebase
 - ~~Goal of game is to leave evidence of your existence (marks) in the game world~~
-- More complicated "marks" require more complex interactions involving more objects
-  - That includes objects in inventory, and objects nearby (chain reactions?)
+- ~~More complicated "marks" require more complex interactions involving more objects~~
+  - ~~That includes objects in inventory, and objects nearby (chain reactions?)~~
 - ~~Player lives should be finite~~
   - ~~Need to keep making marks or you die~~
   - No users/registration, persistence is done through localstorage
@@ -22,15 +22,15 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 - Item durability, eg. scissors eventually wear down/break
 - Player skill system
   - Use less durability when skilled with an item
-  - Yield more product when crafting certain things?
-  - Chance to create some special item when crafting?
+  - ~~Yield more product when crafting certain things?~~
+  - ~~Chance to create some special item when crafting?~~
 - **Add Item quality levels with colored names/icons**
   - Wrapped presents and chests that contain a random high quality item
 - Instanced player worlds so that one player doesn't dominate the server?
   - Players can explore an instance together (created specifically for their combination of player IDs)
     - Offers better loot?
     - Need a way to fairly divide loot when 2+ players are exploring
-- **Make game isometric?**
+- Buddy cam system?
 
 ### Metagame ideas
 
@@ -50,9 +50,14 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
   - Attacks are based on what is equipped
     - Different equip slots, like cutting tool, stabbing tool, bashing tool, writing tool, etc
   - Monsters to attack?
-- All items are hidden in containers (chests, bags, presents, buried)
+- Most items are hidden in containers (chests, bags, presents, buried)
   - Player attacks/uses containers to lower their health until opened
-    - Damage to container is based on item used to attack and container type/material
+    - Damage to container is based on item used to attack type and container type
+      - Best attack for container type is chosen from items in toolbelt
+      - Attacks have a cooldown, per attack and per item
+      - Number keys to manually select an attack
+      - Tilde to revert to auto-choose
+      - Can disable specific abilities to not be auto-chosen
     - Attacked containers are busted open and have the broken sprite
     - Player can gain specific container opening skills to open them cleanly
       - Chance of success is based on amount of power saved up in that skill
@@ -65,3 +70,12 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
     - Opened containers store on firebase as time opened, will respawn eventually
       - Or, all objects reset with a new seed every day?
   - Dropped items have time dropped stored, will decay eventually
+  - Resource mines that players can mine raw material from (aluminum, rubber, wood, etc)
+    - Raw material can be used to craft items?
+    - Raw material can be used for a chance to upgrade items?
+      - More material = higher chance of success
+    - Raw material can be used to repair items?
+
+### Ambient AI
+
+- Little creatures that idle around containers, attack container when player does

@@ -2,6 +2,7 @@
 
 Application.Services.service('Util', function() {
 
+    var tw = 24, th = tw/2;
     var qualityLevels = [
         {r:176, g:176, b:176, hex:'b0b0b0', name:'Poor', min:0},
         {r:220, g:220, b:220, hex:'fbfbfb', name:'Average', min:400},
@@ -33,17 +34,49 @@ Application.Services.service('Util', function() {
     var hexToRGB = function(hex) {
         var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
+            r: Math.floor(result[1], 16),
+            g: Math.floor(result[2], 16),
+            b: Math.floor(result[3], 16)
         } : null;
     };
     
     return {
         randomIntRange: function(min,max) { return Math.floor(Math.random() * (+max - +min + 1)) + +min ; },
+        randomSlide: function(input,min,max) { // Randomly pick between upper/lower values based on the input value
+            if(input >= max || input <= min) return input;
+            return Math.random() * (max-min) + +min > input ? +min : +max;
+        },
         pickInArray: pickInArray,
         hsvToHex: hsvToHex, hexToRGB: hexToRGB,
-        capitalize: function(s) { return s.substring(0,1).toUpperCase()+s.substring(1); },
+        rgbToHSV: function(r, g, b) {
+            r = r/255; g = g/255; b = b/255;
+            var max = Math.max(r, g, b), min = Math.min(r, g, b);
+            var h, s, v = max, d = max - min;
+            s = max == 0 ? 0 : d / max;
+            if(max == min){  h = 0; } else { // achromatic
+                switch(max){
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return {h:h,s:s,v:v};
+        },
+        hsvToRGB: function(h, s, v) {
+            var r, g, b, i = Math.floor(h * 6);
+            var f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+            return {r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};
+        },
+        capitalize: function(s) { return s[0].toUpperCase()+s.substring(1); },
         randomColor: function(/* maxMins (object has 'maxSat') OR object type (string) */) {
             //    var palette = jQuery.isArray(arguments[0]) ? arguments[0] : undefined;
             if (arguments[0]) {
@@ -103,7 +136,7 @@ Application.Services.service('Util', function() {
             return pickInArray(array);
         },
         flip: function() { return Math.random() > 0.5; }, // Flip a coin
-        isInt: function(input) { return parseInt(input) === input; },
+        isInt: function(input) { return Math.floor(input) === input; },
         restrictNumber: function(input,min,max) {
             input = input.replace(/[^\d.-]/g, '').replace('..','.').replace('..','.').replace('-','');
             return input > max ? max : input < min ? min : input;
@@ -147,17 +180,30 @@ Application.Services.service('Util', function() {
         },
         objectQuality: function(object) {
             if(!object) return false;
-            if(object.tiers) { // If container
-                return object.tier ? { 
-                    name:object.tier[0].toUpperCase() + object.tier.substring(1, object.tier.length),
-                    r:240, g:240, b:240, hex:'f0f0f0'
-                } : { name:'', r:240, g:240, b:240, hex:'f0f0f0' };
+            if(object.health) { // If container
+                return { name:'', r:240, g:240, b:240, hex:'f0f0f0' };
             } else { // If thing
                 for(var q = qualityLevels.length-1; q >= 0; q--) {
-                    if(object.quality > qualityLevels[q].min) return qualityLevels[q];
+                    if(object.quality >= qualityLevels[q].min) return qualityLevels[q];
                 }
             }
-        }
+        },
+        xyInBounds: function(x,y,bx,by,w,h) { return x >= bx && x < bx+w && y >= by && y < by+h; },
+        // Convert isometric grid to screen space
+        isoToScreen: function(x,y) { return { x: (+x + +y) * tw + 2, y: (+y - x) * th + 188 }; },
+        // Convert screen space to isometric grid
+        screenToIso: function(x,y) { 
+            return { x: ((x-2) / tw - (y-188) / th)/2, y: ((y-188) / th + (x-2) / tw)/2 }; },  
+        // Convert isometric grid to relative screen space
+        isoToScreenRel: function(x,y) { return { x: (+x + +y) * tw, y: (+y - x) * th }; },
+        // Convert relative screen space to isometric grid
+        screenToIsoRel: function(x,y) {
+            return { x: (x / tw - (y) / th)/2, y: ((y) / th + x / tw)/2 }; },
+        validOffSectorTiles: { '0:6':1,'0:7':1,'0:8':1,'14:6':1,'14:7':1,'14:8':1,
+            '6:0':1,'7:0':1,'8:0':1,'6:14':1,'7:14':1,'8:14':1,
+            '15:6':1,'15:7':1,'15:8':1,'-1:6':1,'-1:7':1,'-1:8':1,
+            '6:15':1,'7:15':1,'8:15':1,'6:-1':1,'7:-1':1,'8:-1':1 },
+        qualityLevels: qualityLevels
     }
 });
 
@@ -196,15 +242,149 @@ Application.Filters
         return function(items) { if(!items) return items;
             return items.slice().reverse();
         }
-    }).filter('thingActions', function(Util) {
-        return function(thing) { if(!thing) return thing;
-            var actions = (angular.copy(thing.actions) || []).concat(thing.actionsExtra || []);
-            actions = Util.subtractArrays(actions,thing.actionsLost || []);
-            return actions.sort();
-        }
     })
     .filter('properVowelConsonant', function() {
         return function(input) { if(!input) { return ''; }
             return jQuery.inArray(input[0],['a','e','i','o','u']) >= 0 ? 'an' : 'a';
         }
+    }).filter('reverse', function() {
+        return function(items) {
+            return items.slice().reverse();
+        };
     });
+
+
+/*
+
+EASING FUNCTIONS
+
+ linear: function(t) {
+ return t
+ },
+ inQuad: function(t) {
+ return t * t
+ },
+ outQuad: function(t) {
+ return t * (2 - t)
+ },
+ inOutQuad: function(t) {
+ return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+ },
+ inCubic: function(t) {
+ return t * t * t
+ },
+ outCubic: function(t) {
+ return (--t) * t * t + 1
+ },
+ inOutCubic: function(t) {
+ return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
+ },
+ inQuart: function(t) {
+ return t * t * t * t
+ },
+ outQuart: function(t) {
+ return 1 - (--t) * t * t * t
+ },
+ inOutQuart: function(t) {
+ return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t
+ },
+ inQuint: function(t) {
+ return t * t * t * t * t
+ },
+ outQuint: function(t) {
+ return 1 + (--t) * t * t * t * t
+ },
+ inOutQuint: function(t) {
+ return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t
+ },
+ inSine: function(t) {
+ return -1 * Math.cos(t / 1 * (Math.PI * 0.5)) + 1;
+ },
+ outSine: function(t) {
+ return Math.sin(t / 1 * (Math.PI * 0.5));
+ },
+ inOutSine: function(t) {
+ return -1 / 2 * (Math.cos(Math.PI * t) - 1);
+ },
+ inExpo: function(t) {
+ return (t == 0) ? 0 : Math.pow(2, 10 * (t - 1));
+ },
+ outExpo: function(t) {
+ return (t == 1) ? 1 : (-Math.pow(2, -10 * t) + 1);
+ },
+ inOutExpo: function(t) {
+ if (t == 0) return 0;
+ if (t == 1) return 1;
+ if ((t /= 1 / 2) < 1) return 1 / 2 * Math.pow(2, 10 * (t - 1));
+ return 1 / 2 * (-Math.pow(2, -10 * --t) + 2);
+ },
+ inCirc: function(t) {
+ return -1 * (Math.sqrt(1 - t * t) - 1);
+ },
+ outCirc: function(t) {
+ return Math.sqrt(1 - (t = t - 1) * t);
+ },
+ inOutCirc: function(t) {
+ if ((t /= 1 / 2) < 1) return -1 / 2 * (Math.sqrt(1 - t * t) - 1);
+ return 1 / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1);
+ },
+ inElastic: function(t) {
+ var s = 1.70158;
+ var p = 0;
+ var a = 1;
+ if (t == 0) return 0;
+ if (t == 1) return 1;
+ if (!p) p = 0.3;
+ if (a < 1) {
+ a = 1;
+ var s = p / 4;
+ } else var s = p / (2 * Math.PI) * Math.asin(1 / a);
+ return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t - s) * (2 * Math.PI) / p));
+ },
+ outElastic: function(t) {
+ var s = 1.70158;
+ var p = 0;
+ var a = 1;
+ if (t == 0) return 0;
+ if (t == 1) return 1;
+ if (!p) p = 0.3;
+ if (a < 1) {
+ a = 1;
+ var s = p / 4;
+ } else var s = p / (2 * Math.PI) * Math.asin(1 / a);
+ return a * Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p) + 1;
+ },
+ inOutElastic: function(t) {
+ var s = 1.70158;
+ var p = 0;
+ var a = 1;
+ if (t == 0) return 0;
+ if ((t /= 1 / 2) == 2) return 1;
+ if (!p) p = (0.3 * 1.5);
+ if (a < 1) {
+ a = 1;
+ var s = p / 4;
+ } else var s = p / (2 * Math.PI) * Math.asin(1 / a);
+ if (t < 1) return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t - s) * (2 * Math.PI) / p));
+ return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t - s) * (2 * Math.PI) / p) * 0.5 + 1;
+ },
+ inBounce: function(t) {
+ return 1 - this.outBounce(1 - t);
+ },
+ outBounce: function(t) {
+ if ((t /= 1) < (1 / 2.75)) {
+ return (7.5625 * t * t);
+ } else if (t < (2 / 2.75)) {
+ return (7.5625 * (t -= (1.5 / 2.75)) * t + .75);
+ } else if (t < (2.5 / 2.75)) {
+ return (7.5625 * (t -= (2.25 / 2.75)) * t + .9375);
+ } else {
+ return (7.5625 * (t -= (2.625 / 2.75)) * t + .984375);
+ }
+ },
+ inOutBounce: function(t) {
+ if (t < 1 / 2) return this.inBounce(t * 2) * 0.5;
+ return this.outBounce(t * 2 - 1) * 0.5 + 0.5;
+ }
+
+ */

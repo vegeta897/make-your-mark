@@ -2,15 +2,84 @@
 Application.Services.factory('Containers',function(Things,Util) {
     
     var CONTAINERS = {
-        chest: { name:'Chest', common:10, maxContent:2,
-            tiers:[['plastic',40,100],['wooden',80,150],['ceramic',120,200],['aluminum',300,300],['steel',500,500],
-                ['silver',600,800],['gold',700,1200],['jeweled',1000,2000],['diamond',2000,4000]] },
-        present: { name:'Present', common:30, maxContent:1, 
-            tiers:[['plain',20,50],['cute',25,75],['pretty',30,12],['elegant',40,20]] },
-        bag: { name:'Bag', common:50, maxContent:2, 
-            tiers:[['paper',10,10],['plastic',15,15],['cloth',30,35],['velvet',35,100]] },
-        buried: { name:'Mound', common:20, maxContent:1, tiers:[['dirt',40,50],['gravel',70,60],['clay',100,70]] },
-        crate: { name:'Crate', common:50, maxContent:4, tiers:[['wooden',60,80],['metal',200,200],['armored',450,450]] }
+        plastic_chest: { name:'Plastic Chest', common:30, maxContent:1, health:40, value:100,
+            bash: 3, pry: 8, saw: 2, chop: 2
+        },
+        ceramic_chest: { name:'Ceramic Chest', common:25, maxContent:1, health:80, value:150,
+            bash: 5, pry: 7, chop: 2
+        },
+        wooden_chest: { name:'Wooden Chest', common:20, maxContent:1, health:120, value:200,
+            bash: 2, pry: 6, saw: 5, chop: 4
+        },
+        aluminum_chest: { name:'Aluminum Chest', common:15, maxContent:2, health:300, value:300,
+            bash: 2, pry: 5, chop: 2
+        },
+        iron_chest: { name:'Iron Chest', common:12, maxContent:2, health:400, value:400,
+            bash: 2, pry: 5
+        },
+        steel_chest: { name:'Steel Chest', common:10, maxContent:2, health:500, value:500,
+            pry: 5
+        },
+        silver_chest: { name:'Silver Chest', common:8, maxContent:2, health:600, value:800,
+            bash: 2, pry: 3
+        },
+        gold_chest: { name:'Gold Chest', common:5, maxContent:2, health:700, value: 1200,
+            bash: 2, pry: 3
+        },
+        jeweled_chest: { name:'Jeweled Chest', common:3, maxContent:2, health:1000, value:2000,
+            pry: 2
+        },
+        diamond_chest: { name:'Diamond Chest', common:1, maxContent:2, health:2000, value:4000,
+            pry: 2
+        },
+        plain_present: { name:'Plain Present', common:60, maxContent:1, health:20, value:50,
+            snip: 3, pry: 2, slice: 2, saw: 2
+        },
+        cute_present: { name:'Cute Present', common:40, maxContent:1, health:25, value:75,
+            snip: 2, pry: 3, slice: 2, saw: 2
+        },
+        pretty_present: { name:'Pretty Present', common:30, maxContent:1, health:30, value:120,
+            snip: 2, pry: 3, slice: 2, saw: 2
+        },
+        elegant_present: { name:'Elegant Present', common:15, maxContent:1, health:40, value:200,
+            snip: 2, pry: 2, slice: 2
+        },
+        paper_bag: { name:'Paper Bag', common:100, maxContent:1, health:10, value:10,
+            snip: 6, stab: 2, slice: 3
+        },
+        plastic_bag: { name:'Plastic Bag', common:80, maxContent:1, health:15, value:15,
+            snip: 5, stab: 3, slice: 3
+        },
+        cloth_sack: { name:'Cloth Sack', common:50, maxContent:2, health:30, value:35,
+            snip: 3, stab: 2
+        },
+        velvet_pouch: { name:'Velvet Pouch', common:15, maxContent:1, health:25, value:100,
+            snip: 2
+        },
+        dirt_mound: { name:'Dirt Mound', common:30, maxContent:1, health:40, value:50,
+            dig: 10, bash: 1, stab: 2, pry: 2, chop: 2
+        },
+        gravel_mound: { name:'Gravel Mound', common:25, maxContent:1, health:70, value:60,
+            dig: 10, bash: 2, pry: 3, chop: 3
+        },
+        clay_mound: { name:'Clay Mound', common:20, maxContent:1, health:100, value:70,
+            dig: 10, stab: 2, pry: 3, chop: 4
+        },
+        wooden_crate: { name:'Wooden Crate', common:25, maxContent:3, health:60, value:80,
+            bash: 2, pry: 8, saw: 10, chop: 6
+        },
+        metal_crate: { name:'Metal Crate', common:15, maxContent:3, health:200, value:200,
+            pry: 6, chop: 2
+        },
+        armored_crate: { name:'Armored Crate', common:10, maxContent:3, health:450, value:450,
+            pry: 2
+        },
+        wooden_barrel: { name:'Wooden Barrel', common:20, maxContent:2, health:80, value:100,
+            bash: 2, pry: 8, saw: 5, chop: 6
+        },
+        steel_drum: { name:'Steel Drum', common:10, maxContent:2, health:250, value:25,
+            pry: 5, chop: 2
+        }
     };
     
     var containersArray = [];
@@ -34,20 +103,11 @@ Application.Services.factory('Containers',function(Things,Util) {
             var newContainer = angular.copy(containersArray[i]);
             newContainer.sx = sx; newContainer.sy = sy; newContainer.x = x; newContainer.y = y;
             newContainer.guid = 'c'+Util.positionSeed(sx,sy,x,y);
-            newContainer.tiers.reverse(); // Reverse array so lower tiers are more common
-            var tier = Util.randomIntRange(1,Math.pow(newContainer.tiers.length+1,4));
-            for(var t = 0; t < newContainer.tiers.length; t++) {
-                if(tier <= Math.pow(t+2,4)) {
-                    var tierData = newContainer.tiers[t];
-                    newContainer.tier = tierData[0];
-                    newContainer.tierNum = newContainer.tiers.length - 1 - t;
-                    var health = parseInt(+tierData[1] * 3 * (Util.randomIntRange(8,12)/10));
-                    newContainer.health = [health,health];
-                    newContainer.realHealth = health;
-                    newContainer.value = Math.ceil(tierData[2]*2 / newContainer.maxContent);
-                    break;
-                }
-            }
+            var health = Math.floor(newContainer.health * 30 * (Util.randomIntRange(80,120)/100));
+            newContainer.health = [health,health];
+            newContainer.realHealth = health;
+            newContainer.value = newContainer.value*2 / newContainer.maxContent;
+            newContainer.knocked = {x:0,y:0};
             return newContainer;
         }
     };
