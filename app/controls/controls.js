@@ -44,6 +44,8 @@ Application.Directives.directive('controls',function() {
             var mcv = document.getElementById('mainCanvas');
             var mc = mcv.getContext ? mcv.getContext('2d') : null;
             mc.mozImageSmoothingEnabled = false;
+            mc.webkitImageSmoothingEnabled = false;
+            mc.msImageSmoothingEnabled = false;
             mc.imageSmoothingEnabled = false;
             mcv.onselectstart = function() { return false; }; // Disable selecting
             ctrl.initMainCanvas(mcv,mc);

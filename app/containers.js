@@ -94,7 +94,7 @@ Application.Services.factory('Containers',function(Things,Util) {
     }();
     
     var spawnContainer = function(sx,sy,x,y) {
-        Math.seedrandom('container'+Util.positionSeed(sx,sy,x,y));
+        Math.seedrandom('ctr'+Util.positionSeed(sx,sy,x,y));
         var target = Util.randomIntRange(1,totalCommon);
         var total = 0;
         for(var i = 0; i < containersArray.length; i++) {

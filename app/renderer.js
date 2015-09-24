@@ -7,8 +7,6 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
     var zoomed, prevZoomed, zoomFrame, zoomOff;
     var cycle, glowRamp;
     var lastSO = {}, so = { x: 0, y: 0}, hoverCount = {};
-    var bufferCanvas = document.createElement('canvas');
-    var buffer = bufferCanvas.getContext('2d');
     
     var disableShadow = function(canvas) {
         canvas.shadowColor = 'transparent'; canvas.shadowBlur = 0; canvas.shadowOffsetX = 0; canvas.shadowOffsetY = 0;
@@ -100,9 +98,9 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         // TODO: Create shadow sprites for various object shapes/sizes
         if(SpriteMan.thingSpriteLib.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
             if(o.quality >= Util.qualityLevels[2].min) { // Uncommon or greater
-                buffer.shadowColor = qualityShadow(o);
-                buffer.shadowBlur = 1 + glowRamp; 
-                buffer.shadowOffsetX = 0; buffer.shadowOffsetY = 0;
+                cm.shadowColor = qualityShadow(o);
+                cm.shadowBlur = 1 + glowRamp; 
+                cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
                 var xd = Util.randomIntRange(-6,6)/15, yd = Util.randomIntRange(-6,6)/15;
                 if(o.quality >= Util.qualityLevels[4].min && !(game.ticks & 3)) {
                     Effects.add({type:'sparkle', style: 'evaporate', color: '#'+quality.hex,
@@ -115,25 +113,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     });
                 }
             }
-            //buffer.shadowColor = 'rgba(0,0,0,0.3)'; buffer.shadowBlur = 4;
-            //buffer.shadowOffsetX = 2; buffer.shadowOffsetY = 1;
-            buffer.drawImage(SpriteMan.getThingSprite(o), 0, 0, pix, pix,
+            //cm.shadowColor = 'rgba(0,0,0,0.3)'; cm.shadowBlur = 4;
+            //cm.shadowOffsetX = 2; cm.shadowOffsetY = 1;
+            cm.drawImage(SpriteMan.getThingSprite(o), 0, 0, pix, pix,
                 draw.x, draw.y, pix, pix);
-            disableShadow(buffer);
+            disableShadow(cm);
         } else if(containerSprite) { // If this container has a sprite
-            buffer.shadowColor = 'rgba(0,0,0,0.3)'; buffer.shadowBlur = 4;
-            buffer.shadowOffsetX = 2; buffer.shadowOffsetY = 1;
+            cm.shadowColor = 'rgba(0,0,0,0.3)'; cm.shadowBlur = 4;
+            cm.shadowOffsetX = 2; cm.shadowOffsetY = 1;
             var cState = o.open ? o.broke ? 'spriteBroken' : 'spriteOpen' : 'sprite';
-            buffer.drawImage(containerSprite[cState], 0, 0, 36, 36,
+            cm.drawImage(containerSprite[cState], 0, 0, 36, 36,
                 draw.x+o.knocked.x-6, draw.y+o.knocked.y-6, 36, 36);
-            disableShadow(buffer);
+            disableShadow(cm);
         } else { // No sprite, draw letter box
-            buffer.drawImage(SpriteMan.genericSprite,draw.x+o.knocked.x, draw.y+o.knocked.y);
-            disableShadow(buffer);
-            buffer.fillStyle = '#112244';
-            buffer.font = 'bold 14px Arial';buffer.textAlign = 'center';
+            cm.drawImage(SpriteMan.genericSprite,draw.x+o.knocked.x, draw.y+o.knocked.y);
+            disableShadow(cm);
+            cm.fillStyle = '#112244';
+            cm.font = 'bold 14px Arial';cm.textAlign = 'center';
             var kerning = jQuery.inArray(o.name[0],['A','B','C','D','G','H','R','M']) >= 0 ? 1 : 0;
-            buffer.fillText(o.name[0],draw.x+11+kerning+o.knocked.x,draw.y+20+o.knocked.y);
+            cm.fillText(o.name[0],draw.x+11+kerning+o.knocked.x,draw.y+20+o.knocked.y);
         }
         if(o.newHit) { // If hit and haven't created fx yet
             Math.seedrandom();
@@ -156,31 +154,31 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         var showHealth = o.health && o.realHealth < o.health[1];
         // Draw container health
         if(showHealth) {
-            disableShadow(buffer);
-            buffer.fillStyle = 'rgba(0,0,0,0.7)';
-            buffer.fillRect(draw.x+o.knocked.x,draw.y-5+o.knocked.y,pix+2,5);
-            buffer.fillStyle = 'white';
-            buffer.fillRect(draw.x-1+o.knocked.x,draw.y-6+o.knocked.y,pix+2,5);
+            disableShadow(cm);
+            cm.fillStyle = 'rgba(0,0,0,0.7)';
+            cm.fillRect(draw.x+o.knocked.x,draw.y-5+o.knocked.y,pix+2,5);
+            cm.fillStyle = 'white';
+            cm.fillRect(draw.x-1+o.knocked.x,draw.y-6+o.knocked.y,pix+2,5);
             var hp = o.realHealth/ o.health[1];
-            buffer.fillStyle = 'rgba(0,0,0,0.9)';
-            buffer.fillRect(draw.x+pix+o.knocked.x,draw.y-5+o.knocked.y,Math.floor((pix)*(1-hp))*-1,3);
+            cm.fillStyle = 'rgba(0,0,0,0.9)';
+            cm.fillRect(draw.x+pix+o.knocked.x,draw.y-5+o.knocked.y,Math.floor((pix)*(1-hp))*-1,3);
         }
         // Draw hover info
         if(cursor.hover.hasOwnProperty(o.guid)) {
-            buffer.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
+            cm.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
             var grid = o.x+':'+o.y;
             var healthSpacing = showHealth ? 10 : 0;
-            TextDraw.drawText(quality.name+' '+o.name, o.health ? 'white' : quality.name, buffer,
+            TextDraw.drawText(quality.name+' '+o.name, o.health ? 'white' : quality.name, cm,
                 'normal','med',draw.x+12,draw.y-8-healthSpacing-(12*(hoverCount[grid] || 0)),'center',1);
             hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
         }
         // Draw select box
         if(!game.selected || game.selected.guid != o.guid) return;
-        buffer.lineWidth = 2; buffer.strokeStyle = 'rgba(200,230,255,0.5)';
-        buffer.beginPath();
-        buffer.moveTo(draw.x,draw.y); buffer.lineTo(draw.x + pix,draw.y);
-        buffer.lineTo(draw.x + pix,draw.y + pix); buffer.lineTo(draw.x,draw.y + pix);
-        buffer.closePath(); buffer.stroke();
+        cm.lineWidth = 2; cm.strokeStyle = 'rgba(200,230,255,0.5)';
+        cm.beginPath();
+        cm.moveTo(draw.x,draw.y); cm.lineTo(draw.x + pix,draw.y);
+        cm.lineTo(draw.x + pix,draw.y + pix); cm.lineTo(draw.x,draw.y + pix);
+        cm.closePath(); cm.stroke();
     };
     var renderPlayer = function(p) {
         var pdx = (p.osx - game.player.osx)*(game.arena.width) + p.ox,
@@ -194,14 +192,14 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         drawP.x += so.x + 11; drawP.y += so.y;
         if(drawP.x < pix*-1 || drawP.x > mWidth
             || drawP.y < pix*-1 || drawP.y > mHeight) return;
-        buffer.shadowColor = 'rgba(0,0,0,0.5)';
-        buffer.shadowBlur = 5; buffer.shadowOffsetX = 1; buffer.shadowOffsetY = 1;
-        buffer.fillStyle = '#'+p.color.hex;
-        buffer.beginPath(); buffer.arc(drawP.x+pix/2, drawP.y+pix/4, 9, 0, 2 * Math.PI, false); buffer.fill();
-        disableShadow(buffer);
+        cm.shadowColor = 'rgba(0,0,0,0.5)';
+        cm.shadowBlur = 5; cm.shadowOffsetX = 1; cm.shadowOffsetY = 1;
+        cm.fillStyle = '#'+p.color.hex;
+        cm.beginPath(); cm.arc(drawP.x+pix/2, drawP.y+pix/4, 9, 0, 2 * Math.PI, false); cm.fill();
+        disableShadow(cm);
         // Render other player's names
         if(game.player.guid != p.guid) {
-            TextDraw.drawText(p.name,'white', buffer, 'normal','med',drawP.x + 12, drawP.y - 14,'center',1);
+            TextDraw.drawText(p.name,'white', cm, 'normal','med',drawP.x + 12, drawP.y - 14,'center',1);
         }
         // Render player attack
         if(p.attacking && p.attacking.dir) {
@@ -210,8 +208,8 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var attack = Util.isoToScreenRel(p.attacking.dir.x,p.attacking.dir.y);
                 attack.x *= attackProgress + 1; attack.y *= attackProgress + 1;
                 attack.y += -7 + attackProgress*25;
-                buffer.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
-                buffer.fillRect(drawP.x+Math.floor(attack.x/2)+9,drawP.y+Math.floor(attack.y/2)+5,6,6);
+                cm.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
+                cm.fillRect(drawP.x+Math.floor(attack.x/2)+9,drawP.y+Math.floor(attack.y/2)+5,6,6);
             } else if(p.attacking.frame < 78) {
                 var attackSpriteX = Math.floor((p.attacking.frame-1)/2)*59;
                 var attackSpriteY = (p.attacking.dir.x > 0 || p.attacking.dir.y < 0 ? 43 : 0) +
@@ -219,7 +217,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var attackOffsetX = p.attacking.dir.x + p.attacking.dir.y < 0 ? -33 : -2;
                 var attackOffsetY = p.attacking.dir.x > 0 || p.attacking.dir.y < 0 ? -32 : -8;
                 var attackDir = p.attacking.dir.x + p.attacking.dir.y < 0 ? 'left' : 'right';
-                buffer.drawImage(SpriteMan.attacksImg[attackDir], attackSpriteX, attackSpriteY, 59,43,
+                cm.drawImage(SpriteMan.attacksImg[attackDir], attackSpriteX, attackSpriteY, 59,43,
                     drawP.x+attackOffsetX, drawP.y+attackOffsetY, 59, 43);
             }
         }
@@ -230,50 +228,51 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         if(drawFX.x > mWidth + pix*4 || drawFX.y > mHeight + pix*4 || drawFX.x < pix*-4 || drawFX.y < pix*-6) return;
         if(f.type == 'damage') {
             var fontSize = f.amt >= 100 ? 'large' : f.amt >= 50 ? 'med' : 'small';
-            buffer.save();
-            buffer.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            TextDraw.drawText(''+f.amt, 'yellow', buffer, 'dmg',fontSize,drawFX.x-1,drawFX.y,'center',1);
-            buffer.restore();
+            cm.save();
+            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            TextDraw.drawText(''+f.amt, 'yellow', cm, 'dmg',fontSize,drawFX.x-1,drawFX.y,'center',1);
+            cm.restore();
         } else if(f.type == 'combo') {
-            buffer.save();
-            buffer.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            TextDraw.drawText(f.text, 'white', buffer,
-                'normal','med',drawFX.x,drawFX.y,'center',1);
-            buffer.restore();
+            cm.save();
+            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            TextDraw.drawText(f.text, 'white', cm, 'normal','med',drawFX.x,drawFX.y,'center',1);
+            cm.restore();
         } else if(f.type == 'spark') {
-            buffer.save();
-            buffer.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            buffer.fillStyle = 'rgba(0,0,0,0.7)';
-            buffer.fillRect(drawFX.x+1,drawFX.y+1,f.width,f.height);
-            buffer.fillStyle = f.color;
-            buffer.fillRect(drawFX.x,drawFX.y,f.width,f.height);
-            buffer.restore();
+            cm.save();
+            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            cm.fillStyle = 'rgba(0,0,0,0.7)';
+            cm.fillRect(drawFX.x+1,drawFX.y+1,f.width,f.height);
+            cm.fillStyle = f.color;
+            cm.fillRect(drawFX.x,drawFX.y,f.width,f.height);
+            cm.restore();
         } else if(f.type == 'rain') {
             // TODO: Gradient trail
-            buffer.save();
-            buffer.globalAlpha = f.frame >= (f.time - 10) ? (f.time - f.frame) / 10 : // Fade out
+            cm.save();
+            cm.globalAlpha = f.frame >= (f.time - 10) ? (f.time - f.frame) / 10 : // Fade out
                 f.frame < 30 && !f.splash ? f.frame/30 : 1; // Fade in
-            buffer.fillStyle = f.color;
-            buffer.fillRect(drawFX.x-10,drawFX.y-5,1,f.splash ? 1 : f.vz*pix*2);
-            buffer.restore();
+            cm.fillStyle = f.color;
+            cm.fillRect(drawFX.x-10,drawFX.y-5,1,f.splash ? 1 : f.vz*pix*2);
+            cm.restore();
         } else if(f.type == 'snow') {
-            buffer.save();
-            buffer.globalAlpha = f.frame >= (f.time - 300) ? (f.time - f.frame) / 300 : // Fade out
+            cm.save();
+            cm.globalAlpha = f.frame >= (f.time - 300) ? (f.time - f.frame) / 300 : // Fade out
                 f.frame < 60 ? f.frame/60 : 1; // Fade in
-            buffer.fillStyle = f.color;
-            buffer.fillRect(drawFX.x-10,drawFX.y+15,1,1);
-            buffer.restore();
+            cm.fillStyle = f.color;
+            cm.fillRect(drawFX.x-10,drawFX.y+15,1,1);
+            cm.restore();
         } else if(f.type == 'sparkle') {
-            buffer.save();
+            cm.save();
+            cm.shadowColor = f.color; cm.shadowBlur = 2;
+            cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
             if(f.style == 'fireflies') {
-                buffer.globalAlpha = f.frame < 60 ? f.frame/60 : (f.time - f.frame) / 60; // Fade in & out
+                cm.globalAlpha = f.frame < 60 ? f.frame/60 : (f.time - f.frame) / 60; // Fade in & out
             } else if(f.style == 'evaporate') {
-                buffer.globalAlpha = f.frame < 20 ? f.frame/20 : (f.time - f.frame) / 100; // Fade in & out
+                cm.globalAlpha = f.frame < 20 ? f.frame/20 : (f.time - f.frame) / 100; // Fade in & out
             }
-            buffer.globalAlpha *= (0.35 - (Math.pow(f.xd, 2) + Math.pow(f.yd, 2))) / 0.35;
-            buffer.fillStyle = f.color;
-            buffer.fillRect(drawFX.x,drawFX.y,1,1);
-            buffer.restore();
+            cm.globalAlpha *= (0.35 - (Math.pow(f.xd, 2) + Math.pow(f.yd, 2))) / 0.35;
+            cm.fillStyle = f.color;
+            cm.fillRect(drawFX.x,drawFX.y,1,1);
+            cm.restore();
         }
     };
     
@@ -281,24 +280,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         init: function(g) { game = g; pix = game.arena.pixels; },
         initMainCanvas: function(canvas,ctx,curse) { 
             cm = ctx; cvm = canvas; mWidth = canvas.width; mHeight = canvas.height;
-            bufferCanvas.width = mWidth; bufferCanvas.height = mHeight;
+            cm.mozImageSmoothingEnabled = false;
+            cm.webkitImageSmoothingEnabled = false;
+            cm.msImageSmoothingEnabled = false;
+            cm.imageSmoothingEnabled = false;
             cursor = curse;
         },
         initMinimap: function(canvas,ctx) { cmm = ctx; mmWidth = canvas.width; mmHeight = canvas.height; },
         initZoomCanvas: function(canvas,ctx) { cz = ctx; cvz = canvas; zWidth = canvas.width; zHeight = canvas.height; },
         drawFrame: function(rt,step,tick) {
-            if(!buffer || !mWidth || !pix) return;
-            buffer.clearRect(0,0,mWidth,mHeight);
+            if(!cvm || !mWidth || !pix) return;
+            cm.clearRect(0,0,mWidth,mHeight);
             if(SpriteMan.getLoadProgress() < 1) { // Show loading screen
-                buffer.fillStyle = '#777777';
-                buffer.font = 'bold 24px Arial';buffer.textAlign = 'center';
-                buffer.fillText('Loading Sprites '+Math.round(SpriteMan.getLoadProgress()*100)+'%', 
-                    bufferCanvas.width/2, bufferCanvas.height/2 - 12);
-                buffer.fillRect(200, bufferCanvas.height/2+6, bufferCanvas.width-400,20);
-                buffer.clearRect(bufferCanvas.width-202, bufferCanvas.height/2+8, 
-                    (1-SpriteMan.getLoadProgress())*(-bufferCanvas.width+404),16);
-                cm.clearRect(0,0,mWidth,mHeight);
-                cm.drawImage(bufferCanvas,0,0);
+                cm.fillStyle = '#777777';
+                cm.font = 'bold 24px Arial';cm.textAlign = 'center';
+                cm.fillText('Loading Sprites '+Math.round(SpriteMan.getLoadProgress()*100)+'%',
+                    mWidth/2, mHeight/2 - 12);
+                cm.fillRect(200, mHeight/2+6, mWidth-400,20);
+                cm.clearRect(cvm.width-202, mHeight/2+8, 
+                    (1-SpriteMan.getLoadProgress())*(-mWidth+404),16);
                 return;
             }
             so = { x: Math.floor(game.player.sectorMove.x * mWidth), 
@@ -315,25 +315,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     bgDraw.x += so.x; bgDraw.y += so.y;
                     if(bgDraw.x < pix*-2 || bgDraw.x >= mWidth ||
                         bgDraw.y < pix*-2 || bgDraw.y >= mHeight) continue;
-                    buffer.drawImage(SpriteMan.bgTileImg,sw != 0 || sh != 0 ? 46 : 0,0,46,24,
+                    cm.drawImage(SpriteMan.bgTileImg,sw != 0 || sh != 0 ? 46 : 0,0,46,24,
                         bgDraw.x,bgDraw.y,46,24);
-                    //buffer.fillStyle = 'rgba(255,255,255,0.5)';
-                    //buffer.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
+                    //cm.fillStyle = 'rgba(255,255,255,0.5)';
+                    //cm.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
                 } }
             } }
             if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
             
             if(game.weather.now.temp < 36) {
-                buffer.globalCompositeOperation = 'source-atop';
-                buffer.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
-                buffer.fillRect(0,0, bufferCanvas.width, bufferCanvas.height);
-                buffer.globalCompositeOperation = 'source-over';
+                cm.globalCompositeOperation = 'source-atop';
+                cm.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
+                cm.fillRect(0,0, mWidth, mHeight);
+                cm.globalCompositeOperation = 'source-over';
             }
             // Render cursor highlight
             if(cursor.iso && ((cursor.iso.x >= 0 && cursor.iso.x < 15 && cursor.iso.y >= 0 && cursor.iso.y < 15)
                 || (Util.validOffSectorTiles[cursor.iso.x+':'+cursor.iso.y]))) {
                 var cursorDraw = Util.isoToScreen(cursor.iso.x, cursor.iso.y);
-                buffer.drawImage(SpriteMan.bgTileImg, 92, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
+                cm.drawImage(SpriteMan.bgTileImg, 92, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
             }
             // Render minimap
             if(!mmWidth) return;
@@ -385,11 +385,11 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                         SpriteMan.pathTileLib);
                     if(pathTile < 0) pathTile = jQuery.inArray('0:0|'+dNext.x+':'+dNext.y,SpriteMan.pathTileLib);
                     if(pathTile < 0) continue;
-                    buffer.globalAlpha = pn == 0 ? 1 - game.player.moveProgress : 1;
-                    buffer.drawImage(SpriteMan.pathTileImg,pathTile % 8 * 48,Math.floor(pathTile/8)*24,48,24,
+                    cm.globalAlpha = pn == 0 ? 1 - game.player.moveProgress : 1;
+                    cm.drawImage(SpriteMan.pathTileImg,pathTile % 8 * 48,Math.floor(pathTile/8)*24,48,24,
                         node.x,node.y,48,24);
                 }
-                buffer.globalAlpha = 1;
+                cm.globalAlpha = 1;
             }
             cycle = game.ticks % 240;
             glowRamp = (cycle > 120 ? 120 - (cycle - 120) : cycle) / 30;
@@ -448,85 +448,85 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             // TODO: Create inventory canvas?
             if(game.drawInventory) {
                 //for(var tb1 = 0; tb1 < 5; tb1++) {
-                //    buffer.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
+                //    cm.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
                 //}
                 var tbX = 376, tbY = 367, tbXS = 34, tbYS = 17;
                 for(var tb = 0; tb < game.player.toolbelt.length; tb++) { // Draw toolbelt
                     var tbItem = game.player.toolbelt[tb];
                     if(tbItem) {
                         if(tbItem.cooldown) {
-                            buffer.save(); buffer.globalAlpha = 0.5;
+                            cm.save(); cm.globalAlpha = 0.5;
                         }
-                        buffer.fillStyle = '#525252';
-                        buffer.fillRect(tbX+28 + tbXS*tb,tbY+14 - tbYS*tb,28,14);
+                        cm.fillStyle = '#525252';
+                        cm.fillRect(tbX+28 + tbXS*tb,tbY+14 - tbYS*tb,28,14);
                         var abilityPos = 0;
                         for(var a in tbItem.abilities) { if(!tbItem.abilities.hasOwnProperty(a)) continue;
-                            buffer.fillStyle = tbItem.cooldown && tbItem.cooldown[0] == a ? '#292b2a' : '#525252';
-                            buffer.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,55,14);
+                            cm.fillStyle = tbItem.cooldown && tbItem.cooldown[0] == a ? '#292b2a' : '#525252';
+                            cm.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,55,14);
                             if(tbItem.cooldown && tbItem.cooldown[0] == a) {
-                                buffer.fillStyle = '#565656';
+                                cm.fillStyle = '#565656';
                                 var totalCool = Math.max(1,Things.abilities[a].cooldown-tbItem.handling)*10;
-                                buffer.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,
+                                cm.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,
                                     /*Math.floor*/(55*((totalCool-tbItem.cooldown[1])/totalCool)),14);
                             }
-                            buffer.drawImage(SpriteMan.inventorySpriteImg,
+                            cm.drawImage(SpriteMan.inventorySpriteImg,
                                 (jQuery.inArray(a,SpriteMan.abiSpriteLib.names)-1)*14,28,14,14,
                                 tbX+57 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,14,14);
-                            TextDraw.drawText(Util.capitalize(a), 'white', buffer,
+                            TextDraw.drawText(Util.capitalize(a), 'white', cm,
                                 'normal','med',tbX+90 + tbXS*tb+59*abilityPos,tbY+17 - tbYS*tb,'center',1);
                             abilityPos++;
                         }
-                        if(tbItem.cooldown) buffer.restore();
+                        if(tbItem.cooldown) cm.restore();
                     }
                     if(tbItem && game.selected && game.selected.guid == tbItem.guid) {
-                        buffer.drawImage(SpriteMan.inventorySpriteImg,108,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        cm.drawImage(SpriteMan.inventorySpriteImg,108,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     } else if(cursor.onTBslot == tb) {
-                        buffer.drawImage(SpriteMan.inventorySpriteImg,54,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        cm.drawImage(SpriteMan.inventorySpriteImg,54,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     } else {
-                        buffer.drawImage(SpriteMan.inventorySpriteImg,0,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        cm.drawImage(SpriteMan.inventorySpriteImg,0,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     }
                     if(!tbItem) continue;
                     if(game.dragging && game.dragging.guid == tbItem.guid) {
-                        buffer.save(); buffer.globalAlpha = 0.5;
+                        cm.save(); cm.globalAlpha = 0.5;
                     }
                     quality = Util.objectQuality(tbItem);
                     if(tbItem.quality >= 860) {
-                        buffer.shadowColor = qualityShadow(tbItem);
-                        buffer.shadowBlur = 5; buffer.shadowOffsetX = 0; buffer.shadowOffsetY = 0;
+                        cm.shadowColor = qualityShadow(tbItem);
+                        cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
                     }
-                    buffer.drawImage(SpriteMan.getThingSprite(tbItem),0, 0, pix, pix,
+                    cm.drawImage(SpriteMan.getThingSprite(tbItem),0, 0, pix, pix,
                         tbX+15 + tbXS*tb,tbY-3 - tbYS*tb,pix,pix);
-                    disableShadow(buffer);
-                    if(game.dragging && game.dragging.guid == tbItem.guid) buffer.restore();
+                    disableShadow(cm);
+                    if(game.dragging && game.dragging.guid == tbItem.guid) cm.restore();
                 }
-                buffer.fillStyle = '#424242';
-                buffer.fillRect(609,261,108,52);
+                cm.fillStyle = '#424242';
+                cm.fillRect(609,261,108,52);
                 // TODO: Isometric backpack?
                 for(var bp = 0; bp < game.player.backpack.length; bp++) { // Draw backpack
                     var bpItem = game.player.backpack[bp];
                     if(bpItem && game.selected && game.selected.guid == bpItem.guid) {
-                        buffer.fillStyle = '#b5b5b5';
-                        buffer.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        cm.fillStyle = '#b5b5b5';
+                        cm.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
                     } else if(cursor.onBPslot == bp) {
-                        buffer.fillStyle = '#6e6e6e';
-                        buffer.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        cm.fillStyle = '#6e6e6e';
+                        cm.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
                     }
-                    buffer.fillStyle = '#4a4a4a';
-                    buffer.fillRect(608+(bp%4)*28,260+Math.floor(bp/4)*28,26,26);
+                    cm.fillStyle = '#4a4a4a';
+                    cm.fillRect(608+(bp%4)*28,260+Math.floor(bp/4)*28,26,26);
                     if(!bpItem) continue;
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
-                        buffer.save(); buffer.globalAlpha = 0.5;
+                        cm.save(); cm.globalAlpha = 0.5;
                     }
                     quality = Util.objectQuality(bpItem);
                     if(bpItem.quality >= 860) {
-                        buffer.shadowColor = qualityShadow(bpItem);
-                        buffer.shadowBlur = 5; buffer.shadowOffsetX = 0; buffer.shadowOffsetY = 0;
+                        cm.shadowColor = qualityShadow(bpItem);
+                        cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
                     }
-                    buffer.drawImage(SpriteMan.getThingSprite(bpItem),0, 0, pix, pix,
+                    cm.drawImage(SpriteMan.getThingSprite(bpItem),0, 0, pix, pix,
                         609+(bp%4)*28,261+Math.floor(bp/4)*28,pix,pix);
-                    disableShadow(buffer);
+                    disableShadow(cm);
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
-                        buffer.restore();
+                        cm.restore();
                     }
                 }
                 game.drawInventory = false;
@@ -534,12 +534,12 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             if(game.dragging && cursor.x != '-') {
                 quality = Util.objectQuality(game.dragging);
                 if(game.dragging.quality >= 860) {
-                    buffer.shadowColor = qualityShadow(game.dragging);
-                    buffer.shadowBlur = 5; buffer.shadowOffsetX = 0; buffer.shadowOffsetY = 0;
+                    cm.shadowColor = qualityShadow(game.dragging);
+                    cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
                 }
-                buffer.drawImage(SpriteMan.getThingSprite(game.dragging),0, 0, pix, pix,
+                cm.drawImage(SpriteMan.getThingSprite(game.dragging),0, 0, pix, pix,
                     +cursor.x-pix/2,+cursor.y-pix/2,pix,pix);
-                disableShadow(buffer);
+                disableShadow(cm);
             }
             // Draw thrown items
             // TODO; Move to render array
@@ -549,12 +549,12 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 throwDraw.x += 11; throwDraw.y += -7 - world.thrown[throwKey].physics.z * pix;
                 quality = Util.objectQuality(world.thrown[throwKey]);
                 if(world.thrown[throwKey].quality >= 860) {
-                    buffer.shadowColor = qualityShadow(world.thrown[throwKey]);
-                    buffer.shadowBlur = 5; buffer.shadowOffsetX = 0; buffer.shadowOffsetY = 0;
+                    cm.shadowColor = qualityShadow(world.thrown[throwKey]);
+                    cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
                 }
-                buffer.drawImage(SpriteMan.getThingSprite(world.thrown[throwKey]),0, 0, pix, pix,
+                cm.drawImage(SpriteMan.getThingSprite(world.thrown[throwKey]),0, 0, pix, pix,
                     throwDraw.x,throwDraw.y,pix,pix);
-                disableShadow(buffer);
+                disableShadow(cm);
             }
             // Draw zoom canvas
             if(game.player.attacking && game.player.attacking.type != 'punch' || zoomFrame > 0) {
@@ -568,7 +568,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var zoomPosition = Util.isoToScreen(game.player.ox+0.1+zoomOff.x/2,game.player.oy-0.1+1+zoomOff.y/2);
                 var zx = Math.round(zoomPosition.x - zWidth / 2), zy = Math.round(zoomPosition.y - zHeight / 2);
                 cz.fillRect(0,0,zWidth,zHeight);
-                cz.drawImage(bufferCanvas,zx,zy,zWidth,zHeight,0,0,zWidth,zHeight);
+                cz.drawImage(cvm,zx,zy,zWidth,zHeight,0,0,zWidth,zHeight);
                 if(!game.player.attacking || game.player.attacking.type == 'punch') {
                     zoomFrame--;
                     if(zoomFrame < 9) cvz.style.opacity = zoomFrame/8;
@@ -581,8 +581,6 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     prevZoomed = false;
                 }
             }
-            cm.clearRect(0,0,mWidth,mHeight);
-            cm.drawImage(bufferCanvas,0,0);
         }
     };
 });

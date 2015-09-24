@@ -22,12 +22,15 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
             newMap[sectorKey] = {'15:6':true,'15:7':true,'15:8':true,'-1:6':true,'-1:7':true,'-1:8':true,
                 '6:15':true,'7:15':true,'8:15':true,'6:-1':true,'7:-1':true,'8:-1':true};
             newSectors[sectorKey] = {things:[],containers:[]}; // Sector not near, spawn objects
-            Math.seedrandom('ctnr-thing-gen'+Util.positionSeed(+position.sx+sw, +position.sy+sh, 0, 0));
+            Math.seedrandom('ctg'+Util.positionSeed(+position.sx+sw, +position.sy+sh, 0, 0));
+            var containersSpawned = 0;
             for(var w = 0; w < game.arena.width; w++) { for(var h = 0; h < game.arena.height; h++) {
                 newMap[sectorKey][w+':'+h] = true;
-                if(Math.random() <= 0.007 // 0.7% chance of container
+                // 2% initial chance of container, diminishes with each spawn
+                if(Math.random() <= 0.02 / (containersSpawned + 1)
                     && w > 0 && h > 0 && w < game.arena.width - 1 && h < game.arena.height - 1 // Don't spawn on edges
                     && (w != 7 || h != 7)) { // Or in center of sector
+                    containersSpawned++;
                     newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
                     newMap[sectorKey][w+':'+h] = false;
                 } else if(Math.random() <= 0.0007) {

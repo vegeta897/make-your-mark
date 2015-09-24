@@ -3,7 +3,7 @@ Application.Services.factory('Things',function(Util) {
     
     var abilities = {
         bash: { past: 'Bashed', cooldown: 20, time: 32, buffs: ['mighty','forceful','weighty'], nerfs: ['weak','frail'] },
-        snip: { past: 'Snip', cooldown: 100, time: 50, buffs: ['razor','sharpened'], nerfs: ['dull','blunted','rusty'] },
+        snip: { past: 'Snipped', cooldown: 100, time: 50, buffs: ['razor','sharpened'], nerfs: ['dull','blunted','rusty'] },
         stab: { past: 'Stabbed', cooldown: 60, time: 58, buffs: ['sharpened','stinging'], nerfs: ['dull','blunted'] },
         pry: { past: 'Pried', cooldown: 200, time: 68, buffs: ['sturdy','robust'], nerfs: ['bent','crooked'] },
         slice: { past: 'Sliced', cooldown: 60, time: 32, buffs: ['razor','sharpened','stinging'], nerfs: ['dull','blunted','rusty'] },
