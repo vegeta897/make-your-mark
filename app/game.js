@@ -63,7 +63,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
             for(var i = 0; i < drops; i++) {
                 var snow = Util.randomSlide(game.weather.now.temp,32,33) <= 32;
                 var brightness = snow ? 1 - Math.random() * 0.05 : Math.random();
-                game.effects.push({
+                Effects.add({
                     type: snow ? 'snow' : 'rain', 
                     color: 'rgba('+Math.floor(162+brightness*93)+','+Math.floor(186+brightness*69)+','+255+','
                         +(snow ? Math.random()*0.4 + 0.45 : Math.random()*0.2 + 0.1)+')',

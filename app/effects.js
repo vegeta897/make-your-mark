@@ -23,8 +23,8 @@ Application.Services.factory('Effects',function(Util,TextDraw) {
                     efx.frame++;
                     efx.x += efx.vx; efx.y += efx.vy; efx.z += efx.vz; // Apply velocities
                 }
-                // Bounce if hit ground
-                if(efx.z <= 0) {
+                // TODO: Add wind for rain and snow
+                if(efx.z <= 0) { // Bounce if hit ground
                     if(efx.type == 'rain') {
                         if(!efx.splash) {
                             for(var c = 0; c < Util.randomIntRange(1,3); c++) {
@@ -48,6 +48,10 @@ Application.Services.factory('Effects',function(Util,TextDraw) {
                 if(efx.type == 'damage' || efx.type == 'combo') {
                     efx.vz -= 0.003;
                 } else if(efx.type == 'snow') {
+                    if(efx.z > 0) {
+                        efx.vx = Math.max(-0.004,Math.min(0.004,efx.vx + Math.random() / 1000 - 0.0005));
+                        efx.vy = Math.max(-0.004,Math.min(0.004,efx.vy + Math.random() / 1000 - 0.0005));
+                    }
                     efx.vz -= 0.0004;
                     efx.vz = Math.max(efx.vz,-0.03);
                 } else if(efx.type == 'sparkle') {

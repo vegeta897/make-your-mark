@@ -280,10 +280,6 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         init: function(g) { game = g; pix = game.arena.pixels; },
         initMainCanvas: function(canvas,ctx,curse) { 
             cm = ctx; cvm = canvas; mWidth = canvas.width; mHeight = canvas.height;
-            cm.mozImageSmoothingEnabled = false;
-            cm.webkitImageSmoothingEnabled = false;
-            cm.msImageSmoothingEnabled = false;
-            cm.imageSmoothingEnabled = false;
             cursor = curse;
         },
         initMinimap: function(canvas,ctx) { cmm = ctx; mmWidth = canvas.width; mmHeight = canvas.height; },

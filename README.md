@@ -79,3 +79,11 @@ You guessed it, a multiplayer web game. This might be doomed but who cares anymo
 ### Ambient AI
 
 - Little creatures that idle around containers, attack container when player does
+
+### New Game Concept
+
+- Each container represents a "dungeon" that the player enters and fights through
+  - Items appropriate for that container will help greatly
+  - Dungeon itself is same 15x15 iso view, but different colors and of course layout
+  - Failed dungeon will break container, beating it will open
+  - What kind of enemies?
