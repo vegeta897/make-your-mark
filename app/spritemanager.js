@@ -5,7 +5,7 @@ Application.Services.factory('SpriteMan',function(Util,TextDraw) {
         dmgNumbersImg, bgTileImg, pathTileImg, pathTileLib, genericSprite, inventorySpriteImg,
         abiSpriteLib, sectorSpriteImg, attacksImg = {},
         imagesLoaded = 0, totalImages = 0, 
-        graphicsRevision = 26;
+        graphicsRevision = 27;
     var pix = 24;
     
     // TODO: Create a saturation filter for lower quality items, and other effects for higher quality items

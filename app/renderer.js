@@ -7,9 +7,11 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
     var zoomed, prevZoomed, zoomFrame, zoomOff;
     var cycle, glowRamp;
     var lastSO = {}, so = { x: 0, y: 0}, hoverCount = {};
+    var bfCanvas = document.createElement('canvas');
+    var bf = bfCanvas.getContext('2d');
     
-    var disableShadow = function(canvas) {
-        canvas.shadowColor = 'transparent'; canvas.shadowBlur = 0; canvas.shadowOffsetX = 0; canvas.shadowOffsetY = 0;
+    var disableShadow = function() {
+        bf.shadowColor = 'transparent'; bf.shadowBlur = 0; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
     };
     
     var qualityShadow = function(object) {
@@ -98,9 +100,9 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         // TODO: Create shadow sprites for various object shapes/sizes
         if(SpriteMan.thingSpriteLib.indexes.hasOwnProperty(o.id)) { // If this thing has a sprite
             if(o.quality >= Util.qualityLevels[2].min) { // Uncommon or greater
-                cm.shadowColor = qualityShadow(o);
-                cm.shadowBlur = 1 + glowRamp; 
-                cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+                bf.shadowColor = qualityShadow(o);
+                bf.shadowBlur = 1 + glowRamp; 
+                bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                 var xd = Util.randomIntRange(-6,6)/15, yd = Util.randomIntRange(-6,6)/15;
                 if(o.quality >= Util.qualityLevels[4].min && !(game.ticks & 3)) {
                     Effects.add({type:'sparkle', style: 'evaporate', color: '#'+quality.hex,
@@ -113,25 +115,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     });
                 }
             }
-            //cm.shadowColor = 'rgba(0,0,0,0.3)'; cm.shadowBlur = 4;
-            //cm.shadowOffsetX = 2; cm.shadowOffsetY = 1;
-            cm.drawImage(SpriteMan.getThingSprite(o), 0, 0, pix, pix,
+            //bf.shadowColor = 'rgba(0,0,0,0.3)'; bf.shadowBlur = 4;
+            //bf.shadowOffsetX = 2; bf.shadowOffsetY = 1;
+            bf.drawImage(SpriteMan.getThingSprite(o), 0, 0, pix, pix,
                 draw.x, draw.y, pix, pix);
-            disableShadow(cm);
+            disableShadow();
         } else if(containerSprite) { // If this container has a sprite
-            cm.shadowColor = 'rgba(0,0,0,0.3)'; cm.shadowBlur = 4;
-            cm.shadowOffsetX = 2; cm.shadowOffsetY = 1;
+            bf.shadowColor = 'rgba(0,0,0,0.3)'; bf.shadowBlur = 4;
+            bf.shadowOffsetX = 2; bf.shadowOffsetY = 1;
             var cState = o.open ? o.broke ? 'spriteBroken' : 'spriteOpen' : 'sprite';
-            cm.drawImage(containerSprite[cState], 0, 0, 36, 36,
+            bf.drawImage(containerSprite[cState], 0, 0, 36, 36,
                 draw.x+o.knocked.x-6, draw.y+o.knocked.y-6, 36, 36);
-            disableShadow(cm);
+            disableShadow();
         } else { // No sprite, draw letter box
-            cm.drawImage(SpriteMan.genericSprite,draw.x+o.knocked.x, draw.y+o.knocked.y);
-            disableShadow(cm);
-            cm.fillStyle = '#112244';
-            cm.font = 'bold 14px Arial';cm.textAlign = 'center';
+            bf.drawImage(SpriteMan.genericSprite,draw.x+o.knocked.x, draw.y+o.knocked.y);
+            disableShadow();
+            bf.fillStyle = '#112244';
+            bf.font = 'bold 14px Arial';bf.textAlign = 'center';
             var kerning = jQuery.inArray(o.name[0],['A','B','C','D','G','H','R','M']) >= 0 ? 1 : 0;
-            cm.fillText(o.name[0],draw.x+11+kerning+o.knocked.x,draw.y+20+o.knocked.y);
+            bf.fillText(o.name[0],draw.x+11+kerning+o.knocked.x,draw.y+20+o.knocked.y);
         }
         if(o.newHit) { // If hit and haven't created fx yet
             Math.seedrandom();
@@ -154,31 +156,31 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         var showHealth = o.health && o.realHealth < o.health[1];
         // Draw container health
         if(showHealth) {
-            disableShadow(cm);
-            cm.fillStyle = 'rgba(0,0,0,0.7)';
-            cm.fillRect(draw.x+o.knocked.x,draw.y-5+o.knocked.y,pix+2,5);
-            cm.fillStyle = 'white';
-            cm.fillRect(draw.x-1+o.knocked.x,draw.y-6+o.knocked.y,pix+2,5);
+            disableShadow();
+            bf.fillStyle = 'rgba(0,0,0,0.7)';
+            bf.fillRect(draw.x+o.knocked.x,draw.y-5+o.knocked.y,pix+2,5);
+            bf.fillStyle = 'white';
+            bf.fillRect(draw.x-1+o.knocked.x,draw.y-6+o.knocked.y,pix+2,5);
             var hp = o.realHealth/ o.health[1];
-            cm.fillStyle = 'rgba(0,0,0,0.9)';
-            cm.fillRect(draw.x+pix+o.knocked.x,draw.y-5+o.knocked.y,Math.floor((pix)*(1-hp))*-1,3);
+            bf.fillStyle = 'rgba(0,0,0,0.9)';
+            bf.fillRect(draw.x+pix+o.knocked.x,draw.y-5+o.knocked.y,Math.floor((pix)*(1-hp))*-1,3);
         }
         // Draw hover info
         if(cursor.hover.hasOwnProperty(o.guid)) {
-            cm.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
+            bf.fillStyle = 'rgba('+quality.r+','+quality.g+','+quality.b+',1)';
             var grid = o.x+':'+o.y;
             var healthSpacing = showHealth ? 10 : 0;
-            TextDraw.drawText(quality.name+' '+o.name, o.health ? 'white' : quality.name, cm,
+            TextDraw.drawText(quality.name+' '+o.name, o.health ? 'white' : quality.name, bf,
                 'normal','med',draw.x+12,draw.y-8-healthSpacing-(12*(hoverCount[grid] || 0)),'center',1);
             hoverCount[grid] = hoverCount[grid] ? hoverCount[grid] + 1 : 1;
         }
         // Draw select box
         if(!game.selected || game.selected.guid != o.guid) return;
-        cm.lineWidth = 2; cm.strokeStyle = 'rgba(200,230,255,0.5)';
-        cm.beginPath();
-        cm.moveTo(draw.x,draw.y); cm.lineTo(draw.x + pix,draw.y);
-        cm.lineTo(draw.x + pix,draw.y + pix); cm.lineTo(draw.x,draw.y + pix);
-        cm.closePath(); cm.stroke();
+        bf.lineWidth = 2; bf.strokeStyle = 'rgba(200,230,255,0.5)';
+        bf.beginPath();
+        bf.moveTo(draw.x,draw.y); bf.lineTo(draw.x + pix,draw.y);
+        bf.lineTo(draw.x + pix,draw.y + pix); bf.lineTo(draw.x,draw.y + pix);
+        bf.closePath(); bf.stroke();
     };
     var renderPlayer = function(p) {
         var pdx = (p.osx - game.player.osx)*(game.arena.width) + p.ox,
@@ -192,14 +194,14 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         drawP.x += so.x + 11; drawP.y += so.y;
         if(drawP.x < pix*-1 || drawP.x > mWidth
             || drawP.y < pix*-1 || drawP.y > mHeight) return;
-        cm.shadowColor = 'rgba(0,0,0,0.5)';
-        cm.shadowBlur = 5; cm.shadowOffsetX = 1; cm.shadowOffsetY = 1;
-        cm.fillStyle = '#'+p.color.hex;
-        cm.beginPath(); cm.arc(drawP.x+pix/2, drawP.y+pix/4, 9, 0, 2 * Math.PI, false); cm.fill();
-        disableShadow(cm);
+        bf.shadowColor = 'rgba(0,0,0,0.5)';
+        bf.shadowBlur = 5; bf.shadowOffsetX = 1; bf.shadowOffsetY = 1;
+        bf.fillStyle = '#'+p.color.hex;
+        bf.beginPath(); bf.arc(drawP.x+pix/2, drawP.y+pix/4, 9, 0, 2 * Math.PI, false); bf.fill();
+        disableShadow();
         // Render other player's names
         if(game.player.guid != p.guid) {
-            TextDraw.drawText(p.name,'white', cm, 'normal','med',drawP.x + 12, drawP.y - 14,'center',1);
+            TextDraw.drawText(p.name,'white', bf, 'normal','med',drawP.x + 12, drawP.y - 14,'center',1);
         }
         // Render player attack
         if(p.attacking && p.attacking.dir) {
@@ -208,8 +210,8 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var attack = Util.isoToScreenRel(p.attacking.dir.x,p.attacking.dir.y);
                 attack.x *= attackProgress + 1; attack.y *= attackProgress + 1;
                 attack.y += -7 + attackProgress*25;
-                cm.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
-                cm.fillRect(drawP.x+Math.floor(attack.x/2)+9,drawP.y+Math.floor(attack.y/2)+5,6,6);
+                bf.fillStyle = 'rgba(255,255,255,'+(1-attackProgress)+')';
+                bf.fillRect(drawP.x+Math.floor(attack.x/2)+9,drawP.y+Math.floor(attack.y/2)+5,6,6);
             } else if(p.attacking.frame < 78) {
                 var attackSpriteX = Math.floor((p.attacking.frame-1)/2)*59;
                 var attackSpriteY = (p.attacking.dir.x > 0 || p.attacking.dir.y < 0 ? 43 : 0) +
@@ -217,7 +219,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var attackOffsetX = p.attacking.dir.x + p.attacking.dir.y < 0 ? -33 : -2;
                 var attackOffsetY = p.attacking.dir.x > 0 || p.attacking.dir.y < 0 ? -32 : -8;
                 var attackDir = p.attacking.dir.x + p.attacking.dir.y < 0 ? 'left' : 'right';
-                cm.drawImage(SpriteMan.attacksImg[attackDir], attackSpriteX, attackSpriteY, 59,43,
+                bf.drawImage(SpriteMan.attacksImg[attackDir], attackSpriteX, attackSpriteY, 59,43,
                     drawP.x+attackOffsetX, drawP.y+attackOffsetY, 59, 43);
             }
         }
@@ -228,51 +230,51 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         if(drawFX.x > mWidth + pix*4 || drawFX.y > mHeight + pix*4 || drawFX.x < pix*-4 || drawFX.y < pix*-6) return;
         if(f.type == 'damage') {
             var fontSize = f.amt >= 100 ? 'large' : f.amt >= 50 ? 'med' : 'small';
-            cm.save();
-            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            TextDraw.drawText(''+f.amt, 'yellow', cm, 'dmg',fontSize,drawFX.x-1,drawFX.y,'center',1);
-            cm.restore();
+            bf.save();
+            bf.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            TextDraw.drawText(''+f.amt, 'yellow', bf, 'dmg',fontSize,drawFX.x-1,drawFX.y,'center',1);
+            bf.restore();
         } else if(f.type == 'combo') {
-            cm.save();
-            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            TextDraw.drawText(f.text, 'white', cm, 'normal','med',drawFX.x,drawFX.y,'center',1);
-            cm.restore();
+            bf.save();
+            bf.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            TextDraw.drawText(f.text, 'white', bf, 'normal','med',drawFX.x,drawFX.y,'center',1);
+            bf.restore();
         } else if(f.type == 'spark') {
-            cm.save();
-            cm.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
-            cm.fillStyle = 'rgba(0,0,0,0.7)';
-            cm.fillRect(drawFX.x+1,drawFX.y+1,f.width,f.height);
-            cm.fillStyle = f.color;
-            cm.fillRect(drawFX.x,drawFX.y,f.width,f.height);
-            cm.restore();
+            bf.save();
+            bf.globalAlpha = f.frame >= (f.time - 20) ? (f.time - f.frame) / 20 : 1; // Fade out
+            bf.fillStyle = 'rgba(0,0,0,0.7)';
+            bf.fillRect(drawFX.x+1,drawFX.y+1,f.width,f.height);
+            bf.fillStyle = f.color;
+            bf.fillRect(drawFX.x,drawFX.y,f.width,f.height);
+            bf.restore();
         } else if(f.type == 'rain') {
             // TODO: Gradient trail
-            cm.save();
-            cm.globalAlpha = f.frame >= (f.time - 10) ? (f.time - f.frame) / 10 : // Fade out
+            bf.save();
+            bf.globalAlpha = f.frame >= (f.time - 10) ? (f.time - f.frame) / 10 : // Fade out
                 f.frame < 30 && !f.splash ? f.frame/30 : 1; // Fade in
-            cm.fillStyle = f.color;
-            cm.fillRect(drawFX.x-10,drawFX.y-5,1,f.splash ? 1 : f.vz*pix*2);
-            cm.restore();
+            bf.fillStyle = f.color;
+            bf.fillRect(drawFX.x-10,drawFX.y-5,1,f.splash ? 1 : f.vz*pix*2);
+            bf.restore();
         } else if(f.type == 'snow') {
-            cm.save();
-            cm.globalAlpha = f.frame >= (f.time - 300) ? (f.time - f.frame) / 300 : // Fade out
+            bf.save();
+            bf.globalAlpha = f.frame >= (f.time - 300) ? (f.time - f.frame) / 300 : // Fade out
                 f.frame < 60 ? f.frame/60 : 1; // Fade in
-            cm.fillStyle = f.color;
-            cm.fillRect(drawFX.x-10,drawFX.y+15,1,1);
-            cm.restore();
+            bf.fillStyle = f.color;
+            bf.fillRect(drawFX.x-10,drawFX.y+15,1,1);
+            bf.restore();
         } else if(f.type == 'sparkle') {
-            cm.save();
-            cm.shadowColor = f.color; cm.shadowBlur = 2;
-            cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+            bf.save();
+            bf.shadowColor = f.color; bf.shadowBlur = 2;
+            bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
             if(f.style == 'fireflies') {
-                cm.globalAlpha = f.frame < 60 ? f.frame/60 : (f.time - f.frame) / 60; // Fade in & out
+                bf.globalAlpha = f.frame < 60 ? f.frame/60 : (f.time - f.frame) / 60; // Fade in & out
             } else if(f.style == 'evaporate') {
-                cm.globalAlpha = f.frame < 20 ? f.frame/20 : (f.time - f.frame) / 100; // Fade in & out
+                bf.globalAlpha = f.frame < 20 ? f.frame/20 : (f.time - f.frame) / 100; // Fade in & out
             }
-            cm.globalAlpha *= (0.35 - (Math.pow(f.xd, 2) + Math.pow(f.yd, 2))) / 0.35;
-            cm.fillStyle = f.color;
-            cm.fillRect(drawFX.x,drawFX.y,1,1);
-            cm.restore();
+            bf.globalAlpha *= (0.35 - (Math.pow(f.xd, 2) + Math.pow(f.yd, 2))) / 0.35;
+            bf.fillStyle = f.color;
+            bf.fillRect(drawFX.x,drawFX.y,1,1);
+            bf.restore();
         }
     };
     
@@ -280,20 +282,24 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         init: function(g) { game = g; pix = game.arena.pixels; },
         initMainCanvas: function(canvas,ctx,curse) { 
             cm = ctx; cvm = canvas; mWidth = canvas.width; mHeight = canvas.height;
+            bfCanvas.width = mWidth; bfCanvas.height = mHeight;
+            bf.mozImageSmoothingEnabled = false;
+            bf.msImageSmoothingEnabled = false;
+            bf.imageSmoothingEnabled = false;
             cursor = curse;
         },
         initMinimap: function(canvas,ctx) { cmm = ctx; mmWidth = canvas.width; mmHeight = canvas.height; },
         initZoomCanvas: function(canvas,ctx) { cz = ctx; cvz = canvas; zWidth = canvas.width; zHeight = canvas.height; },
         drawFrame: function(rt,step,tick) {
             if(!cvm || !mWidth || !pix) return;
-            cm.clearRect(0,0,mWidth,mHeight);
+            bf.clearRect(0,0,mWidth,mHeight);
             if(SpriteMan.getLoadProgress() < 1) { // Show loading screen
-                cm.fillStyle = '#777777';
-                cm.font = 'bold 24px Arial';cm.textAlign = 'center';
-                cm.fillText('Loading Sprites '+Math.round(SpriteMan.getLoadProgress()*100)+'%',
+                bf.fillStyle = '#777777';
+                bf.font = 'bold 24px Arial';bf.textAlign = 'center';
+                bf.fillText('Loading Sprites '+Math.round(SpriteMan.getLoadProgress()*100)+'%',
                     mWidth/2, mHeight/2 - 12);
-                cm.fillRect(200, mHeight/2+6, mWidth-400,20);
-                cm.clearRect(cvm.width-202, mHeight/2+8, 
+                bf.fillRect(200, mHeight/2+6, mWidth-400,20);
+                bf.clearRect(cvm.width-202, mHeight/2+8, 
                     (1-SpriteMan.getLoadProgress())*(-mWidth+404),16);
                 return;
             }
@@ -302,6 +308,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             
             // Render background
             lastSO.x = game.player.sectorMove.x; lastSO.y = game.player.sectorMove.y;
+            Math.seedrandom('bg-'+game.player.osx+':'+game.player.osy);
             for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) {
                 if(Math.abs(sw) + Math.abs(sh) > 1) continue; // Don't include diagonals
                 for(var w = 0; w < game.arena.width; w++) { for(var h = 0; h < game.arena.height; h++) {
@@ -311,25 +318,29 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     bgDraw.x += so.x; bgDraw.y += so.y;
                     if(bgDraw.x < pix*-2 || bgDraw.x >= mWidth ||
                         bgDraw.y < pix*-2 || bgDraw.y >= mHeight) continue;
-                    cm.drawImage(SpriteMan.bgTileImg,sw != 0 || sh != 0 ? 46 : 0,0,46,24,
+                    var tileType = sw != 0 || sh != 0 ? 230 : 0;
+                    if(tileType == 0 && Math.random() < 0.04) {
+                        tileType = Util.randomIntRange(1,4) * 46;
+                    }
+                    bf.drawImage(SpriteMan.bgTileImg,tileType,0,46,24,
                         bgDraw.x,bgDraw.y,46,24);
-                    //cm.fillStyle = 'rgba(255,255,255,0.5)';
-                    //cm.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
+                    //bf.fillStyle = 'rgba(255,255,255,0.5)';
+                    //bf.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
                 } }
             } }
             if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
             
             if(game.weather.now.temp < 36) {
-                cm.globalCompositeOperation = 'source-atop';
-                cm.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
-                cm.fillRect(0,0, mWidth, mHeight);
-                cm.globalCompositeOperation = 'source-over';
+                bf.globalCompositeOperation = 'source-atop';
+                bf.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
+                bf.fillRect(0,0, mWidth, mHeight);
+                bf.globalCompositeOperation = 'source-over';
             }
             // Render cursor highlight
             if(cursor.iso && ((cursor.iso.x >= 0 && cursor.iso.x < 15 && cursor.iso.y >= 0 && cursor.iso.y < 15)
                 || (Util.validOffSectorTiles[cursor.iso.x+':'+cursor.iso.y]))) {
                 var cursorDraw = Util.isoToScreen(cursor.iso.x, cursor.iso.y);
-                cm.drawImage(SpriteMan.bgTileImg, 92, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
+                bf.drawImage(SpriteMan.bgTileImg, 276, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
             }
             // Render minimap
             if(!mmWidth) return;
@@ -381,11 +392,11 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                         SpriteMan.pathTileLib);
                     if(pathTile < 0) pathTile = jQuery.inArray('0:0|'+dNext.x+':'+dNext.y,SpriteMan.pathTileLib);
                     if(pathTile < 0) continue;
-                    cm.globalAlpha = pn == 0 ? 1 - game.player.moveProgress : 1;
-                    cm.drawImage(SpriteMan.pathTileImg,pathTile % 8 * 48,Math.floor(pathTile/8)*24,48,24,
+                    bf.globalAlpha = pn == 0 ? 1 - game.player.moveProgress : 1;
+                    bf.drawImage(SpriteMan.pathTileImg,pathTile % 8 * 48,Math.floor(pathTile/8)*24,48,24,
                         node.x,node.y,48,24);
                 }
-                cm.globalAlpha = 1;
+                bf.globalAlpha = 1;
             }
             cycle = game.ticks % 240;
             glowRamp = (cycle > 120 ? 120 - (cycle - 120) : cycle) / 30;
@@ -444,85 +455,85 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             // TODO: Create inventory canvas?
             if(game.drawInventory) {
                 //for(var tb1 = 0; tb1 < 5; tb1++) {
-                //    cm.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
+                //    bf.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
                 //}
                 var tbX = 376, tbY = 367, tbXS = 34, tbYS = 17;
                 for(var tb = 0; tb < game.player.toolbelt.length; tb++) { // Draw toolbelt
                     var tbItem = game.player.toolbelt[tb];
                     if(tbItem) {
                         if(tbItem.cooldown) {
-                            cm.save(); cm.globalAlpha = 0.5;
+                            bf.save(); bf.globalAlpha = 0.5;
                         }
-                        cm.fillStyle = '#525252';
-                        cm.fillRect(tbX+28 + tbXS*tb,tbY+14 - tbYS*tb,28,14);
+                        bf.fillStyle = '#525252';
+                        bf.fillRect(tbX+28 + tbXS*tb,tbY+14 - tbYS*tb,28,14);
                         var abilityPos = 0;
                         for(var a in tbItem.abilities) { if(!tbItem.abilities.hasOwnProperty(a)) continue;
-                            cm.fillStyle = tbItem.cooldown && tbItem.cooldown[0] == a ? '#292b2a' : '#525252';
-                            cm.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,55,14);
+                            bf.fillStyle = tbItem.cooldown && tbItem.cooldown[0] == a ? '#292b2a' : '#525252';
+                            bf.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,55,14);
                             if(tbItem.cooldown && tbItem.cooldown[0] == a) {
-                                cm.fillStyle = '#565656';
+                                bf.fillStyle = '#565656';
                                 var totalCool = Math.max(1,Things.abilities[a].cooldown-tbItem.handling)*10;
-                                cm.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,
+                                bf.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,
                                     /*Math.floor*/(55*((totalCool-tbItem.cooldown[1])/totalCool)),14);
                             }
-                            cm.drawImage(SpriteMan.inventorySpriteImg,
+                            bf.drawImage(SpriteMan.inventorySpriteImg,
                                 (jQuery.inArray(a,SpriteMan.abiSpriteLib.names)-1)*14,28,14,14,
                                 tbX+57 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,14,14);
-                            TextDraw.drawText(Util.capitalize(a), 'white', cm,
+                            TextDraw.drawText(Util.capitalize(a), 'white', bf,
                                 'normal','med',tbX+90 + tbXS*tb+59*abilityPos,tbY+17 - tbYS*tb,'center',1);
                             abilityPos++;
                         }
-                        if(tbItem.cooldown) cm.restore();
+                        if(tbItem.cooldown) bf.restore();
                     }
                     if(tbItem && game.selected && game.selected.guid == tbItem.guid) {
-                        cm.drawImage(SpriteMan.inventorySpriteImg,108,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        bf.drawImage(SpriteMan.inventorySpriteImg,108,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     } else if(cursor.onTBslot == tb) {
-                        cm.drawImage(SpriteMan.inventorySpriteImg,54,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        bf.drawImage(SpriteMan.inventorySpriteImg,54,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     } else {
-                        cm.drawImage(SpriteMan.inventorySpriteImg,0,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
+                        bf.drawImage(SpriteMan.inventorySpriteImg,0,0,54,28,tbX + tbXS*tb, tbY - tbYS*tb, 54, 28);
                     }
                     if(!tbItem) continue;
                     if(game.dragging && game.dragging.guid == tbItem.guid) {
-                        cm.save(); cm.globalAlpha = 0.5;
+                        bf.save(); bf.globalAlpha = 0.5;
                     }
                     quality = Util.objectQuality(tbItem);
                     if(tbItem.quality >= 860) {
-                        cm.shadowColor = qualityShadow(tbItem);
-                        cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+                        bf.shadowColor = qualityShadow(tbItem);
+                        bf.shadowBlur = 5; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                     }
-                    cm.drawImage(SpriteMan.getThingSprite(tbItem),0, 0, pix, pix,
+                    bf.drawImage(SpriteMan.getThingSprite(tbItem),0, 0, pix, pix,
                         tbX+15 + tbXS*tb,tbY-3 - tbYS*tb,pix,pix);
-                    disableShadow(cm);
-                    if(game.dragging && game.dragging.guid == tbItem.guid) cm.restore();
+                    disableShadow();
+                    if(game.dragging && game.dragging.guid == tbItem.guid) bf.restore();
                 }
-                cm.fillStyle = '#424242';
-                cm.fillRect(609,261,108,52);
+                bf.fillStyle = '#424242';
+                bf.fillRect(609,261,108,52);
                 // TODO: Isometric backpack?
                 for(var bp = 0; bp < game.player.backpack.length; bp++) { // Draw backpack
                     var bpItem = game.player.backpack[bp];
                     if(bpItem && game.selected && game.selected.guid == bpItem.guid) {
-                        cm.fillStyle = '#b5b5b5';
-                        cm.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        bf.fillStyle = '#b5b5b5';
+                        bf.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
                     } else if(cursor.onBPslot == bp) {
-                        cm.fillStyle = '#6e6e6e';
-                        cm.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        bf.fillStyle = '#6e6e6e';
+                        bf.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
                     }
-                    cm.fillStyle = '#4a4a4a';
-                    cm.fillRect(608+(bp%4)*28,260+Math.floor(bp/4)*28,26,26);
+                    bf.fillStyle = '#4a4a4a';
+                    bf.fillRect(608+(bp%4)*28,260+Math.floor(bp/4)*28,26,26);
                     if(!bpItem) continue;
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
-                        cm.save(); cm.globalAlpha = 0.5;
+                        bf.save(); bf.globalAlpha = 0.5;
                     }
                     quality = Util.objectQuality(bpItem);
                     if(bpItem.quality >= 860) {
-                        cm.shadowColor = qualityShadow(bpItem);
-                        cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+                        bf.shadowColor = qualityShadow(bpItem);
+                        bf.shadowBlur = 5; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                     }
-                    cm.drawImage(SpriteMan.getThingSprite(bpItem),0, 0, pix, pix,
+                    bf.drawImage(SpriteMan.getThingSprite(bpItem),0, 0, pix, pix,
                         609+(bp%4)*28,261+Math.floor(bp/4)*28,pix,pix);
-                    disableShadow(cm);
+                    disableShadow();
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
-                        cm.restore();
+                        bf.restore();
                     }
                 }
                 game.drawInventory = false;
@@ -530,12 +541,12 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             if(game.dragging && cursor.x != '-') {
                 quality = Util.objectQuality(game.dragging);
                 if(game.dragging.quality >= 860) {
-                    cm.shadowColor = qualityShadow(game.dragging);
-                    cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+                    bf.shadowColor = qualityShadow(game.dragging);
+                    bf.shadowBlur = 5; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                 }
-                cm.drawImage(SpriteMan.getThingSprite(game.dragging),0, 0, pix, pix,
+                bf.drawImage(SpriteMan.getThingSprite(game.dragging),0, 0, pix, pix,
                     +cursor.x-pix/2,+cursor.y-pix/2,pix,pix);
-                disableShadow(cm);
+                disableShadow();
             }
             // Draw thrown items
             // TODO; Move to render array
@@ -545,12 +556,12 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 throwDraw.x += 11; throwDraw.y += -7 - world.thrown[throwKey].physics.z * pix;
                 quality = Util.objectQuality(world.thrown[throwKey]);
                 if(world.thrown[throwKey].quality >= 860) {
-                    cm.shadowColor = qualityShadow(world.thrown[throwKey]);
-                    cm.shadowBlur = 5; cm.shadowOffsetX = 0; cm.shadowOffsetY = 0;
+                    bf.shadowColor = qualityShadow(world.thrown[throwKey]);
+                    bf.shadowBlur = 5; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                 }
-                cm.drawImage(SpriteMan.getThingSprite(world.thrown[throwKey]),0, 0, pix, pix,
+                bf.drawImage(SpriteMan.getThingSprite(world.thrown[throwKey]),0, 0, pix, pix,
                     throwDraw.x,throwDraw.y,pix,pix);
-                disableShadow(cm);
+                disableShadow();
             }
             // Draw zoom canvas
             if(game.player.attacking && game.player.attacking.type != 'punch' || zoomFrame > 0) {
@@ -577,6 +588,8 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     prevZoomed = false;
                 }
             }
+            cm.clearRect(0,0,mWidth,mHeight);
+            cm.drawImage(bfCanvas,0,0);
         }
     };
 });
