@@ -75,13 +75,14 @@ Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
         createPrompt: function(type,onClick,data) {
             switch(type) {
                 case 'enterContainer':
-                    //    var playerPos = Util.isoToScreen(game.player.ox+0.5,game.player.oy+0.5);
-                    prompt = new Window(180,180,100,150); elements.push(prompt);
-                    prompt.children.push(new Label(230,190,data.container.name,'center'));
+                    var playerPos = Util.isoToScreen(data.player.ox+0.5,data.player.oy+0.5);
+                    var windowY = playerPos.y - 94 < 2 ? playerPos.y + 28 : playerPos.y - 94;
+                    prompt = new Window(playerPos.x - 90,windowY,180,76); elements.push(prompt);
+                    prompt.children.push(new Label(prompt.x + 125,prompt.y + 13,data.container.name,'center'));
                     // TODO: Show open sprite when hovering on "Enter" button
-                    prompt.children.push(
-                        new Graphic(200,200,72,72,SpriteMan.containerSpriteLib.indexes[data.container.id]['sprite']));
-                    var newButton = new Button(200,280,58,30,'Enter',onClick);
+                    prompt.children.push(new Graphic(prompt.x+2,prompt.y+2,72,72,
+                        SpriteMan.containerSpriteLib.indexes[data.container.id]['sprite']));
+                    var newButton = new Button(prompt.x + 95,prompt.y + 34,60,30,'Enter',onClick);
                     newButton.addOnClick(onClick);
                     newButton.addOnClick(function(){deleteElement(prompt);});
                     prompt.children.push(newButton);
