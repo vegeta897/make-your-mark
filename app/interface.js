@@ -38,9 +38,9 @@ Application.Services.factory('Interface',function(World,Players,Things,Util,Fire
             //};
             
             if(c.x != '-') {
-                var onBackpack = Util.xyInBounds(c.x, c.y,608,260,108,54);
+                var onBackpack = Util.xyInBounds(c.x, c.y,608,265,108,54);
                 var onToolbelt = Util.xyInBounds(c.isoFine.x, c.isoFine.y, 0.1, 15.2, 5.65, 1.43);
-                var cio = {x: c.x - 608,y: c.y -260}; // Cursor backpack offset
+                var cio = {x: c.x - 608,y: c.y -265}; // Cursor backpack offset
                 c.onBPslot = onBackpack ? Math.floor(cio.x/28) + 4*(Math.floor(cio.y/28)) : -1;
                 c.onTBslot = onToolbelt ? Math.floor((c.isoFine.x-0.1)/1.43) : -1;
                 if(onBackpack) {

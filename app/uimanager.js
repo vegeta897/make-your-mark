@@ -42,21 +42,21 @@ Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
             }
         };
         this.draw = function() {
-            if(!this.disabled && this.hover && !this.pressed) {
-                bf.fillStyle = '#888888'
-            } else { bf.fillStyle = '#666666' }
+            if(!this.disabled && this.hover && !this.pressed) { // Border
+                bf.fillStyle = '#888888'; // Hover
+            } else { bf.fillStyle = '#666666'; } // Normal/disabled/pressed
             bf.fillRect(this.x, this.y, this.w, this.h);
-            if(!this.disabled) {
-                if(this.hover) bf.fillStyle = '#404040';
-                else if(this.pressed) bf.fillStyle = '#222222';
-                else bf.fillStyle = '#282828';
-            } else bf.fillStyle = '#404040';
+            if(!this.disabled) { // Fill
+                if(this.hover) bf.fillStyle = '#404040'; // Hover
+                else if(this.pressed) bf.fillStyle = '#222222'; // Pressed
+                else bf.fillStyle = '#282828'; // Normal
+            } else bf.fillStyle = '#404040'; // Disabled
             bf.fillRect(this.x+1, this.y+1, this.w-2, this.h-2);
             var fontColor;
-            if(!this.disabled) {
-                if(this.hover) fontColor = 'Legendary';
-                else fontColor = 'white';
-            } else fontColor = 'Poor';
+            if(!this.disabled) { // Text
+                if(this.hover) fontColor = 'Legendary'; // Hover
+                else fontColor = 'white'; // Normal/pressed
+            } else fontColor = 'Poor'; // Disabled
             TextDraw.drawText(this.text,fontColor,bf,'normal','med',this.x+this.w/2,this.y+this.h/2-4,'center',1);
         };
     };
@@ -83,13 +83,13 @@ Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
         },
         initGame: function(g) { 
             game = g;
-            mmZoomOut = new Button(0,138,17,16,'-');
+            mmZoomOut = new Button(0,139,17,16,'-');
             mmZoomOut.addOnClick(function(){
                 game.options.minimapZoom = Math.max(1,game.options.minimapZoom-1); 
                 mmZoomOut.disabled = game.options.minimapZoom == 1;
                 mmZoomIn.disabled = game.options.minimapZoom == 3;
             });
-            mmZoomIn = new Button(20,138,17,16,'+');
+            mmZoomIn = new Button(20,139,17,16,'+');
             mmZoomIn.addOnClick(function(){
                 game.options.minimapZoom = Math.min(3,game.options.minimapZoom+1);
                 mmZoomOut.disabled = game.options.minimapZoom == 1;

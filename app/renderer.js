@@ -320,10 +320,16 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     if(bgDraw.x < pix*-2 || bgDraw.x >= mWidth ||
                         bgDraw.y < pix*-2 || bgDraw.y >= mHeight) continue;
                     var tileType = sw != 0 || sh != 0 ? 230 : 0;
-                    if(tileType == 0 && Math.random() < 0.04) {
-                        tileType = Util.randomIntRange(1,4) * 46;
+                    if(game.player.inContainer) {
+                        if(tileType == 0) {
+                            tileType = Util.randomIntRange(0,4) * 46;
+                        }
+                    } else {
+                        if(tileType == 0 && Math.random() < 0.04) {
+                            tileType = Util.randomIntRange(1,4) * 46;
+                        }
                     }
-                    bf.drawImage(SpriteMan.bgTileImg,tileType,0,46,24,
+                    bf.drawImage(SpriteMan.bgTileImg,tileType,game.player.inContainer ? 24 : 0,46,24,
                         bgDraw.x,bgDraw.y,46,24);
                     //bf.fillStyle = 'rgba(255,255,255,0.5)';
                     //bf.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
@@ -331,7 +337,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             } }
             if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
             
-            if(game.weather.now.temp < 36) {
+            if(!game.player.inContainer && game.weather.now.temp < 36) {
                 bf.globalCompositeOperation = 'source-atop';
                 bf.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
                 bf.fillRect(0,0, mWidth, mHeight);
@@ -470,19 +476,19 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     if(game.dragging && game.dragging.guid == tbItem.guid) bf.restore();
                 }
                 bf.fillStyle = '#424242';
-                bf.fillRect(609,261,108,52);
+                bf.fillRect(609,266,108,52);
                 // TODO: Isometric backpack?
                 for(var bp = 0; bp < game.player.backpack.length; bp++) { // Draw backpack
                     var bpItem = game.player.backpack[bp];
                     if(bpItem && game.selected && game.selected.guid == bpItem.guid) {
                         bf.fillStyle = '#b5b5b5';
-                        bf.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        bf.fillRect(608+(bp%4)*28-1,265+Math.floor(bp/4)*28-1,28,28);
                     } else if(cursor.onBPslot == bp) {
                         bf.fillStyle = '#6e6e6e';
-                        bf.fillRect(608+(bp%4)*28-1,260+Math.floor(bp/4)*28-1,28,28);
+                        bf.fillRect(608+(bp%4)*28-1,265+Math.floor(bp/4)*28-1,28,28);
                     }
                     bf.fillStyle = '#4a4a4a';
-                    bf.fillRect(608+(bp%4)*28,260+Math.floor(bp/4)*28,26,26);
+                    bf.fillRect(608+(bp%4)*28,265+Math.floor(bp/4)*28,26,26);
                     if(!bpItem) continue;
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
                         bf.save(); bf.globalAlpha = 0.5;
@@ -493,7 +499,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                         bf.shadowBlur = 5; bf.shadowOffsetX = 0; bf.shadowOffsetY = 0;
                     }
                     bf.drawImage(SpriteMan.getThingSprite(bpItem),0, 0, pix, pix,
-                        609+(bp%4)*28,261+Math.floor(bp/4)*28,pix,pix);
+                        609+(bp%4)*28,266+Math.floor(bp/4)*28,pix,pix);
                     disableShadow();
                     if(game.dragging && game.dragging.guid == bpItem.guid) {
                         bf.restore();
@@ -527,24 +533,26 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 disableShadow();
             }
             // Render minimap
+            bf.fillStyle = '#666666';
+            bf.fillRect(0,30,mmWidth+2,mmHeight+2);
             bf.fillStyle = 'rgba(44,46,45,0.9)';
-            bf.fillRect(0,30,mmWidth,mmHeight);
+            bf.fillRect(1,31,mmWidth,mmHeight);
             var mmDiv = game.options.minimapZoom > 1 ? game.options.minimapZoom > 2 ? 15 : 35 : 105;
             var mmReach = (mmDiv - 1) / 2;
             var mmw = mmWidth / mmDiv, mmh = mmHeight / mmDiv;
-            bf.fillStyle = '#41535a';
+            bf.fillStyle = game.player.inContainer ? '#474957' : '#41535a';
             for(var mmsx = -mmReach; mmsx <= mmReach; mmsx++) {
                 for(var mmsy = -mmReach; mmsy <= mmReach; mmsy++) {
                     var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)];
                     if(thingCount >= 0) {
-                        bf.clearRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                            30+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        bf.fillRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                            30+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                        bf.clearRect(1+mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
+                            31+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                        bf.fillRect(1+mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
+                            31+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
                     }
                 }
             }
-            bf.fillStyle = '#60889f'; bf.fillRect(mmw*mmReach,30+mmw*mmReach,mmw,mmh);
+            bf.fillStyle = '#60889f'; bf.fillRect(1+mmw*mmReach,31+mmw*mmReach,mmw,mmh);
             // Draw zoom canvas
             if(game.player.attacking && game.player.attacking.type != 'punch' || zoomFrame > 0) {
                 zoomOff = game.player.attacking ? game.player.attacking.dir : zoomOff;
@@ -564,12 +572,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 } else {
                     zoomFrame++;
                 }
-            } else {
-                if(zoomFrame <= 0) {
-                    zoomed = false;
-                    prevZoomed = false;
-                }
-            }
+            } else { if(zoomFrame <= 0) { zoomed = false; prevZoomed = false; } }
             // Render UI
             UIMan.render();
             

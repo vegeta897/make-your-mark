@@ -32,6 +32,12 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         };
     localStorageService.set('player',storedPlayer);
     Math.seedrandom(storedPlayer.guid);
+    if(storedPlayer.inContainer) { // If player was in a container, put them back to the container in overworld
+        storedPlayer.sx = +storedPlayer.inContainer.sx; storedPlayer.sy = +storedPlayer.inContainer.sy;
+        storedPlayer.osx = +storedPlayer.inContainer.sx; storedPlayer.osy = +storedPlayer.inContainer.sy;
+        storedPlayer.x = +storedPlayer.inContainer.x; storedPlayer.y = +storedPlayer.inContainer.y;
+        storedPlayer.ox = +storedPlayer.inContainer.x; storedPlayer.oy = +storedPlayer.inContainer.y;
+    }
     var player = {
         sx: +storedPlayer.sx, sy: +storedPlayer.sy, osx: +storedPlayer.sx, osy: +storedPlayer.sy, 
         x: +storedPlayer.x, y: +storedPlayer.y, ox: +storedPlayer.x, oy: +storedPlayer.y, sectorMove: { x: 0, y: 0 },
@@ -47,7 +53,9 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         var storedPlayer = { sx: player.sx, sy: player.sy, x: player.x, y: player.y, 
             score: player.score, cash: player.cash, guid: player.guid, name: player.name,
             backpack: Things.shrinkThings(player.backpack), toolbelt: Things.shrinkThings(player.toolbelt), 
-            rv: revision, explored: player.explored };
+            rv: revision, explored: player.explored, inContainer: player.inContainer };
+        var oldStoredPlayer = localStorageService.get('player');
+        if(oldStoredPlayer && player.inContainer) storedPlayer.explored = oldStoredPlayer.explored;
         localStorageService.set('player',storedPlayer);
     };
     
@@ -60,9 +68,12 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         }
         var valid = true;
         if(player.ox == dest.x && player.oy == dest.y) valid = false;
-        if(!valid) takeThing(World.getObjectsAt(player.sx,player.sy,player.x,player.y,'things')[0]);
+        if(!valid) {
+            takeThing(World.getObjectsAt(player.sx,player.sy,player.x,player.y,'things')[0]);
+            onStopMovement();
+            return;
+        }
         //if(World.getObjectsAt(player.sx,player.sy,dest.x,dest.y,'containers').length > 0) valid = false;
-        if(!valid) return;
         if(player.x + (player.sx-player.osx)*game.arena.width == dest.x
             && player.y + (player.sy-player.osy)*game.arena.height == dest.y) return; // Destination hasn't changed
         UIMan.removePrompt();
@@ -97,7 +108,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                 p.ox = p.path[0].x;
                 p.oy = p.path[0].y;
                 if (p.guid == player.guid) {
-                    World.setPosition(p.osx,p.osy,p.ox,p.oy);
+                    World.setPosition(p.osx,p.osy,p.ox,p.oy,player.inContainer);
                 }
                 p.path.splice(0, 1);
                 delete p.moveProgress;
@@ -110,7 +121,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                     delete p.path;
                     p.moving = false;
                     if (p.guid == player.guid) {
-                        World.setPosition(p.osx,p.osy,p.ox,p.oy);
+                        World.setPosition(p.osx,p.osy,p.ox,p.oy,player.inContainer);
                         storePlayer(); onStopMovement();
                         if(Math.abs(sxd) + Math.abs(syd) > 0) { 
                             World.newSector(); 
@@ -140,12 +151,16 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'all');
         for(var u = 0; u < underPlayer.length; u++) {
             if(!underPlayer[u].health) { takeThing(underPlayer[u]); } // If on thing, take it
-            else { // If on container, prompt to enter
+            else if(!player.containerPrompt) { // If on container, prompt to enter
                 player.containerPrompt = underPlayer[u];
                 UIMan.createPrompt('enterContainer',function(){
-                    
-                    // TODO: Enter dungeon
-                    
+                    player.inContainer = player.containerPrompt;
+                    player.osx = 0; player.sx = 0; player.osy = 0; player.sy = 0; 
+                    player.ox = 7; player.x = 7; player.oy = 7; player.y = 7;
+                    World.setPosition(player.sx,player.sy,player.x,player.y,true);
+                    World.newSector();
+                    storePlayer();
+                    player.explored = {'0,0':0};
                 },{ container: player.containerPrompt, player: player });
             }
         }
@@ -332,7 +347,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
             player.osx = player.sx; player.osy = player.sy;
             var storedName = player.name && player.name.trim() != '' ? ':' + player.name : ':';
             FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName+':teleport');
-            World.setPosition(player.sx,player.sy,player.x,player.y);
+            World.setPosition(player.sx,player.sy,player.x,player.y,player.inContainer);
             World.newSector();
             exploreSector(player.sx,player.sy);
         },

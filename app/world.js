@@ -1,7 +1,7 @@
 'use strict';
 Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,FireService) {
 
-    var position = { sx: 0, sy: 0, x: 0, y: 0 };
+    var position = { sx: 0, sy: 0, x: 0, y: 0}, inContainer;
     var game;
     var world = { things: [], removed: {}, dropped: {}, containers: [], players: {}, sectorObjectCount: 0,
         nearSectors: {}, map: {}, thrown: {} };
@@ -14,7 +14,8 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
         for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) { // Include neighbor sectors
             if(Math.abs(sw) + Math.abs(sh) > 1) continue; // Don't include diagonals
             var sectorKey = (+position.sx+sw)+':'+(+position.sy+sh);
-            if(world.nearSectors[sectorKey]) { // Copy stored sector objects/map if not new sector
+            // Copy stored sector objects/map if not new sector
+            if(!game.player.inContainer && world.nearSectors[sectorKey]) { 
                 newSectors[sectorKey] = world.nearSectors[sectorKey];
                 newMap[sectorKey] = world.map[sectorKey];
                 continue;
@@ -26,6 +27,7 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
             var containersSpawned = 0;
             for(var w = 0; w < game.arena.width; w++) { for(var h = 0; h < game.arena.height; h++) {
                 newMap[sectorKey][w+':'+h] = true;
+                if(game.player.inContainer) continue;
                 // 2% initial chance of container, diminishes with each spawn
                 if(Math.random() <= 0.02 / (containersSpawned + 1)
                     && w > 0 && h > 0 && w < game.arena.width - 1 && h < game.arena.height - 1 // Don't spawn on edges
@@ -216,8 +218,9 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
                 }
             }
         },
-        setPosition: function(sx,sy,x,y) {
+        setPosition: function(sx,sy,x,y,ic) {
             position.sx = sx; position.sy = sy; position.x = x; position.y = y;
+            inContainer = ic;
         },
         newSector: function() {
             generateContainersAndThings(); 

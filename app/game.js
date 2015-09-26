@@ -56,7 +56,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         World.update(game.ticks);
         UIMan.update();
         Effects.update();
-        if(game.weather.now) {
+        if(!game.player.inContainer && game.weather.now) {
             var drops = Util.randomSlide(game.weather.now.rain/10,Math.floor(game.weather.now.rain/10),
                 Math.ceil(game.weather.now.rain/10));
             // TODO: Rain brings bad luck? But maybe makes certain container types easier? (paper bags, mounds)
