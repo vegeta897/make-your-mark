@@ -20,11 +20,6 @@
         </div>
         <canvas id="zoomCanvas" width="180" height="110"></canvas>
         <controls ng-hide="needUpdate"></controls>
-        <div class="minimap" ng-hide="needUpdate">
-            <canvas id="minimap" width="225" height="225"></canvas>
-            <button ng-click="minimapZoom(-1)" ng-disabled="game.options.minimapZoom < 2">-</button>
-            <button ng-click="minimapZoom(1)" ng-disabled="game.options.minimapZoom > 3">+</button>
-        </div>
         <section id="stats" ng-hide="needUpdate">
             <dl class="stats">
                 <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>

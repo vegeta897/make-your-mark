@@ -5,7 +5,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         arena: {width: 15, height: 15, pixels: 24}, fps: 60, rendered: false,
         objects: {}, player: Players.player, effects: [], 
         weather: { interval: 120, rain: 0, temp: 0, forecast: {rain: 0, temp: 0}, now: {rain: 0, temp: 50} },
-        options: { minimapZoom: 4 },
+        options: { minimapZoom: 3 },
         eventLog: []
     };
     

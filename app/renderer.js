@@ -3,7 +3,8 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
 
     var cm, cvm, cmm, cz, cvz; // Canvas, minimap, and zoom objects
     var cursor;
-    var renderArray, game, world = World.world, pix, mmWidth, mmHeight, mWidth, mHeight, zWidth, zHeight;
+    var renderArray, game, world = World.world, pix, mWidth, mHeight,
+        mmWidth = 105, mmHeight = 105, zWidth, zHeight;
     var zoomed, prevZoomed, zoomFrame, zoomOff;
     var cycle, glowRamp;
     var lastSO = {}, so = { x: 0, y: 0}, hoverCount = {};
@@ -289,7 +290,6 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             cursor = curse;
             UIMan.init(cursor,bf,mWidth,mHeight);
         },
-        initMinimap: function(canvas,ctx) { cmm = ctx; mmWidth = canvas.width; mmHeight = canvas.height; },
         initZoomCanvas: function(canvas,ctx) { cz = ctx; cvz = canvas; zWidth = canvas.width; zHeight = canvas.height; },
         drawFrame: function(rt,step,tick) {
             if(!cvm || !mWidth || !pix) return;
@@ -343,42 +343,6 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 var cursorDraw = Util.isoToScreen(cursor.iso.x, cursor.iso.y);
                 bf.drawImage(SpriteMan.bgTileImg, 276, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
             }
-            // Render minimap
-            if(!mmWidth) return;
-            cmm.clearRect(0,0,mmWidth,mmHeight);
-            //cmm.fillStyle = 'rgba(47,56,60,0.7)';
-            //cmm.fillRect(0,0,mmWidth,mmHeight);
-            var mmDiv = game.options.minimapZoom > 1 ? game.options.minimapZoom > 2 ? game.options.minimapZoom > 3 ? 
-                15 : 25 : 45 : 75;
-            var mmReach = (mmDiv - 1) / 2;
-            var mmw = mmWidth / mmDiv, mmh = mmHeight / mmDiv;
-            cmm.fillStyle = '#41535a';
-            for(var mmsx = -mmReach; mmsx <= mmReach; mmsx++) {
-                for(var mmsy = -mmReach; mmsy <= mmReach; mmsy++) {
-                    var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)];
-                    if(thingCount >= 0) {
-                        cmm.clearRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                            mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        if(thingCount > 30) thingCount = 7;
-                        else if(thingCount > 20) thingCount = 6;
-                        else if(thingCount > 14) thingCount = 5;
-                        else if(thingCount > 9) thingCount = 4;
-                        else if(thingCount > 5) thingCount = 3;
-                        else if(thingCount > 2) thingCount = 2;
-                        else if(thingCount > 0) thingCount = 1;
-                        else thingCount = 0;
-                        if(game.options.minimapZoom == 4) {
-                            cmm.drawImage(SpriteMan.sectorSpriteImg,(thingCount+1)*mmw,0,mmw,mmh,
-                                mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                                mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        } else {
-                            cmm.fillRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                                mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        }
-                    }
-                }
-            }
-            cmm.drawImage(SpriteMan.sectorSpriteImg,0,0,mmw,mmh,mmw*mmReach,mmh*mmReach,mmw,mmh);
             // Render player move path
             if(game.player.path) {
                 for(var pn = 0; pn < game.player.path.length; pn++) {
@@ -440,17 +404,14 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             }
 
             // Render players on minimap
-            for(var pmmKey in world.players) { if (!world.players.hasOwnProperty(pmmKey)) continue;
-                var pmm = world.players[pmmKey];
-                var pmmdx = (pmm.osx - game.player.osx) * (game.arena.width) + pmm.ox,
-                    pmmdy = (pmm.osy - game.player.osy) * (game.arena.height) + pmm.oy;
-                cmm.fillStyle = '#' + pmm.color.hex; // Draw player on minimap
-                if (game.options.minimapZoom == 4) {
-                    cmm.fillRect(pmmdx + mmw * mmReach - 1, pmmdy + mmh * mmReach, 3, 1);
-                    cmm.fillRect(pmmdx + mmw * mmReach, pmmdy + mmh * mmReach - 1, 1, 3);
-                } else cmm.fillRect(Math.floor(pmmdx * 15 / mmDiv + mmw * mmReach - 1), 
-                    Math.floor(pmmdy * 15 / mmDiv + mmh * mmReach - 1), 1, 1);
-            }
+            //for(var pmmKey in world.players) { if (!world.players.hasOwnProperty(pmmKey)) continue;
+            //    var pmm = world.players[pmmKey];
+            //    var pmmdx = (pmm.osx - game.player.osx) * (game.arena.width) + pmm.ox,
+            //        pmmdy = (pmm.osy - game.player.osy) * (game.arena.height) + pmm.oy;
+            //    bf.fillStyle = '#' + pmm.color.hex; // Draw player on minimap
+            //    bf.fillRect(Math.floor(pmmdx * 15 / mmDiv + mmw * mmReach - 1), 
+            //        30+Math.floor(pmmdy * 15 / mmDiv + mmh * mmReach - 1), 1, 1);
+            //}
             var quality;
             // Render inventory
             game.drawInventory = true;
@@ -565,6 +526,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     throwDraw.x,throwDraw.y,pix,pix);
                 disableShadow();
             }
+            // Render minimap
+            bf.fillStyle = 'rgba(44,46,45,0.9)';
+            bf.fillRect(0,30,mmWidth,mmHeight);
+            var mmDiv = game.options.minimapZoom > 1 ? game.options.minimapZoom > 2 ? 15 : 35 : 105;
+            var mmReach = (mmDiv - 1) / 2;
+            var mmw = mmWidth / mmDiv, mmh = mmHeight / mmDiv;
+            bf.fillStyle = '#41535a';
+            for(var mmsx = -mmReach; mmsx <= mmReach; mmsx++) {
+                for(var mmsy = -mmReach; mmsy <= mmReach; mmsy++) {
+                    var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)];
+                    if(thingCount >= 0) {
+                        bf.clearRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
+                            30+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                        bf.fillRect(mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
+                            30+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                    }
+                }
+            }
+            bf.fillStyle = '#60889f'; bf.fillRect(mmw*mmReach,30+mmw*mmReach,mmw,mmh);
             // Draw zoom canvas
             if(game.player.attacking && game.player.attacking.type != 'punch' || zoomFrame > 0) {
                 zoomOff = game.player.attacking ? game.player.attacking.dir : zoomOff;

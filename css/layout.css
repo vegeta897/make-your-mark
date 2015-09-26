@@ -90,10 +90,6 @@ canvas#highCanvas { z-index: 4500; }
 }
 .controls strong+strong { font-size: 0.97em; line-height: 1em; }
 
-.minimap { width: 227px; height: 227px; padding: 1px; position: absolute; 
-    box-sizing: border-box; top: 56px; z-index: 5500; }
-.minimap button { font-weight: bold; font-size: 1.2em; width: 24px; height: 24px; padding: 0; }
-
 p.coords { margin-right: 2px; float: right; text-align: right; margin-bottom: 0; }
 section#stats { z-index: -99; width: 220px; position: absolute; top: 60px; left: 250px; }
 section#info { z-index: 5000; width: 228px; padding: 6px 0; position: absolute; top: 480px; }

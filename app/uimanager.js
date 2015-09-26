@@ -2,7 +2,7 @@
 Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
     var game;
     var cursor, bf, cw, ch;
-    var elements = [], prompt;
+    var elements = [], prompt, mmZoomOut, mmZoomIn;
     
     var Window = function(x,y,w,h) {
         this.x = x; this.y = y; this.w = w; this.h = h; this.children = [];
@@ -30,24 +30,34 @@ Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
     
     var Button = function(x,y,w,h,text) {
         this.x = x; this.y = y; this.w = w; this.h = h;
-        this.text = text; this.onClick = [];
+        this.text = text; this.onClick = []; this.disabled = false;
         this.hover = false;
         this.addOnClick = function(cb) { this.onClick.push(cb); };
         this.update = function() {
             this.hover = Util.isInArea(cursor.x, cursor.y, this.x, this.y, this.w, this.h, false);
-            this.pressed = this.hover && cursor.click;
+            this.pressed = this.hover && cursor.lmb;
             // TODO: Don't allow clicking by dragging a clicked cursor into button and releasing
             if(this.hover && cursor.click) { // Fire onClick events
                 for(var i = 0; i < this.onClick.length; i++) this.onClick[i]();
             }
         };
         this.draw = function() {
-            bf.fillStyle = this.hover && !this.pressed ? '#888888' : '#666666';
+            if(!this.disabled && this.hover && !this.pressed) {
+                bf.fillStyle = '#888888'
+            } else { bf.fillStyle = '#666666' }
             bf.fillRect(this.x, this.y, this.w, this.h);
-            bf.fillStyle = this.hover ? this.pressed ? '#222222' : '#404040' : '#282828';
+            if(!this.disabled) {
+                if(this.hover) bf.fillStyle = '#404040';
+                else if(this.pressed) bf.fillStyle = '#222222';
+                else bf.fillStyle = '#282828';
+            } else bf.fillStyle = '#404040';
             bf.fillRect(this.x+1, this.y+1, this.w-2, this.h-2);
-            TextDraw.drawText(this.text, this.hover ? 'Legendary' : 'white', bf,'normal','med',
-                this.x + this.w/2, this.y + this.h/2-4,'center',1);
+            var fontColor;
+            if(!this.disabled) {
+                if(this.hover) fontColor = 'Legendary';
+                else fontColor = 'white';
+            } else fontColor = 'Poor';
+            TextDraw.drawText(this.text,fontColor,bf,'normal','med',this.x+this.w/2,this.y+this.h/2-4,'center',1);
         };
     };
 
@@ -68,21 +78,41 @@ Application.Services.factory('UIMan',function(Util,TextDraw,SpriteMan) {
     };
     
     return {
-        init: function(c,b,w,h) { cursor = c; bf = b; cw = w; ch = h; },
-        initGame: function(g) { game = g; },
+        init: function(c,buffer,w,h) {
+            cursor = c; bf = buffer; cw = w; ch = h;
+        },
+        initGame: function(g) { 
+            game = g;
+            mmZoomOut = new Button(0,138,17,16,'-');
+            mmZoomOut.addOnClick(function(){
+                game.options.minimapZoom = Math.max(1,game.options.minimapZoom-1); 
+                mmZoomOut.disabled = game.options.minimapZoom == 1;
+                mmZoomIn.disabled = game.options.minimapZoom == 3;
+            });
+            mmZoomIn = new Button(20,138,17,16,'+');
+            mmZoomIn.addOnClick(function(){
+                game.options.minimapZoom = Math.min(3,game.options.minimapZoom+1);
+                mmZoomOut.disabled = game.options.minimapZoom == 1;
+                mmZoomIn.disabled = game.options.minimapZoom == 3;
+                
+            });
+            mmZoomIn.disabled = true;
+            elements.push(mmZoomOut); elements.push(mmZoomIn);
+        },
         update: function() { for(var i = 0; i < elements.length; i++) { elements[i].update(); } },
         render: function() { for(var i = 0; i < elements.length; i++) { elements[i].draw(); } },
         createPrompt: function(type,onClick,data) {
             switch(type) {
                 case 'enterContainer':
                     var playerPos = Util.isoToScreen(data.player.ox+0.5,data.player.oy+0.5);
+                    var windowX = Math.max(0,Math.min(cw-180,playerPos.x - 90));
                     var windowY = playerPos.y - 94 < 2 ? playerPos.y + 28 : playerPos.y - 94;
-                    prompt = new Window(playerPos.x - 90,windowY,180,76); elements.push(prompt);
+                    prompt = new Window(windowX,windowY,180,76); elements.push(prompt);
                     prompt.children.push(new Label(prompt.x + 125,prompt.y + 13,data.container.name,'center'));
                     // TODO: Show open sprite when hovering on "Enter" button
                     prompt.children.push(new Graphic(prompt.x+2,prompt.y+2,72,72,
                         SpriteMan.containerSpriteLib.indexes[data.container.id]['sprite']));
-                    var newButton = new Button(prompt.x + 95,prompt.y + 34,60,30,'Enter',onClick);
+                    var newButton = new Button(prompt.x + 95,prompt.y + 34,60,30,'Enter');
                     newButton.addOnClick(onClick);
                     newButton.addOnClick(function(){deleteElement(prompt);});
                     prompt.children.push(newButton);

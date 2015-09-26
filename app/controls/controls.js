@@ -35,7 +35,6 @@ Application.Directives.directive('controls',function() {
                 canvas.addEventListener('mouseup',function(){},false);
                 jQuery(canvas).mousedown(function(e) { return Controls.onMouse(e, e.which, true); });
             };
-            this.initMinimap = Renderer.initMinimap;
             this.initZoomCanvas = Renderer.initZoomCanvas;
             this.initPanel = Controls.initPanel;
         },
@@ -48,19 +47,15 @@ Application.Directives.directive('controls',function() {
             mc.imageSmoothingEnabled = false;
             mcv.onselectstart = function() { return false; }; // Disable selecting
             ctrl.initMainCanvas(mcv,mc);
-            var mmcv = document.getElementById('minimap');
-            var mmc = mmcv.getContext ? mmcv.getContext('2d') : null;
-            mmcv.onselectstart = function() { return false; }; // Disable selecting
-            ctrl.initMinimap(mmcv,mmc);
             var zcv = document.getElementById('zoomCanvas');
             var zc = zcv.getContext ? zcv.getContext('2d') : null;
             zc.mozImageSmoothingEnabled = false;
+            zc.msImageSmoothingEnabled = false;
             zc.imageSmoothingEnabled = false;
-            mmcv.onselectstart = function() { return false; }; // Disable selecting
+            zcv.onselectstart = function() { return false; }; // Disable selecting
             ctrl.initZoomCanvas(zcv,zc);
             // Disable right clicking
-            jQuery('body').on('contextmenu', '#minimap', function(){ return false; })
-                .on('contextmenu', '#zoomCanvas', function(){ return false; })
+            jQuery('body').on('contextmenu', '#zoomCanvas', function(){ return false; })
                 .on('contextmenu', '#mainCanvas', function(){ return false; });
         }
     }
