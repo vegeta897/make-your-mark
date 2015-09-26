@@ -30,17 +30,19 @@
                 <dt>FPS: <strong>{{ game.framesPerSecond }}</strong></dt>
                 <dt>Global Time: <strong>{{ game.globalSecond }}</strong></dt>
                 <dt>Local/Server Offset: <strong>{{ game.localServerOffset }}</strong> ms</dt>
+                
+                <!-- TODO: REPLACE WEATHER NUMBERS WITH GRAPHICS -->
+                
                 <dt>Temperature: <strong>{{ game.weather.now.temp | number:0 }}</strong>&deg;F &nbsp;&nbsp;&nbsp;
                     Precipitation: <strong>{{ game.weather.now.rain | number:0 }}</strong>%</dt>
             </dl>
         </section>
         <section id="info" ng-hide="needUpdate">
             <p>
-                <strong>Move</strong> around with <strong>right</strong> click.<br />
-                Move to things to pick them up.<br />
+                <strong>Move</strong> with <strong>right</strong> click.<br />
                 <strong>Attack</strong> with <strong>left</strong> click.
             </p>
-            <p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>
+            <!--<p>Cash: $<strong>{{ player.cash | number:0 }}</strong></p>-->
             <p>
                 <label>Name
                     <input type="text" name="playerName" ng-model="player.name" size="10" maxlength="20">
@@ -82,6 +84,7 @@
     <script src="app/renderer.js"></script>
     <script src="app/spritemanager.js"></script>
     <script src="app/textdraw.js"></script>
+    <script src="app/uimanager.js"></script>
     <script src="app/effects.js"></script>
     <script src="app/interface.js"></script>
     <script src="app/controls/controls.js"></script>

@@ -29,6 +29,7 @@ Application.Services.factory('Interface',function(World,Players,Things,Util,Fire
                 noAttack = false; // Reset noAttack when left mouse released
             }
             c.hover = {};
+            c.click = false;
             var underCursor = [], hoverSelect;
             
             // Auto attack
@@ -68,6 +69,7 @@ Application.Services.factory('Interface',function(World,Players,Things,Util,Fire
                     delete game.selected; game.player.needTarget = false;
                 }
                 if(lmb) {
+                    c.lmb = true;
                     if(hoverSelect && !game.dragging && !lmbLast) {
                         game.selected = hoverSelect; grabOrigin = {x:c.x, y:c.y, bpSlot:c.onBPslot, tbSlot:c.onTBslot};
                     }
@@ -82,6 +84,8 @@ Application.Services.factory('Interface',function(World,Players,Things,Util,Fire
                     game.player.needTarget = false;
                     if(!game.dragging && !game.selected && !noAttack) Players.attack(c.clickQuad);
                 } else {
+                    c.lmb = false;
+                    if(lmbLast) c.click = true;
                     if(game.dragging) {
                         if(cursorInSector) {
                             game.dragging.sx = game.player.osx; game.dragging.sy = game.player.osy;
@@ -109,10 +113,11 @@ Application.Services.factory('Interface',function(World,Players,Things,Util,Fire
                     }
                 }
                 if(rmb) {
+                    c.rmb = true;
                     Players.move(c.iso); // Move on right click
-                    if(onBackpack && hoverSelect) Players.dropThing(hoverSelect)
-                } 
-                if(c.hoverSingle) {
+                    if((onBackpack || onToolbelt) && hoverSelect) Players.dropThing(hoverSelect)
+                }  else { c.rmb = false; }
+                if(hoverSelect) {
                     var panelX = c.x > 610 ? c.x*2 - 212 - (c.x - 610)*2 : c.x*2 - 212;
                     var panelY = c.y*2 - 200 < 0 ? c.y*2 + 40 : c.y*2 - 220;
                     jQuery(panel).fadeIn(200).css({left: panelX, top: panelY});

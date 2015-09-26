@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,Util,SpriteMan) {
+Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,Util,SpriteMan,UIMan) {
 
     var cm, cvm, cmm, cz, cvz; // Canvas, minimap, and zoom objects
     var cursor;
@@ -196,7 +196,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             || drawP.y < pix*-1 || drawP.y > mHeight) return;
         bf.shadowColor = 'rgba(0,0,0,0.5)';
         bf.shadowBlur = 5; bf.shadowOffsetX = 1; bf.shadowOffsetY = 1;
-        bf.fillStyle = '#'+p.color.hex;
+        bf.fillStyle = 'rgba('+ p.color.rgb.r+','+p.color.rgb.g+','+p.color.rgb.b+','+(p.containerPrompt ? 0.7 : 1)+')';
         bf.beginPath(); bf.arc(drawP.x+pix/2, drawP.y+pix/4, 9, 0, 2 * Math.PI, false); bf.fill();
         disableShadow();
         // Render other player's names
@@ -279,7 +279,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
     };
     
     return {
-        init: function(g) { game = g; pix = game.arena.pixels; },
+        init: function(g) { game = g; pix = game.arena.pixels; UIMan.initGame(g); },
         initMainCanvas: function(canvas,ctx,curse) { 
             cm = ctx; cvm = canvas; mWidth = canvas.width; mHeight = canvas.height;
             bfCanvas.width = mWidth; bfCanvas.height = mHeight;
@@ -287,6 +287,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             bf.msImageSmoothingEnabled = false;
             bf.imageSmoothingEnabled = false;
             cursor = curse;
+            UIMan.init(cursor,bf,mWidth,mHeight);
         },
         initMinimap: function(canvas,ctx) { cmm = ctx; mmWidth = canvas.width; mmHeight = canvas.height; },
         initZoomCanvas: function(canvas,ctx) { cz = ctx; cvz = canvas; zWidth = canvas.width; zHeight = canvas.height; },
@@ -403,6 +404,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             
             // Build render array
             renderArray = [];
+            Math.seedrandom();
             var objects = world.things.concat(world.containers);
             for(var j = objects.length-1; j >= 0; j--) {
                 var o = objects[j];
@@ -452,7 +454,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
             var quality;
             // Render inventory
             game.drawInventory = true;
-            // TODO: Create inventory canvas?
+            // TODO: Create UI manager to handle rendering and cursor events
             if(game.drawInventory) {
                 //for(var tb1 = 0; tb1 < 5; tb1++) {
                 //    bf.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
@@ -472,7 +474,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                             bf.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,55,14);
                             if(tbItem.cooldown && tbItem.cooldown[0] == a) {
                                 bf.fillStyle = '#565656';
-                                var totalCool = Math.max(1,Things.abilities[a].cooldown-tbItem.handling)*10;
+                                var totalCool = Math.max(1,Things.abilities[a].cooldown-tbItem.handling)*1;
                                 bf.fillRect(tbX+56 + tbXS*tb+59*abilityPos,tbY+14 - tbYS*tb,
                                     /*Math.floor*/(55*((totalCool-tbItem.cooldown[1])/totalCool)),14);
                             }
@@ -588,6 +590,10 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     prevZoomed = false;
                 }
             }
+            // Render UI
+            UIMan.render();
+            
+            // Render buffer to canvas
             cm.clearRect(0,0,mWidth,mHeight);
             cm.drawImage(bfCanvas,0,0);
         }

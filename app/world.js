@@ -32,7 +32,7 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
                     && (w != 7 || h != 7)) { // Or in center of sector
                     containersSpawned++;
                     newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
-                    newMap[sectorKey][w+':'+h] = false;
+                    //newMap[sectorKey][w+':'+h] = false;
                 } else if(Math.random() <= 0.0007) {
                     newSectors[sectorKey].things.push(Things.spawnThing({sx:+position.sx+sw, sy:+position.sy+sh, x:w, y:h}));
                 }

@@ -53,6 +53,7 @@ Application.Services.factory('TextDraw',function(Util) {
         loadFont: function(imgN,imgD) { 
             fontNormal = { white: imgN };
             fontDmg = { yellow: imgD };
+            // Generate quality level colors
             for(var ql in Util.qualityLevels) { if(!Util.qualityLevels.hasOwnProperty(ql)) continue;
                 var quality = Util.qualityLevels[ql];
                 var colorCanvas = document.createElement('canvas');

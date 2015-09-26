@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Effects',function(Util,TextDraw) {
+Application.Services.factory('Effects',function(Util) {
     var effects = [];
     
     return {

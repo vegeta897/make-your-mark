@@ -18,7 +18,7 @@
 
  */
 
-Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,Things,SpriteMan,FireService,localStorageService) {
+Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,Things,SpriteMan,UIMan,FireService,localStorageService) {
 
     var revision = 11; // Stored player data format revision
     var allInv; // Backpack and toolbelt combined
@@ -61,10 +61,12 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         var valid = true;
         if(player.ox == dest.x && player.oy == dest.y) valid = false;
         if(!valid) takeThing(World.getObjectsAt(player.sx,player.sy,player.x,player.y,'things')[0]);
-        if(World.getObjectsAt(player.sx,player.sy,dest.x,dest.y,'containers').length > 0) valid = false;
+        //if(World.getObjectsAt(player.sx,player.sy,dest.x,dest.y,'containers').length > 0) valid = false;
         if(!valid) return;
         if(player.x + (player.sx-player.osx)*game.arena.width == dest.x
             && player.y + (player.sy-player.osy)*game.arena.height == dest.y) return; // Destination hasn't changed
+        UIMan.removePrompt();
+        delete player.containerPrompt;
         player.newDest = true; player.moving = true;
         player.sx = player.osx + dest.rsx; player.sy = player.osy + dest.rsy;
         player.x = dest.rsx > 0 ? 0 : dest.x < 0 ? game.arena.width-1 : dest.x;
@@ -135,20 +137,28 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
     var updateInv = function() { allInv = player.backpack.concat(player.toolbelt); };
     
     var onStopMovement = function() {
-        var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'things');
+        var underPlayer = World.getObjectsAt(player.sx,player.sy,player.x,player.y,'all');
         for(var u = 0; u < underPlayer.length; u++) {
-            if(!underPlayer[u].health) takeThing(underPlayer[u]);
+            if(!underPlayer[u].health) { takeThing(underPlayer[u]); } // If on thing, take it
+            else { // If on container, prompt to enter
+                player.containerPrompt = underPlayer[u];
+                UIMan.createPrompt('enterContainer',function(){
+                    
+                    // TODO: Enter dungeon
+                    
+                },{ container: player.containerPrompt, player: player });
+            }
         }
     };
     
     var takeThing = function(thing) {
         if(!thing) return;
         var stored = false;
-        for(var i = 0; i < player.backpack.length; i++) {
-            if(!player.backpack[i]) { player.backpack[i] = thing; stored = true; break; }
-        }
-        if(!stored) for(var j = 0; j < player.toolbelt.length; j++) {
+        for(var j = 0; j < player.toolbelt.length; j++) { // First try toolbelt
             if(!player.toolbelt[j]) { player.toolbelt[j] = thing; stored = true; break; }
+        }
+        if(!stored) for(var i = 0; i < player.backpack.length; i++) { // Then try backpack
+            if(!player.backpack[i]) { player.backpack[i] = thing; stored = true; break; }
         }
         if(stored) {
             World.removeThing(thing);
@@ -191,6 +201,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         // TODO: For abilities, show how the total damage is reached by showing the multipliers being applied
         
         if(player.attacking) return;
+        return;
         player.attacking = { dir: dir, frame: 0, type: 'punch' };
         if(player.x + dir.x < 0 || player.y + dir.y < 0 || player.x + dir.x > 14 || player.y + dir.y > 14) return;
         var target = World.getObjectsAt(player.osx,player.osy,player.x + dir.x,player.y + dir.y,'containers')[0];
@@ -213,7 +224,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                 }
             }
             if(best.tool) best.tool.cooldown = 
-                [best.ability,Math.max(1,Things.abilities[best.ability].cooldown-best.tool.handling)*10];
+                [best.ability,Math.max(1,Things.abilities[best.ability].cooldown-best.tool.handling)*1];
             //best.ability = Util.pickInObject(Things.abilities); // Random ability
             player.attacking.type = best.ability;
             player.attacking.target = target;

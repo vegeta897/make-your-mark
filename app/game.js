@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('Game',function($timeout,FireService,Renderer,Players,Controls,World,Things,Effects,Util,Interface) {
+Application.Services.factory('Game',function($timeout,FireService,Renderer,Players,Controls,World,Things,Effects,Util,Interface,UIMan) {
 
     var game = {
         arena: {width: 15, height: 15, pixels: 24}, fps: 60, rendered: false,
@@ -54,6 +54,7 @@ Application.Services.factory('Game',function($timeout,FireService,Renderer,Playe
         Controls.processInput(game,Players);
         Players.update(step,game.ticks);
         World.update(game.ticks);
+        UIMan.update();
         Effects.update();
         if(game.weather.now) {
             var drops = Util.randomSlide(game.weather.now.rain/10,Math.floor(game.weather.now.rain/10),

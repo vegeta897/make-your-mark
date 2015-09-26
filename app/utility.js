@@ -33,11 +33,7 @@ Application.Services.service('Util', function() {
     };
     var hexToRGB = function(hex) {
         var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: Math.floor(result[1], 16),
-            g: Math.floor(result[2], 16),
-            b: Math.floor(result[3], 16)
-        } : null;
+        return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
     };
     
     return {
@@ -67,12 +63,9 @@ Application.Services.service('Util', function() {
             var r, g, b, i = Math.floor(h * 6);
             var f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
             switch (i % 6) {
-                case 0: r = v; g = t; b = p; break;
-                case 1: r = q; g = v; b = p; break;
-                case 2: r = p; g = v; b = t; break;
-                case 3: r = p; g = q; b = v; break;
-                case 4: r = t; g = p; b = v; break;
-                case 5: r = v; g = p; b = q; break;
+                case 0: r = v; g = t; b = p; break; case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break; case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break; case 5: r = v; g = p; b = q; break;
             }
             return {r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};
         },
@@ -150,8 +143,9 @@ Application.Services.service('Util', function() {
             return { sx: +seed.substr(0,4)-5000, sy: +seed.substr(4,4)-5000,
                 x: +seed.substr(8,2), y: +seed.substr(10,2) };
         },
-        isInArea: function(x1,y1,x2,y2,w,h) { // Is XY1 within a rectangular area WxH centered on XY2
-            return Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2;
+        isInArea: function(x1,y1,x2,y2,w,h,center) { // Is XY1 within a rectangular area WxH at XY2
+            return center ? Math.abs(+x1 - +x2) <= w/2 && Math.abs(+y1 - +y2) <= h/2
+                : +x1 >= +x2 && +x1 < +x2 + +w && +y1 >= +y2 && +y1 < +y2 + +h ;
         },
         getXYdiff: function(x1,y1,x2,y2) { return { x: +x2 - +x1, y: +y2 - +y1 }; }, // XY diff between 2 points
         getDistance: function(x1,y1,x2,y2) { // Get distance between 2 points
