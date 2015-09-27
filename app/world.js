@@ -1,5 +1,5 @@
 'use strict';
-Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,FireService) {
+Application.Services.factory('World',function(Util,Dungeon,Things,Containers,SpriteMan,FireService) {
 
     var position = { sx: 0, sy: 0, x: 0, y: 0}, inContainer;
     var game;
@@ -15,7 +15,7 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
             if(Math.abs(sw) + Math.abs(sh) > 1) continue; // Don't include diagonals
             var sectorKey = (+position.sx+sw)+':'+(+position.sy+sh);
             // Copy stored sector objects/map if not new sector
-            if(!game.player.inContainer && world.nearSectors[sectorKey]) { 
+            if(world.nearSectors[sectorKey]) { 
                 newSectors[sectorKey] = world.nearSectors[sectorKey];
                 newMap[sectorKey] = world.map[sectorKey];
                 continue;
@@ -27,16 +27,17 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
             var containersSpawned = 0;
             for(var w = 0; w < game.arena.width; w++) { for(var h = 0; h < game.arena.height; h++) {
                 newMap[sectorKey][w+':'+h] = true;
-                if(game.player.inContainer) continue;
                 // 2% initial chance of container, diminishes with each spawn
                 if(Math.random() <= 0.02 / (containersSpawned + 1)
-                    && w > 0 && h > 0 && w < game.arena.width - 1 && h < game.arena.height - 1 // Don't spawn on edges
-                    && (w != 7 || h != 7)) { // Or in center of sector
+                    && w > 0 && h > 0 && w < game.arena.width - 1 && h < game.arena.height - 1
+                    && (w != 7 || h != 7)) { // Don't spawn on edges or in center of sector
                     containersSpawned++;
-                    newSectors[sectorKey].containers.push(Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
+                    newSectors[sectorKey].containers.push(
+                        Containers.spawnContainer(+position.sx+sw, +position.sy+sh, w, h));
                     //newMap[sectorKey][w+':'+h] = false;
                 } else if(Math.random() <= 0.0007) {
-                    newSectors[sectorKey].things.push(Things.spawnThing({sx:+position.sx+sw, sy:+position.sy+sh, x:w, y:h}));
+                    newSectors[sectorKey].things.push(
+                        Things.spawnThing({sx:+position.sx+sw, sy:+position.sy+sh, x:w, y:h}));
                 }
             } }
         } }
@@ -45,6 +46,15 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
         for(var sKey in world.nearSectors) { if(!world.nearSectors.hasOwnProperty(sKey)) continue;
             world.things = world.things.concat(world.nearSectors[sKey].things);
             world.containers = world.containers.concat(world.nearSectors[sKey].containers);
+        }
+    };
+    
+    var generateDungeon = function() {
+        world.things = [];
+        world.containers = [];
+        var dungeon = Dungeon.buildDungeon(inContainer);
+        for(var rKey in dungeon.rooms) { if(!dungeon.rooms.hasOwnProperty(rKey)) continue;
+            world.map[rKey] = dungeon.rooms[rKey].tiles;
         }
     };
     
@@ -220,9 +230,12 @@ Application.Services.factory('World',function(Util,Things,Containers,SpriteMan,F
         },
         setPosition: function(sx,sy,x,y,ic) {
             position.sx = sx; position.sy = sy; position.x = x; position.y = y;
-            inContainer = ic;
+            if(!inContainer && ic) {
+                inContainer = ic; generateDungeon();
+            }
         },
         newSector: function() {
+            if(inContainer) return;
             generateContainersAndThings(); 
             applyRemovalsAndDrops();
             applyContainerStatuses();

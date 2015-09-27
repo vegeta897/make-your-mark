@@ -1,5 +1,5 @@
 'use strict';
-Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Controls,FireService,Util) {
+Application.Controllers.controller('Main', function($scope,$timeout,Game,World,Players,Controls,FireService) {
 
     $scope.version = 0.02; $scope.versionName = 'Mark of the Unicorn';
     FireService.onceGlobal('version',function(ver) {
@@ -18,9 +18,7 @@ Application.Controllers.controller('Main', function($scope,$timeout,Game,World,P
     $scope.world = World.world;
     $scope.cursor = Controls.cursor;
     $scope.player = Players.player;
-    $scope.minimapZoom = Game.minimapZoom;
     
     $scope.clearPlayerData = Players.clearPlayerData;
     $scope.clearMapData = World.clearMapData;
-    $scope.gotoPlayer = Players.gotoPlayer;
 });

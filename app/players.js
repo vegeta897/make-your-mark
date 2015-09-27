@@ -1,23 +1,4 @@
 'use strict';
-
-/*
-
-                        ???????? ??????????????  ?????? ???????     ????????????  ???????????                 
-                        ????????????????????????????????????????    ????????????  ???????????                 
-                        ???????????     ????????????????????????       ???   ??????????????                   
-                        ???????????     ???????????????????????        ???   ??????????????                   
-                        ???????????????????  ??????  ??????            ???   ???  ???????????                 
-                        ???????? ??????????  ??????  ??????            ???   ???  ???????????                  
-                
-                 ????   ???????   ??????  ??????????????????? ???      ?????? ???   ?????????????????? 
-                 ????? ????????   ??????  ???????????????????????     ???????????? ????????????????????
-                 ??????????????   ??????     ???   ??????????????     ???????? ??????? ??????  ????????
-                 ??????????????   ??????     ???   ?????????? ???     ????????  ?????  ??????  ????????
-                 ??? ??? ???????????????????????   ??????     ???????????  ???   ???   ???????????  ???
-                 ???     ??? ??????? ???????????   ??????     ???????????  ???   ???   ???????????  ???      
-
- */
-
 Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,Things,SpriteMan,UIMan,FireService,localStorageService) {
 
     var revision = 11; // Stored player data format revision
@@ -40,7 +21,7 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
     }
     var player = {
         sx: +storedPlayer.sx, sy: +storedPlayer.sy, osx: +storedPlayer.sx, osy: +storedPlayer.sy, 
-        x: +storedPlayer.x, y: +storedPlayer.y, ox: +storedPlayer.x, oy: +storedPlayer.y, sectorMove: { x: 0, y: 0 },
+        x: +storedPlayer.x, y: +storedPlayer.y, ox: +storedPlayer.x, oy: +storedPlayer.y,
         input: {}, score: +storedPlayer.score, cash: +storedPlayer.cash, 
         guid: storedPlayer.guid, color: Util.randomColor('vibrant'), name: storedPlayer.name,
         backpack: Things.expandThings(storedPlayer.backpack), toolbelt: Things.expandThings(storedPlayer.toolbelt),
@@ -82,8 +63,6 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         player.sx = player.osx + dest.rsx; player.sy = player.osy + dest.rsy;
         player.x = dest.rsx > 0 ? 0 : dest.x < 0 ? game.arena.width-1 : dest.x;
         player.y = dest.rsy > 0 ? 0 : dest.y < 0 ? game.arena.height-1 : dest.y;
-        var storedName = player.name && player.name.trim() != '' ? ':' + player.name : ':';
-        FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
     };
     
     var doMove = function(p) {
@@ -132,17 +111,6 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                 }
             }
         }
-        //if(p.hasOwnProperty('sectorMove')) {
-        //    if(p.sectorMove.x != 0 || p.sectorMove.y != 0) { p.sectorMove.done = false; delete game.selected; }
-        //    if(p.sectorMove.x != 0) p.sectorMove.x *= 0.85;
-        //    if(p.sectorMove.y != 0) p.sectorMove.y *= 0.85;
-        //    p.sectorMove.x = Math.abs(p.sectorMove.x) < 0.001 ? 0 : p.sectorMove.x;
-        //    p.sectorMove.y = Math.abs(p.sectorMove.y) < 0.001 ? 0 : p.sectorMove.y;
-        //    if(p.sectorMove.x == 0 && p.sectorMove.y == 0 && p.sectorMove.rendered && !p.sectorMove.done) {
-        //        World.newSector(); p.sectorMove.done = true;
-        //        exploreSector(player.osx,player.osy);
-        //    }
-        //}
     };
     
     var updateInv = function() { allInv = player.backpack.concat(player.toolbelt); };
@@ -155,9 +123,10 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                 player.containerPrompt = underPlayer[u];
                 UIMan.createPrompt('enterContainer',function(){
                     player.inContainer = player.containerPrompt;
+                    delete player.containerPrompt;
                     player.osx = 0; player.sx = 0; player.osy = 0; player.sy = 0; 
                     player.ox = 7; player.x = 7; player.oy = 7; player.y = 7;
-                    World.setPosition(player.sx,player.sy,player.x,player.y,true);
+                    World.setPosition(player.sx,player.sy,player.x,player.y,player.inContainer);
                     World.newSector();
                     storePlayer();
                     player.explored = {'0,0':0};
@@ -254,33 +223,14 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
             updateInv();
             World.setPosition(player.sx,player.sy,player.x,player.y);
             World.newSector();
-            var storedName = player.name && player.name.trim() != '' ? ':' + player.name : ':';
-            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName);
+            var storedName = player.name && player.name.trim() != '' ?  player.name : '';
+            FireService.set('players/'+player.guid,storedName);
             console.log('Player:',player.name,player.guid,player.sx+':'+player.sy);
             FireService.onValue('players',function(players) {
                 if(!players) players = {};
                 for(var pKey in players) { if(!players.hasOwnProperty(pKey)) continue;
                     if(pKey == player.guid) { players[pKey] = player; continue; }
-                    var sx = +players[pKey].split(':')[0], sy = +players[pKey].split(':')[1],
-                        x = +players[pKey].split(':')[2], y = +players[pKey].split(':')[3];
-                    var ox = world.players[pKey] ? world.players[pKey].ox : x,
-                        oy = world.players[pKey] ? world.players[pKey].oy : y,
-                        osx = world.players[pKey] ? world.players[pKey].osx : sx,
-                        osy = world.players[pKey] ? world.players[pKey].osy : sy;
-                    osx = Math.abs(osx - sx) > 1 ? sx : osx;
-                    osy = Math.abs(osy - sy) > 1 ? sy : osy;
-                    var sectorDistance = Math.abs(player.osx - osx) + Math.abs(player.osy - osy);
-                    var moving, path, newDest;
-                    if(sectorDistance > 1 || 
-                        (players[pKey].split(':').length == 6 && players[pKey].split(':')[5] == 'teleport')) {
-                        moving = false; path = false; newDest = false;
-                        ox = 7; x = 7; oy = 7; y = 7; osx = sx; osy = sy;
-                    } else {
-                        moving = (osx != sx || osy != sy || ox != x || oy != y);
-                        path = world.players[pKey] && world.players[pKey].path ? world.players[pKey].path : false;
-                        newDest = world.players[pKey] && (world.players[pKey].x != x || world.players[pKey].y != y);
-                    }
-                    var name = players[pKey].split(':')[4].length > 0 ? players[pKey].split(':')[4] : pKey;
+                    var name = players[pKey].length > 0 ? players[pKey] : pKey;
                     var color;
                     if(world.players[pKey]) {
                         color = world.players[pKey].color;
@@ -288,31 +238,24 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
                         Math.seedrandom(pKey);
                         color = Util.randomColor('vibrant');
                     }
-                    players[pKey] = {
-                        guid: pKey, sx: sx, sy: sy, x: x, y: y, moving: moving, path: path, newDest: newDest,
-                        ox: ox, oy: oy, osx: osx, osy: osy, name: name, color: color
-                    };
-                    if(world.players[pKey] && world.players[pKey].hasOwnProperty('moveProgress')) 
-                        players[pKey].moveProgress = world.players[pKey].moveProgress;
+                    players[pKey] = { guid: pKey, name: name, color: color };
                 }
                 world.players = players;
             });
         },
         update: function(step,t) {
             tick = t;
-            for(var pKey in world.players) { if(!world.players.hasOwnProperty(pKey)) continue;
-                doMove(world.players[pKey]);
-                if(world.players[pKey].moving) world.players[pKey].attacking = false;
-                if(world.players[pKey].attacking && !world.players[pKey].moving) {
-                    if(world.players[pKey].attacking.hasOwnProperty('frame')) {
-                        world.players[pKey].attacking.frame++;
-                        var totalFrames = world.players[pKey].attacking.type == 'punch' ? 22 : 
-                            Things.abilities[world.players[pKey].attacking.type].time;
-                        if(world.players[pKey].attacking.frame > totalFrames) world.players[pKey].attacking = false;
-                    } else {
-                        console.log('unreachable code?');
-                        world.players[pKey].attacking = { dir: world.players[pKey].attacking, frame: 0 };
-                    }
+            doMove(player);
+            if(player.moving) player.attacking = false;
+            if(player.attacking) {
+                if(player.attacking.hasOwnProperty('frame')) {
+                    player.attacking.frame++;
+                    var totalFrames = player.attacking.type == 'punch' ? 22 :
+                        Things.abilities[player.attacking.type].time;
+                    if(player.attacking.frame > totalFrames) player.attacking = false;
+                } else {
+                    console.log('unreachable code?');
+                    player.attacking = { dir: player.attacking, frame: 0 };
                 }
             }
             if(!(tick & 7)) { // Every 8 ticks
@@ -339,17 +282,6 @@ Application.Services.factory('Players',function(Renderer,Pathfinder,World,Util,T
         clearPlayerData: function() {
             localStorageService.set('player',{name:player.name});
             FireService.remove('players/'+player.guid);
-        },
-        gotoPlayer: function(targetPlayer) {
-            player.x = targetPlayer.x; player.y = targetPlayer.y;
-            player.sx = targetPlayer.sx; player.sy = targetPlayer.sy;
-            player.ox = player.x; player.oy = player.y;
-            player.osx = player.sx; player.osy = player.sy;
-            var storedName = player.name && player.name.trim() != '' ? ':' + player.name : ':';
-            FireService.set('players/'+player.guid,player.sx+':'+player.sy+':'+player.x+':'+player.y+storedName+':teleport');
-            World.setPosition(player.sx,player.sy,player.x,player.y,player.inContainer);
-            World.newSector();
-            exploreSector(player.sx,player.sy);
         },
         move: move, removeFromCarried: removeFromCarried, updateInv: updateInv, storePlayer: storePlayer, attack: attack,
         player: player

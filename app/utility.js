@@ -134,6 +134,7 @@ Application.Services.service('Util', function() {
             input = input.replace(/[^\d.-]/g, '').replace('..','.').replace('..','.').replace('-','');
             return input > max ? max : input < min ? min : input;
         },
+        gridToXY: function(grid) { return { x: +grid.split(':')[0], y: +grid.split(':')[1] }; },
         positionSeed: function(sx,sy,x,y) {
             return ("0000" + (+sx+5000)).slice(-4)+("0000" + (+sy+5000)).slice(-4) +
                 ("00" + (+x)).slice(-2)+("00" + (+y)).slice(-2);
@@ -171,6 +172,11 @@ Application.Services.service('Util', function() {
             var array = [];
             for(var key in object) { if(object.hasOwnProperty(key)) array.push(key); }
             return array;
+        },
+        addProps: function(dest,src) { // Add/overwrite properties from source to destination
+            for(var key in src) { if(!src.hasOwnProperty(key)) continue;
+                dest[key] = src[key];
+            }
         },
         objectQuality: function(object) {
             if(!object) return false;

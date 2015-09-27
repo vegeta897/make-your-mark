@@ -1,13 +1,14 @@
 'use strict';
 Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,Util,SpriteMan,UIMan) {
 
-    var cm, cvm, cmm, cz, cvz; // Canvas, minimap, and zoom objects
+    var cm, cvm, cz, cvz; // Canvas, minimap, and zoom objects
     var cursor;
-    var renderArray, game, world = World.world, pix, mWidth, mHeight,
+    var renderArray, pix, mWidth, mHeight,
         mmWidth = 105, mmHeight = 105, zWidth, zHeight;
+    var game, world = World.world, map = {};
     var zoomed, prevZoomed, zoomFrame, zoomOff;
     var cycle, glowRamp;
-    var lastSO = {}, so = { x: 0, y: 0}, hoverCount = {};
+    var hoverCount = {};
     var bfCanvas = document.createElement('canvas');
     var bf = bfCanvas.getContext('2d');
     
@@ -20,17 +21,50 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         return 'rgba('+quality.r+','+quality.g+','+quality.b+','
             + (object.quality-700) / 300+')'
     };
+
+    var updateMap = function(data) {
+        map.data = data; map.renderArray = [];
+        for(var mKey in data) { if(!data.hasOwnProperty(mKey)) continue;
+            Math.seedrandom(mKey);
+            var tile = Util.gridToXY(mKey);
+            var tileVariant = Util.randomIntRange(0,4);
+            if(!game.player.inContainer) tileVariant = Math.random() < 0.04 ? Util.randomIntRange(1,4) : 0;
+            tile.renderType = 'tile'; tile.variant = tileVariant;
+            var depth = Math.round((tile.y-tile.x+20)*10);
+            if(map.renderArray[depth]) { map.renderArray[depth].push(tile); } else { map.renderArray[depth] = [tile]; }
+        }
+    };
     
     var addToRender = function(r,x,y,rType) {
         var depth = Math.round((y-x+25)*10); r.renderType = rType;
         if(renderArray[depth]) { renderArray[depth].push(r); } else { renderArray[depth] = [r]; }
     };
     
+    var renderTile = function(t) {
+        var bgDraw = Util.isoToScreen(t.x,t.y);
+        var tileType = t.x < 0 || t.x > 14 || t.y < 0 || t.y > 14 ? 230 : 0;
+        if(tileType == 0) {
+            tileType = t.variant * 46;
+        }
+        bf.drawImage(SpriteMan.bgTileImg,tileType,game.player.inContainer ? 24 : 0,46,24,bgDraw.x,bgDraw.y,46,24);
+        // Render cursor highlight
+        if(cursor.iso && cursor.iso.x == t.x && cursor.iso.y == t.y) {
+            var cursorDraw = Util.isoToScreen(cursor.iso.x, cursor.iso.y);
+            bf.drawImage(SpriteMan.bgTileImg, 276, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
+        }
+    };
+    var renderPath = function(p) {
+        var tileDraw = Util.isoToScreen(p.x,p.y);
+        bf.save();
+        bf.globalAlpha = p.opacity;
+        bf.drawImage(SpriteMan.pathTileImg, p.tile % 8 * 48,Math.floor(p.tile/8)*24,48,24,tileDraw.x,tileDraw.y,48,24);
+        bf.restore();
+    };
     var renderObject = function(o) {
         var tdx = (o.sx - game.player.osx)*(game.arena.width) + o.x,
             tdy = (o.sy - game.player.osy)*(game.arena.height) + o.y;
         var draw = Util.isoToScreen(tdx,tdy);
-        draw.x += so.x + 11; draw.y += so.y - 7;
+        draw.x += 11; draw.y += -7;
         if(draw.x <= -pix || draw.x >= mWidth // Don't draw off-screen objects
             || draw.y <= -pix || draw.y >= mHeight) return;
         var containerSprite = SpriteMan.containerSpriteLib.indexes.hasOwnProperty(o.id) ? 
@@ -192,7 +226,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
         pdy += p.moveProgress ? (pddy - pdy) * p.moveProgress : 0;
         // TODO: Make player turns smooth like the path sprites
         var drawP = Util.isoToScreen(pdx,pdy);
-        drawP.x += so.x + 11; drawP.y += so.y;
+        drawP.x += 11;
         if(drawP.x < pix*-1 || drawP.x > mWidth
             || drawP.y < pix*-1 || drawP.y > mHeight) return;
         bf.shadowColor = 'rgba(0,0,0,0.5)';
@@ -304,55 +338,25 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                     (1-SpriteMan.getLoadProgress())*(-mWidth+404),16);
                 return;
             }
-            so = { x: Math.floor(game.player.sectorMove.x * mWidth), 
-                y: Math.floor(game.player.sectorMove.y * mHeight) };
+
+            // Apply cold filter
+            //if(!game.player.inContainer && game.weather.now.temp < 36) {
+            //    bf.globalCompositeOperation = 'source-atop';
+            //    bf.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
+            //    bf.fillRect(0,0, mWidth, mHeight);
+            //    bf.globalCompositeOperation = 'source-over';
+            //}
             
-            // Render background
-            lastSO.x = game.player.sectorMove.x; lastSO.y = game.player.sectorMove.y;
-            Math.seedrandom('bg-'+game.player.osx+':'+game.player.osy);
-            for(var sw = -1; sw < 2; sw++) { for(var sh = -1; sh < 2; sh++) {
-                if(Math.abs(sw) + Math.abs(sh) > 1) continue; // Don't include diagonals
-                for(var w = 0; w < game.arena.width; w++) { for(var h = 0; h < game.arena.height; h++) {
-                    if((sw != 0 || sh != 0) && !Util.validOffSectorTiles[w+':'+h]) continue;
-                    var tileX = sw*game.arena.width + w, tileY = sh*game.arena.height + h;
-                    var bgDraw = Util.isoToScreen(tileX,tileY);
-                    bgDraw.x += so.x; bgDraw.y += so.y;
-                    if(bgDraw.x < pix*-2 || bgDraw.x >= mWidth ||
-                        bgDraw.y < pix*-2 || bgDraw.y >= mHeight) continue;
-                    var tileType = sw != 0 || sh != 0 ? 230 : 0;
-                    if(game.player.inContainer) {
-                        if(tileType == 0) {
-                            tileType = Util.randomIntRange(0,4) * 46;
-                        }
-                    } else {
-                        if(tileType == 0 && Math.random() < 0.04) {
-                            tileType = Util.randomIntRange(1,4) * 46;
-                        }
-                    }
-                    bf.drawImage(SpriteMan.bgTileImg,tileType,game.player.inContainer ? 24 : 0,46,24,
-                        bgDraw.x,bgDraw.y,46,24);
-                    //bf.fillStyle = 'rgba(255,255,255,0.5)';
-                    //bf.fillText(w+','+h,bgDraw.x+13,bgDraw.y+15);
-                } }
-            } }
-            if(so.x == 0 && so.y == 0) game.player.sectorMove.rendered = true;
+            cycle = game.ticks % 240; // Every 4 seconds
+            glowRamp = (cycle > 120 ? 120 - (cycle - 120) : cycle) / 30;
             
-            if(!game.player.inContainer && game.weather.now.temp < 36) {
-                bf.globalCompositeOperation = 'source-atop';
-                bf.fillStyle = 'rgba(255,255,255,'+((12-game.weather.now.temp/3)/100)+')';
-                bf.fillRect(0,0, mWidth, mHeight);
-                bf.globalCompositeOperation = 'source-over';
-            }
-            // Render cursor highlight
-            if(cursor.iso && ((cursor.iso.x >= 0 && cursor.iso.x < 15 && cursor.iso.y >= 0 && cursor.iso.y < 15)
-                || (Util.validOffSectorTiles[cursor.iso.x+':'+cursor.iso.y]))) {
-                var cursorDraw = Util.isoToScreen(cursor.iso.x, cursor.iso.y);
-                bf.drawImage(SpriteMan.bgTileImg, 276, 0, 50, 25, cursorDraw.x-2, cursorDraw.y-1, 50, 25);
-            }
-            // Render player move path
+            // Build render array
+            var curMap = World.getMap(game.player);
+            if(map.data != curMap) updateMap(curMap);
+            renderArray = angular.copy(map.renderArray);
             if(game.player.path) {
                 for(var pn = 0; pn < game.player.path.length; pn++) {
-                    var node = Util.isoToScreen(game.player.path[pn].x, game.player.path[pn].y);
+                    var node = game.player.path[pn];
                     var prev = pn == 0 ? {x:game.player.ox,y:game.player.oy} : game.player.path[pn-1];
                     var cur = game.player.path[pn];
                     var next = pn+1 == game.player.path.length ? cur : game.player.path[pn+1];
@@ -363,65 +367,46 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                         SpriteMan.pathTileLib);
                     if(pathTile < 0) pathTile = jQuery.inArray('0:0|'+dNext.x+':'+dNext.y,SpriteMan.pathTileLib);
                     if(pathTile < 0) continue;
-                    bf.globalAlpha = pn == 0 ? 1 - game.player.moveProgress : 1;
-                    bf.drawImage(SpriteMan.pathTileImg,pathTile % 8 * 48,Math.floor(pathTile/8)*24,48,24,
-                        node.x,node.y,48,24);
+                    addToRender({ opacity: pn == 0 ? 1 - game.player.moveProgress : 1,
+                        tile: pathTile, x: node.x, y: node.y }, node.x, node.y-2, 'path');
                 }
                 bf.globalAlpha = 1;
             }
-            cycle = game.ticks % 240;
-            glowRamp = (cycle > 120 ? 120 - (cycle - 120) : cycle) / 30;
-            
-            // Build render array
-            renderArray = [];
-            Math.seedrandom();
             var objects = world.things.concat(world.containers);
             for(var j = objects.length-1; j >= 0; j--) {
                 var o = objects[j];
                 if(o.removed && !o.dropped) continue; // Skip if object removed and not dropped
                 var tdx = (o.sx - game.player.osx)*(game.arena.width) + o.x,
                     tdy = (o.sy - game.player.osy)*(game.arena.height) + o.y;
-                if((so.x == 0 && so.y == 0) && (tdx > 14 || tdx < 0 || tdy > 14 || tdy < 0)) continue;
+                if(tdx > 14 || tdx < 0 || tdy > 14 || tdy < 0) continue;
                 addToRender(o,tdx,tdy+0.3,'object');
             }
-            for(var pKey in world.players) { if (!world.players.hasOwnProperty(pKey)) continue;
-                var p = world.players[pKey];
-                var pdx = (p.osx - game.player.osx) * (game.arena.width) + p.ox,
-                    pdy = (p.osy - game.player.osy) * (game.arena.height) + p.oy;
-                if (!((pdx < 15 && pdx >= 0 && pdy < 15 && pdy >= 0) ||
-                    (Util.validOffSectorTiles[pdx + ':' + pdy]))) continue;
-                var pddx = (p.osx - game.player.osx) * (game.arena.width) + (p.path ? p.path[0].x : pdx),
-                    pddy = (p.osy - game.player.osy) * (game.arena.height) + (p.path ? p.path[0].y : pdy);
-                pdx += p.moveProgress ? (pddx - pdx) * p.moveProgress : 0;
-                pdy += p.moveProgress ? (pddy - pdy) * p.moveProgress : 0;
-                addToRender(p,pdx,pdy+0.3,'player');
-            }
+            var pdx = game.player.ox, pdy = game.player.oy;
+            var pddx = (game.player.path ? game.player.path[0].x : pdx),
+                pddy = (game.player.path ? game.player.path[0].y : pdy);
+            pdx += game.player.moveProgress ? (pddx - pdx) * game.player.moveProgress : 0;
+            pdy += game.player.moveProgress ? (pddy - pdy) * game.player.moveProgress : 0;
+            addToRender(game.player,pdx,pdy+0.3,'player');
             Effects.prepareRender(addToRender);
             hoverCount = {};
+            Math.seedrandom();
             for(var r = 0; r < renderArray.length; r++) { if(!renderArray[r]) continue;
                 var subArray = renderArray[r];
                 for(var ri = 0; ri < subArray.length; ri++) {
                     switch(subArray[ri].renderType) {
+                        case 'tile': renderTile(subArray[ri]); break;
+                        case 'path': renderPath(subArray[ri]); break;
                         case 'object': renderObject(subArray[ri]); break;
                         case 'player': renderPlayer(subArray[ri]); break;
                         case 'effect': renderEffect(subArray[ri]); break;
                     }
                 }
             }
-
-            // Render players on minimap
-            //for(var pmmKey in world.players) { if (!world.players.hasOwnProperty(pmmKey)) continue;
-            //    var pmm = world.players[pmmKey];
-            //    var pmmdx = (pmm.osx - game.player.osx) * (game.arena.width) + pmm.ox,
-            //        pmmdy = (pmm.osy - game.player.osy) * (game.arena.height) + pmm.oy;
-            //    bf.fillStyle = '#' + pmm.color.hex; // Draw player on minimap
-            //    bf.fillRect(Math.floor(pmmdx * 15 / mmDiv + mmw * mmReach - 1), 
-            //        30+Math.floor(pmmdy * 15 / mmDiv + mmh * mmReach - 1), 1, 1);
-            //}
+            
             var quality;
             // Render inventory
             game.drawInventory = true;
-            // TODO: Create UI manager to handle rendering and cursor events
+            // TODO: Move to UI manager
             if(game.drawInventory) {
                 //for(var tb1 = 0; tb1 < 5; tb1++) {
                 //    bf.drawImage(inventorySpriteImg,0,0,46,24,194 + 28*tb1, 316 + 14*tb1, 46, 24);
@@ -545,10 +530,7 @@ Application.Services.factory('Renderer',function(TextDraw,Effects,World,Things,U
                 for(var mmsy = -mmReach; mmsy <= mmReach; mmsy++) {
                     var thingCount = game.player.explored[(+game.player.osx+mmsx)+','+(+game.player.osy+mmsy)];
                     if(thingCount >= 0) {
-                        bf.clearRect(1+mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                            31+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
-                        bf.fillRect(1+mmw*(mmReach+mmsx)+game.player.sectorMove.x*mmw,
-                            31+mmh*(mmReach+mmsy)+game.player.sectorMove.y*mmh,mmw,mmh);
+                        bf.fillRect(1+mmw*(mmReach+mmsx),31+mmh*(mmReach+mmsy),mmw,mmh);
                     }
                 }
             }
